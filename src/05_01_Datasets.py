@@ -29,12 +29,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST("", train=True, download=True, 
-                 transform=transforms.ToTensor())
+train_ds = MNIST("", train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST("", train=False, download=True, 
-                 transform=transforms.ToTensor())
+test_ds = MNIST("", train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -49,32 +47,22 @@ import matplotlib.pyplot as plt
 X = train_ds.data[0]
 
 # 繪製點陣圖，cmap='gray':灰階
-plt.imshow(X.reshape(28,28), cmap='gray')
+plt.imshow(X.reshape(28, 28), cmap='gray')
 
 # 隱藏刻度
-plt.axis('off') 
+plt.axis('off')
 
 # 顯示圖形
-plt.show() 
+plt.show()
 
 # ## FashionMNIST
 
 # In[8]:
 
 
-training_data = FashionMNIST(
-    root="data",
-    train=True,
-    download=True,
-    transform=transforms.ToTensor()
-)
+training_data = FashionMNIST(root="data", train=True, download=True, transform=transforms.ToTensor())
 
-test_data = FashionMNIST(
-    root="data",
-    train=False,
-    download=True,
-    transform=transforms.ToTensor()
-)
+test_data = FashionMNIST(root="data", train=False, download=True, transform=transforms.ToTensor())
 
 # ## 任意抽樣9筆資料顯示
 
@@ -115,6 +103,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.transforms as T
 
+
 def plot(imgs, with_orig=True, row_title=None, **imshow_kwargs):
     if not isinstance(imgs[0], list):
         # Make a 2d grid even if there's just 1 row
@@ -138,6 +127,7 @@ def plot(imgs, with_orig=True, row_title=None, **imshow_kwargs):
             axs[row_idx, 0].set(ylabel=row_title[row_idx])
 
     plt.tight_layout()
+
 
 # In[83]:
 
@@ -173,7 +163,7 @@ plot(center_crops)
 # In[89]:
 
 
-(top_left, top_right, bottom_left, bottom_right, center) = T.FiveCrop(size=(100, 100))(orig_img)
+top_left, top_right, bottom_left, bottom_right, center = T.FiveCrop(size=(100, 100))(orig_img)
 plot([top_left, top_right, bottom_left, bottom_right, center])
 
 # In[90]:
@@ -194,7 +184,7 @@ plot(padded_imgs)
 
 
 # 目標名稱 --> 目標代碼
-labels_code = {v.lower():k for k, v in labels_map.items()}
+labels_code = {v.lower(): k for k, v in labels_map.items()}
 
 # In[95]:
 
@@ -204,6 +194,7 @@ import pandas as pd
 from torchvision.io import read_image
 from torch.utils.data import Dataset
 import re
+
 
 class CustomImageDataset(Dataset):
     def __init__(self, img_dir, transform=None, target_transform=None):
@@ -223,21 +214,22 @@ class CustomImageDataset(Dataset):
         # 去除副檔名
         label = self.img_labels[idx].split('.')[0]
         # 將檔名數字去除
-        label = re.sub('[0-9]','', label)
-        
+        label = re.sub('[0-9]', '', label)
+
         # 轉換
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
-        
+
         # 將三維轉為二維
         image = image.reshape(*image.shape[1:])
         # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
-        image = 1.0-image
+        image = 1.0 - image
         label = labels_code[label.lower()]
-        
+
         return image, label
+
 
 # In[96]:
 
@@ -249,17 +241,18 @@ model = torch.load('./FashionMNIST.pt')
 
 
 # 建立 transforms
-transform = transforms.Compose([
-    transforms.Grayscale(),
-    transforms.Resize((28, 28)),
-    transforms.CenterCrop(28),
-    # transforms.PILToTensor(),
-    transforms.ConvertImageDtype(torch.float),
-])
+transform = transforms.Compose(
+    [
+        transforms.Grayscale(),
+        transforms.Resize((28, 28)),
+        transforms.CenterCrop(28),
+        # transforms.PILToTensor(),
+        transforms.ConvertImageDtype(torch.float),
+    ]
+)
 
 # 建立 DataLoader
-test_loader = DataLoader(CustomImageDataset('./fashion_test_data', transform)
-                         , shuffle=False, batch_size=10)
+test_loader = DataLoader(CustomImageDataset('./fashion_test_data', transform), shuffle=False, batch_size=10)
 
 model.eval()
 criterion = nn.CrossEntropyLoss()
@@ -271,10 +264,10 @@ with torch.no_grad():
         output = model(data)
         # sum up batch loss
         test_loss += criterion(output, target).item()
-        
+
         # 預測
-        pred = output.argmax(dim=1, keepdim=True)  
-        
+        pred = output.argmax(dim=1, keepdim=True)
+
         # 正確筆數
         correct += pred.eq(target.view_as(pred)).sum().item()
 
@@ -282,9 +275,8 @@ with torch.no_grad():
 test_loss /= len(test_loader.dataset)
 # 顯示測試結果
 data_count = len(test_loader.dataset)
-percentage = 100. * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + 
-      f' ({percentage:.0f}%)\n')
+percentage = 100.0 * correct / data_count
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
 
 # In[98]:
 
@@ -294,6 +286,3 @@ data, target = next(iter(test_loader))
 print(data.shape, target)
 
 # In[ ]:
-
-
-

@@ -8,13 +8,14 @@
 # In[1]:
 
 
-!pip install ray
+# get_ipython().system('pip install ray')
 
 # ## 載入套件
 
 # In[2]:
 
 
+import os
 import numpy as np
 import torch
 import torch.optim as optim
@@ -52,6 +53,7 @@ class ConvNet(nn.Module):
         x = self.fc(x)
         return F.log_softmax(x, dim=1)
 
+
 # ## 定義模型訓練及測試函數
 
 # In[40]:
@@ -59,6 +61,7 @@ class ConvNet(nn.Module):
 
 # 訓練週期
 EPOCH_SIZE = 5
+
 
 # 定義模型訓練函數
 def train(model, optimizer, train_loader):
@@ -70,6 +73,7 @@ def train(model, optimizer, train_loader):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
+
 
 # 定義模型測試函數
 def test(model, data_loader):
@@ -87,15 +91,13 @@ def test(model, data_loader):
 
     return correct / total
 
+
 # ## 定義特徵縮放函數
 
 # In[41]:
 
 
-mnist_transforms = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize((0.1307, ), (0.3081, ))
-    ])
+mnist_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
 
 # ## 定義資料載入及模型訓練函數
 
@@ -104,21 +106,14 @@ mnist_transforms = transforms.Compose(
 
 def train_mnist(config):
     # 載入 MNIST 手寫阿拉伯數字資料
-    train_loader = DataLoader(
-        datasets.MNIST("", train=True, transform=mnist_transforms),
-        batch_size=64,
-        shuffle=True)
-    test_loader = DataLoader(
-        datasets.MNIST("", train=False, transform=mnist_transforms),
-        batch_size=64,
-        shuffle=True)
+    train_loader = DataLoader(datasets.MNIST("", train=True, transform=mnist_transforms), batch_size=64, shuffle=True)
+    test_loader = DataLoader(datasets.MNIST("", train=False, transform=mnist_transforms), batch_size=64, shuffle=True)
 
     # 建立模型
     model = ConvNet().to(device)
 
     # 優化器，使用組態參數
-    optimizer = optim.SGD(model.parameters(), 
-                          lr=config["lr"], momentum=config["momentum"])
+    optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=config["momentum"])
     # 訓練 10 週期
     for i in range(10):
         train(model, optimizer, train_loader)
@@ -132,6 +127,7 @@ def train_mnist(config):
         if i % 5 == 0:
             torch.save(model.state_dict(), "./model.pth")
 
+
 # ## 參數調校
 
 # In[56]:
@@ -139,9 +135,9 @@ def train_mnist(config):
 
 # 參數組合
 search_space = {
-    #"lr": tune.sample_from(lambda spec: 10**(-10 * np.random.rand())),
-    "lr": tune.grid_search([0.01, 0.1, 0.5]), # 每一選項都要測試
-    "momentum": tune.uniform(0.1, 0.9)        # 均勻分配抽樣
+    # "lr": tune.sample_from(lambda spec: 10**(-10 * np.random.rand())),
+    "lr": tune.grid_search([0.01, 0.1, 0.5]),  # 每一選項都要測試
+    "momentum": tune.uniform(0.1, 0.9),  # 均勻分配抽樣
 }
 
 # 加下一行，採分散式處理
@@ -163,20 +159,20 @@ for i in analysis.get_all_configs().keys():
 # In[107]:
 
 
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 # 取得實驗的參數
 config_list = []
 for i in analysis.get_all_configs().keys():
     config_list.append(analysis.get_all_configs()[i])
-    
+
 # 繪圖
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 dfs = analysis.trial_dataframes
 for i, d in enumerate(dfs.values()):
-    plt.subplot(1,3,i+1)
+    plt.subplot(1, 3, i + 1)
     plt.title(config_list[i])
-    d.mean_accuracy.plot() 
+    d.mean_accuracy.plot()
 plt.tight_layout()
 plt.show()
 
@@ -229,7 +225,7 @@ with torch.no_grad():
     for data, target in test_loader:
         data, target = data.to(device), target.to(device)
         output = model(data)
-        
+
         # 正確筆數
         _, predicted = torch.max(output, 1)
         correct += (predicted == target).sum().item()
@@ -240,6 +236,3 @@ percentage = 100.0 * correct / data_count
 print(f'準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 
 # In[ ]:
-
-
-

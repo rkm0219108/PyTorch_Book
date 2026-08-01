@@ -30,14 +30,14 @@ vectorizer = CountVectorizer()
 X = vectorizer.fit_transform(corpus)
 
 # 生字表
-word = vectorizer.get_feature_names()
-print ("Vocabulary：", word)
+word = vectorizer.get_feature_names_out()
+print("Vocabulary：", word)
 
 # In[13]:
 
 
 # 查看四句話的 BOW
-print ("BOW=\n", X.toarray())
+print("BOW=\n", X.toarray())
 
 # In[15]:
 
@@ -45,16 +45,14 @@ print ("BOW=\n", X.toarray())
 # TF-IDF 轉換
 transformer = TfidfTransformer()
 tfidf = transformer.fit_transform(X)
-print ("TF-IDF=\n", np.around(tfidf.toarray(), 4))
+print("TF-IDF=\n", np.around(tfidf.toarray(), 4))
 
 # In[17]:
 
 
 # 最後一句與其他句的相似度比較
 from sklearn.metrics.pairwise import cosine_similarity
-print (cosine_similarity(tfidf[-1], tfidf[:-1], dense_output=False))
+
+print(cosine_similarity(tfidf[-1], tfidf[:-1], dense_output=False))
 
 # In[ ]:
-
-
-

@@ -22,14 +22,12 @@ text_generator = pipeline("text-generation")
 # In[3]:
 
 
-print(text_generator("As far as I am concerned, I will", 
-                     max_length=50, do_sample=False))
+print(text_generator("As far as I am concerned, I will", max_length=50, do_sample=False))
 
 # In[4]:
 
 
-print(text_generator("As far as I am concerned, I will", 
-                     max_length=50, do_sample=True))
+print(text_generator("As far as I am concerned, I will", max_length=50, do_sample=True))
 
 # ## 結合Tokenizer
 
@@ -68,17 +66,12 @@ prompt = "Today the weather is really nice and I am planning on "
 # In[7]:
 
 
-inputs = tokenizer(PADDING_TEXT + prompt, add_special_tokens=False, 
-                   return_tensors="pt")["input_ids"]
+inputs = tokenizer(PADDING_TEXT + prompt, add_special_tokens=False, return_tensors="pt")["input_ids"]
 
 prompt_length = len(tokenizer.decode(inputs[0]))
-outputs = model.generate(inputs, max_length=250, do_sample=True, 
-                         top_p=0.95, top_k=60)
+outputs = model.generate(inputs, max_length=250, do_sample=True, top_p=0.95, top_k=60)
 generated = prompt + tokenizer.decode(outputs[0])[prompt_length + 1 :]
 
 print(generated)
 
 # In[ ]:
-
-
-

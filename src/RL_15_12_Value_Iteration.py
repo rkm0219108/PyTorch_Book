@@ -41,7 +41,7 @@ def value_iteration(env, theta=0.0001, discount_factor=1.0):
             # 比較更新前後的差值，取最大值
             delta = max(delta, np.abs(best_action_value - V[s]))
             # 更新狀態值函數
-            V[s] = best_action_value        
+            V[s] = best_action_value
         # 若最大差值 < 門檻值，則停止評估
         if delta < theta:
             break
@@ -55,8 +55,9 @@ def value_iteration(env, theta=0.0001, discount_factor=1.0):
         best_action = np.argmax(A)
         # 永遠採取最佳行動
         policy[s, best_action] = 1.0
-    
-    return policy, V            
+
+    return policy, V
+
 
 # In[11]:
 
@@ -83,7 +84,7 @@ print(v.reshape(env.shape))
 
 
 # 驗證答案是否正確
-expected_v = np.array([ 0, -1, -2, -3, -1, -2, -3, -2, -2, -3, -2, -1, -3, -2, -1,  0])
+expected_v = np.array([0, -1, -2, -3, -1, -2, -3, -2, -2, -3, -2, -1, -3, -2, -1, 0])
 np.testing.assert_array_almost_equal(v, expected_v, decimal=2)
 
 # ## CliffWalkingEnv
@@ -92,6 +93,7 @@ np.testing.assert_array_almost_equal(v, expected_v, decimal=2)
 
 
 from lib.envs.cliff_walking import CliffWalkingEnv
+
 # 環境
 env = CliffWalkingEnv()
 # 執行策略循環

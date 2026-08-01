@@ -19,26 +19,31 @@ nlp = pipeline("question-answering")
 
 
 # 訓練資料
-context = r"Extractive Question Answering is the task of extracting an answer " + \
-"from a text given a question. An example of a question answering " + \
-"dataset is the SQuAD dataset, which is entirely based on that task. " + \
-"If you would like to fine-tune a model on a SQuAD task, you may " + \
-"leverage the examples/question-answering/run_squad.py script."
+context = (
+    r"Extractive Question Answering is the task of extracting an answer "
+    + "from a text given a question. An example of a question answering "
+    + "dataset is the SQuAD dataset, which is entirely based on that task. "
+    + "If you would like to fine-tune a model on a SQuAD task, you may "
+    + "leverage the examples/question-answering/run_squad.py script."
+)
 
 # In[6]:
 
 
 # 測試 2 筆
 result = nlp(question="What is extractive question answering?", context=context)
-print(f"Answer: '{result['answer']}', score: {round(result['score'], 4)}",
-        f", start: {result['start']}, end: {result['end']}")
+print(
+    f"Answer: '{result['answer']}', score: {round(result['score'], 4)}",
+    f", start: {result['start']}, end: {result['end']}",
+)
 
 print()
 
-result = nlp(question="What is a good example of a question answering dataset?", 
-             context=context)
-print(f"Answer: '{result['answer']}', score: {round(result['score'], 4)}",
-        f", start: {result['start']}, end: {result['end']}")
+result = nlp(question="What is a good example of a question answering dataset?", context=context)
+print(
+    f"Answer: '{result['answer']}', score: {round(result['score'], 4)}",
+    f", start: {result['start']}, end: {result['end']}",
+)
 
 # ## 結合Tokenizer
 
@@ -90,14 +95,9 @@ for question in questions:
     # Get the most likely end of answer with the argmax of the score
     answer_end = torch.argmax(answer_end_scores) + 1
 
-    answer = tokenizer.convert_tokens_to_string(
-        tokenizer.convert_ids_to_tokens(input_ids[answer_start:answer_end])
-    )
+    answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(input_ids[answer_start:answer_end]))
 
     print(f"Question: {question}")
     print(f"Answer: {answer}")
 
 # In[ ]:
-
-
-

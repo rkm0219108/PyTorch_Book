@@ -22,7 +22,7 @@ from torchvision.datasets import MNIST
 # In[61]:
 
 
-PATH_DATASETS = "" # 預設路徑
+PATH_DATASETS = ""  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -33,12 +33,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST(PATH_DATASETS, train=True, download=True, 
-                 transform=transforms.ToTensor())
+train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST(PATH_DATASETS, train=False, download=True, 
-                 transform=transforms.ToTensor())
+test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -64,13 +62,13 @@ import matplotlib.pyplot as plt
 X = train_ds.data[0]
 
 # 繪製點陣圖，cmap='gray':灰階
-plt.imshow(X.reshape(28,28), cmap='gray')
+plt.imshow(X.reshape(28, 28), cmap='gray')
 
 # 隱藏刻度
-plt.axis('off') 
+plt.axis('off')
 
 # 顯示圖形
-plt.show() 
+plt.show()
 
 # In[65]:
 
@@ -86,7 +84,7 @@ writer = SummaryWriter('runs_2/mnist_experiment_1')
 # create grid of images
 import torchvision
 
-img_grid = torchvision.utils.make_grid(X.reshape(28,28))
+img_grid = torchvision.utils.make_grid(X.reshape(28, 28))
 writer.add_image('First image', img_grid)
 
 # ## 步驟2：資料清理，此步驟無需進行
@@ -103,9 +101,9 @@ writer.add_image('First image', img_grid)
 # 建立模型
 model = torch.nn.Sequential(
     torch.nn.Flatten(),
-    torch.nn.Linear(28 * 28, 256), 
+    torch.nn.Linear(28 * 28, 256),
     torch.nn.Dropout(0.2),
-    torch.nn.Linear(256, 10), 
+    torch.nn.Linear(256, 10),
     # 使用nn.CrossEntropyLoss()時，不需要將輸出經過softmax層，否則計算的損失會有誤
     # torch.nn.Softmax(dim=1)
 ).to(device)
@@ -116,7 +114,7 @@ model = torch.nn.Sequential(
 
 
 epochs = 5
-lr=0.1
+lr = 0.1
 
 # 建立 DataLoader
 train_loader = DataLoader(train_ds, batch_size=600)
@@ -128,21 +126,21 @@ optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
 criterion = nn.CrossEntropyLoss()
 
 model.train()
-loss_list = []  
-n=0
+loss_list = []
+n = 0
 for epoch in range(1, epochs + 1):
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-#         if batch_idx == 0 and epoch == 1: print(data[0])
+        #         if batch_idx == 0 and epoch == 1: print(data[0])
 
         optimizer.zero_grad()
         output = model(data)
         loss = criterion(output, target)
-        
+
         # 將損失寫入log
-        n+=1
+        n += 1
         writer.add_scalar("Loss/train", loss, n)
-        
+
         loss.backward()
         optimizer.step()
 
@@ -150,9 +148,8 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_loader.dataset)
-            percentage = (100. * batch_idx / len(train_loader))
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' +
-                  f'  Loss: {loss.item():.6f}')
+            percentage = 100.0 * batch_idx / len(train_loader)
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
 
 # ## 對訓練過程的損失繪圖
 
@@ -170,6 +167,3 @@ writer.flush()
 writer.close()
 
 # In[ ]:
-
-
-

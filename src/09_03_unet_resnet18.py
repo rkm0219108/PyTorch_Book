@@ -4,7 +4,7 @@
 # <a href="https://colab.research.google.com/github/usuyama/pytorch-unet/blob/master/pytorch_unet_resnet18_colab.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 # ## pytorch-uent
-# 
+#
 # https://github.com/usuyama/pytorch-unet
 
 # In[1]:
@@ -12,23 +12,23 @@
 
 import os
 
-if not os.path.exists("pytorch_unet"):
-    !git clone https://github.com/usuyama/pytorch-unet.git
+# if not os.path.exists("pytorch_unet"):
+#     get_ipython().system('git clone https://github.com/usuyama/pytorch-unet.git')
 
-%cd pytorch-unet
+# get_ipython().run_line_magic('cd', 'pytorch-unet')
 
 # In[2]:
 
 
-!ls
+# get_ipython().system('ls')
 
 # ## Enabling GPU on Colab
-# 
+#
 # Need to enable GPU from Notebook settings
-# 
+#
 # - Navigate to Edit-Notebook settings menu
 # - Select GPU from the Hardware Accelerator dropdown list
-# 
+#
 
 # In[3]:
 
@@ -48,7 +48,7 @@ print("device name", torch.cuda.get_device_name(0))
 import matplotlib.pyplot as plt
 import numpy as np
 import helper
-import simulation # simulation.py
+import simulation  # simulation.py
 
 # ## 測試 simulation.py 生成的圖像
 
@@ -56,13 +56,10 @@ import simulation # simulation.py
 
 
 # 產生3張圖像，寬高各為 192，裡面有6個隨機擺放的圖案。
-input_images, target_masks = simulation.generate_random_data(
-                                        192, 192, count=3)
+input_images, target_masks = simulation.generate_random_data(192, 192, count=3)
 
-print("input_images shape and range", input_images.shape, 
-      input_images.min(), input_images.max())
-print("target_masks shape and range", target_masks.shape, 
-      target_masks.min(), target_masks.max())
+print("input_images shape and range", input_images.shape, input_images.min(), input_images.max())
+print("target_masks shape and range", target_masks.shape, target_masks.min(), target_masks.max())
 
 # 輸入圖像，改為單色
 input_images_rgb = [x.astype(np.uint8) for x in input_images]
@@ -82,11 +79,11 @@ helper.plot_side_by_side([input_images_rgb, target_masks_rgb])
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, datasets, models
 
+
 # 自訂資料集，一次傳回原圖、遮罩圖像各一個
 class SimDataset(Dataset):
     def __init__(self, count, transform=None):
-        self.input_images, self.target_masks = \
-            simulation.generate_random_data(192, 192, count=count)
+        self.input_images, self.target_masks = simulation.generate_random_data(192, 192, count=count)
         self.transform = transform
 
     def __len__(self):
@@ -100,30 +97,28 @@ class SimDataset(Dataset):
 
         return [image, mask]
 
+
 # ## 建立 DataLoader
 
 # In[6]:
 
 
 # 轉換
-trans = transforms.Compose([
-  transforms.ToTensor(),
-  transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) # imagenet
-])
+trans = transforms.Compose(
+    [transforms.ToTensor(), transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])]  # imagenet
+)
 
 # 產生訓練及驗證圖像各2000筆
-train_set = SimDataset(2000, transform = trans)
-val_set = SimDataset(200, transform = trans)
+train_set = SimDataset(2000, transform=trans)
+val_set = SimDataset(200, transform=trans)
 
-image_datasets = {
-  'train': train_set, 'val': val_set
-}
+image_datasets = {'train': train_set, 'val': val_set}
 
 batch_size = 25
 
 dataloaders = {
-  'train': DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0),
-  'val': DataLoader(val_set, batch_size=batch_size, shuffle=True, num_workers=0)
+    'train': DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0),
+    'val': DataLoader(val_set, batch_size=batch_size, shuffle=True, num_workers=0),
 }
 
 # ## 建立還原轉換函數，並測試一批資料
@@ -132,6 +127,7 @@ dataloaders = {
 
 
 import torchvision.utils
+
 
 # 還原轉換
 def reverse_transform(inp):
@@ -143,6 +139,7 @@ def reverse_transform(inp):
     inp = (inp * 255).astype(np.uint8)
 
     return inp
+
 
 # 取得一批資料測試
 inputs, masks = next(iter(dataloaders['train']))
@@ -157,23 +154,25 @@ plt.imshow(reverse_transform(inputs[3]))
 import torch.nn as nn
 import torchvision.models
 
+
 def convrelu(in_channels, out_channels, kernel, padding):
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, kernel, padding=padding),
         nn.ReLU(inplace=True),
     )
 
+
 class ResNetUNet(nn.Module):
     def __init__(self, n_class):
         super().__init__()
-        
+
         # 載入 resnet18 模型
-        self.base_model = torchvision.models.resnet18(pretrained=True)
+        self.base_model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
         self.base_layers = list(self.base_model.children())
 
-        self.layer0 = nn.Sequential(*self.base_layers[:3]) # size=(N, 64, x.H/2, x.W/2)
+        self.layer0 = nn.Sequential(*self.base_layers[:3])  # size=(N, 64, x.H/2, x.W/2)
         self.layer0_1x1 = convrelu(64, 64, 1, 0)
-        self.layer1 = nn.Sequential(*self.base_layers[3:5]) # size=(N, 64, x.H/4, x.W/4)
+        self.layer1 = nn.Sequential(*self.base_layers[3:5])  # size=(N, 64, x.H/4, x.W/4)
         self.layer1_1x1 = convrelu(64, 64, 1, 0)
         self.layer2 = self.base_layers[5]  # size=(N, 128, x.H/8, x.W/8)
         self.layer2_1x1 = convrelu(128, 128, 1, 0)
@@ -237,8 +236,9 @@ class ResNetUNet(nn.Module):
 
         return out
 
+
 # ## Instantiate the UNet model
-# 
+#
 # - Move the model to GPU if available
 # - Show model summaries
 
@@ -264,6 +264,7 @@ model
 
 
 from torchsummary import summary
+
 summary(model, input_size=(3, 224, 224))
 
 # ## 定義損失函數
@@ -276,6 +277,7 @@ import torch.nn.functional as F
 from loss import dice_loss
 
 checkpoint_path = "checkpoint.pth"
+
 
 # 損失採 binary cross entropy + dice loss
 def calc_loss(pred, target, metrics, bce_weight=0.5):
@@ -292,13 +294,15 @@ def calc_loss(pred, target, metrics, bce_weight=0.5):
 
     return loss
 
+
 # 計算效能衡量指標
 def print_metrics(metrics, epoch_samples, phase):
     outputs = []
     for k in metrics.keys():
         outputs.append(f"{k}: {(metrics[k] / epoch_samples):4f}")
 
-    print(f"{phase}: {", ".join(outputs)}")
+    print(f"{phase}: {', '.join(outputs)}")
+
 
 # ## 建立訓練及評估函數
 
@@ -319,7 +323,7 @@ def train_model(model, optimizer, scheduler, num_epochs=25):
             if phase == 'train':
                 model.train()  # Set model to training mode
             else:
-                model.eval()   # Set model to evaluate mode
+                model.eval()  # Set model to evaluate mode
 
             metrics = defaultdict(float)
             epoch_samples = 0
@@ -349,9 +353,9 @@ def train_model(model, optimizer, scheduler, num_epochs=25):
             epoch_loss = metrics['loss'] / epoch_samples
 
             if phase == 'train':
-            scheduler.step()
-            for param_group in optimizer.param_groups:
-                print("LR", param_group['lr'])
+                scheduler.step()
+                for param_group in optimizer.param_groups:
+                    print("LR", param_group['lr'])
 
             # save the model weights
             if phase == 'val' and epoch_loss < best_loss:
@@ -367,6 +371,7 @@ def train_model(model, optimizer, scheduler, num_epochs=25):
     # load best model weights
     model.load_state_dict(torch.load(checkpoint_path))
     return model
+
 
 # ## 訓練
 
@@ -400,7 +405,7 @@ model = train_model(model, optimizer_ft, exp_lr_scheduler, num_epochs=10)
 import math
 
 # 建立新資料
-test_dataset = SimDataset(3, transform = trans)
+test_dataset = SimDataset(3, transform=trans)
 test_loader = DataLoader(test_dataset, batch_size=3, shuffle=False, num_workers=0)
 
 # 取一批資料測試
@@ -411,9 +416,9 @@ print('inputs.shape', inputs.shape)
 print('labels.shape', labels.shape)
 
 # 預測
-model.eval()   
+model.eval()
 pred = model(inputs)
-pred = torch.sigmoid(pred) # 轉為 [0, 1] 之間
+pred = torch.sigmoid(pred)  # 轉為 [0, 1] 之間
 pred = pred.data.cpu().numpy()
 print('pred.shape', pred.shape)
 
@@ -432,12 +437,10 @@ helper.plot_side_by_side([input_images_rgb, target_masks_rgb, pred_rgb])
 # In[15]:
 
 
-
-
 # ## Next steps
-# 
+#
 # Try tweaking the hyper-parameters for better accuracy e.g.
-# 
+#
 # - learning rates and schedules
 # - loss weights
 # - unfreezing layers
@@ -445,6 +448,3 @@ helper.plot_side_by_side([input_images_rgb, target_masks_rgb, pred_rgb])
 # - etc.
 
 # In[15]:
-
-
-

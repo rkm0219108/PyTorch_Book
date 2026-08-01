@@ -58,7 +58,7 @@ for face_landmarks in face_landmarks_list:
     # 繪製特徵點
     for facial_feature in face_landmarks.keys():
         d.line(face_landmarks[facial_feature], width=5, fill='green')
-    
+
 # 顯示圖像
 plt.imshow(pil_image)
 plt.axis('off')
@@ -107,17 +107,17 @@ rects = detector(image)
 
 print(f'偵測到{len(rects)}張臉部.')
 # 偵測每張臉的特徵點
-for (i, rect) in enumerate(rects):
+for i, rect in enumerate(rects):
     # 偵測特徵點
     shape = predictor(image, rect)
-    
+
     # 轉為 NumPy 陣列
     shape = face_utils.shape_to_np(shape)
 
     # 標示特徵點
-    for (x, y) in shape:
+    for x, y in shape:
         cv2.circle(image, (x, y), 10, (0, 255, 0), -1)
-        
+
 # 顯示圖像
 plt.imshow(image)
 plt.axis('off')
@@ -133,31 +133,28 @@ cap = cv2.VideoCapture('./images_face/hamilton_clip.mp4')
 while True:
     # 讀取一幀影像
     _, image = cap.read()
-    
+
     # 偵測圖像的臉部
-    rects = detector(image)    
-    for (i, rect) in enumerate(rects):
+    rects = detector(image)
+    for i, rect in enumerate(rects):
         # 偵測特徵點
         shape = predictor(image, rect)
         shape = face_utils.shape_to_np(shape)
-    
+
         # 標示特徵點
-        for (x, y) in shape:
+        for x, y in shape:
             cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
-    
+
     # 顯示影像
     cv2.imshow("Output", image)
 
-    k = cv2.waitKey(5) & 0xFF    # 按 Esc 跳離迴圈
+    k = cv2.waitKey(5) & 0xFF  # 按 Esc 跳離迴圈
     if k == 27:
         break
 
-# 關閉輸入檔    
+# 關閉輸入檔
 cap.release()
 # 關閉所有視窗
 cv2.destroyAllWindows()
 
 # In[ ]:
-
-
-

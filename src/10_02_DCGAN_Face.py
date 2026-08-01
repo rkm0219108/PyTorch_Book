@@ -26,7 +26,7 @@ import numpy as np
 # In[23]:
 
 
-PATH_DATASETS = "" # 預設路徑
+PATH_DATASETS = ""  # 預設路徑
 BATCH_SIZE = 128  # 批量
 image_size = 64
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -40,7 +40,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 nz = 100  # 生成神經網路雜訊維度
 ngf = 64  # 生成神經網路濾波器個數
 ndf = 64  # 判別神經網路濾波器個數
-nc = 3    # 顏色通道
+nc = 3  # 顏色通道
 
 # ## 載入名人臉部資料集
 
@@ -48,26 +48,25 @@ nc = 3    # 顏色通道
 
 
 # 轉換
-transform=transforms.Compose([
-   transforms.Resize(image_size),
-   transforms.CenterCrop(image_size),
-   transforms.ToTensor(),
-   transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize(image_size),
+        transforms.CenterCrop(image_size),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ]
+)
 
 # 訓練資料
-dataset = datasets.ImageFolder(root='celeba_gan',
-                           transform=transform)
-dataloader = torch.utils.data.DataLoader(dataset
-                   , batch_size=BATCH_SIZE, shuffle=True)
+dataset = datasets.ImageFolder(root='celeba_gan', transform=transform)
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 # 顯示圖檔
 real_batch = next(iter(dataloader))
-plt.figure(figsize=(8,8))
+plt.figure(figsize=(8, 8))
 plt.axis("off")
 plt.title("Training Images")
-plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:64]
-                     , padding=2, normalize=True).cpu(),(1,2,0)));
+plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=2, normalize=True).cpu(), (1, 2, 0)))
 
 # ## 神經網路權重初始值
 
@@ -77,10 +76,11 @@ plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:64]
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
-        m.weight.data.normal_(0.0, 0.02) # 卷積層權重初始值 
+        m.weight.data.normal_(0.0, 0.02)  # 卷積層權重初始值
     elif classname.find('BatchNorm') != -1:
-        m.weight.data.normal_(1.0, 0.02) # Batch Normalization 層權重初始值 
+        m.weight.data.normal_(1.0, 0.02)  # Batch Normalization 層權重初始值
         m.bias.data.fill_(0)
+
 
 # ## 定義生成神經網路
 
@@ -92,7 +92,7 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         self.main = nn.Sequential(
             # input is Z, going into a convolution
-            nn.ConvTranspose2d( nz, ngf * 8, 4, 1, 0, bias=False),
+            nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(ngf * 8),
             nn.ReLU(True),
             # state size. (ngf*8) x 4 x 4
@@ -100,22 +100,23 @@ class Generator(nn.Module):
             nn.BatchNorm2d(ngf * 4),
             nn.ReLU(True),
             # state size. (ngf*4) x 8 x 8
-            nn.ConvTranspose2d( ngf * 4, ngf * 2, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf * 2),
             nn.ReLU(True),
             # state size. (ngf*2) x 16 x 16
-            nn.ConvTranspose2d( ngf * 2, ngf, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf),
             nn.ReLU(True),
             # state size. (ngf) x 32 x 32
-            nn.ConvTranspose2d( ngf, nc, 4, 2, 1, bias=False),
-            nn.Tanh()
+            nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
+            nn.Tanh(),
         )
 
     def forward(self, input):
         output = self.main(input)
         return output
-    
+
+
 netG = Generator().to(device)
 netG.apply(weights_init)
 
@@ -145,12 +146,13 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2, inplace=True),
             # state size. (ndf*8) x 4 x 4
             nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
     def forward(self, input):
         output = self.main(input)
         return output.view(-1, 1).squeeze(1)
+
 
 netD = Discriminator().to(device)
 netD.apply(weights_init)
@@ -203,25 +205,25 @@ for epoch in range(niter):
         D_G_z1 = output.mean().item()
         errD = errD_real + errD_fake
         optimizerD.step()
-        
+
         ########################################################
         # (2) 判別神經網路: maximize log(D(G(z)))
         #######################################################
         netG.zero_grad()
-        label.fill_(real_label) 
+        label.fill_(real_label)
         output = netD(fake)
         errG = criterion(output, label)
         errG.backward()
         D_G_z2 = output.mean().item()
         optimizerG.step()
         if i % 200 == 0:
-            print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
-                   % (epoch+1, niter, i, len(dataloader),
-                     errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
-            vutils.save_image(real_cpu,'gan_face_output/real_samples.png' ,normalize=True)
+            print(
+                '[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
+                % (epoch + 1, niter, i, len(dataloader), errD.item(), errG.item(), D_x, D_G_z1, D_G_z2)
+            )
+            vutils.save_image(real_cpu, 'gan_face_output/real_samples.png', normalize=True)
             fake = netG(fixed_noise)
-            vutils.save_image(fake.detach(),'gan_face_output/fake_samples_epoch_%03d.png' 
-                              % (epoch), normalize=True)        
+            vutils.save_image(fake.detach(), 'gan_face_output/fake_samples_epoch_%03d.png' % (epoch), normalize=True)
     torch.save(netG.state_dict(), 'gan_face_weights/netG_epoch_%d.pth' % (epoch))
     torch.save(netD.state_dict(), 'gan_face_weights/netD_epoch_%d.pth' % (epoch))
 
@@ -239,14 +241,14 @@ fake_images = netG(fixed_noise).clamp(min=-1, max=1)
 fake_images_np = fake_images.cpu()
 fake_images_np = fake_images_np.reshape(-1, 3, image_size, image_size)
 fake_images_np = torch.permute(fake_images_np, (0, 2, 3, 1)).detach().numpy()
-fake_images_np = (fake_images_np + 1) *.5  # 使像素值介於 [0, 1] 之間
+fake_images_np = (fake_images_np + 1) * 0.5  # 使像素值介於 [0, 1] 之間
 R, C = 5, 5
 plt.figure(figsize=(8, 8))
 for i in range(batch_size):
     plt.subplot(R, C, i + 1)
     plt.axis('off')
     plt.imshow(fake_images_np[i])
-plt.show();
+plt.show()
 
 # ## 顯示 GIF 檔
 
@@ -263,7 +265,7 @@ with imageio.get_writer(anim_file, mode='I') as writer:
     filenames = sorted(filenames)
     for filename in filenames:
         image = imageio.imread(filename)
-        writer.append_data(image) 
+        writer.append_data(image)
 
 # <img src="./gan_face_output/dcgan.gif" align="left">
 
@@ -273,4 +275,3 @@ with imageio.get_writer(anim_file, mode='I') as writer:
 # 載入權重
 netD.load_state_dict(torch.load('gan_face_weights/netD_epoch_9.pth'))
 netG.load_state_dict(torch.load('gan_face_weights/netG_epoch_9.pth'))
-

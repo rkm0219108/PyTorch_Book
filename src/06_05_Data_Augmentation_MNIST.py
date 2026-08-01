@@ -24,7 +24,7 @@ import numpy as np
 
 
 # 設定參數
-PATH_DATASETS = "" # 預設路徑
+PATH_DATASETS = ""  # 預設路徑
 BATCH_SIZE = 1000  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -35,22 +35,26 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 image_width = 28
-train_transforms = transforms.Compose([
-    #transforms.ColorJitter(), # 亮度、飽和度、對比資料增補
-    # 裁切部分圖像，再調整圖像尺寸
-    transforms.RandomResizedCrop(image_width, scale=(0.8, 1.0)), 
-    transforms.RandomRotation(degrees=(-10, 10)), # 旋轉 10 度
-    #transforms.RandomHorizontalFlip(), # 水平翻轉
-    #transforms.RandomAffine(10), # 仿射
-    transforms.ToTensor(), 
-    transforms.Normalize(mean=(0.1307,), std=(0.3081,))
-    ])
+train_transforms = transforms.Compose(
+    [
+        # transforms.ColorJitter(), # 亮度、飽和度、對比資料增補
+        # 裁切部分圖像，再調整圖像尺寸
+        transforms.RandomResizedCrop(image_width, scale=(0.8, 1.0)),
+        transforms.RandomRotation(degrees=(-10, 10)),  # 旋轉 10 度
+        # transforms.RandomHorizontalFlip(), # 水平翻轉
+        # transforms.RandomAffine(10), # 仿射
+        transforms.ToTensor(),
+        transforms.Normalize(mean=(0.1307,), std=(0.3081,)),
+    ]
+)
 
-test_transforms = transforms.Compose([
-    transforms.Resize((image_width, image_width)), # 調整圖像尺寸
-    transforms.ToTensor(), 
-    transforms.Normalize(mean=(0.1307,), std=(0.3081,))
-    ])
+test_transforms = transforms.Compose(
+    [
+        transforms.Resize((image_width, image_width)),  # 調整圖像尺寸
+        transforms.ToTensor(),
+        transforms.Normalize(mean=(0.1307,), std=(0.3081,)),
+    ]
+)
 
 # ## 步驟1：載入 MNIST 手寫阿拉伯數字資料
 
@@ -58,18 +62,14 @@ test_transforms = transforms.Compose([
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST(PATH_DATASETS, train=True, download=True, 
-                 transform=train_transforms)
+train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=train_transforms)
 
-train_loader = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE,
-                                          shuffle=True, num_workers=2)
+train_loader = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
 # 下載測試資料
-test_ds = MNIST(PATH_DATASETS, train=False, download=True,  
-                 transform=test_transforms)
+test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=test_transforms)
 
-test_loader = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE,
-                                         shuffle=False, num_workers=2)
+test_loader = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -111,6 +111,7 @@ class Net(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
+
 # ## 步驟6：結合訓練資料及模型，進行模型訓練
 
 # In[6]:
@@ -118,25 +119,25 @@ class Net(nn.Module):
 
 def train(model, device, train_loader, criterion, optimizer, epoch):
     model.train()
-    loss_list = []    
+    loss_list = []
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-        
+
         optimizer.zero_grad()
         output = model(data)
-        #loss = F.nll_loss(output, target)
+        # loss = F.nll_loss(output, target)
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
-        
-        if (batch_idx+1) % 10 == 0:
+
+        if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
-            batch = (batch_idx+1) * len(data)
+            batch = (batch_idx + 1) * len(data)
             data_count = len(train_loader.dataset)
-            percentage = (100. * (batch_idx+1) / len(train_loader))
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' +
-                  f'  Loss: {loss.item():.6f}')
+            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
     return loss_list
+
 
 # In[7]:
 
@@ -155,29 +156,30 @@ def test(model, device, test_loader):
                 target = torch.Tensor(target)
             data, target = data.to(device), target.to(device)
             output = model(data)
-            #test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
+            # test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
             _, predicted = torch.max(output.data, 1)
             # print(predicted)
             correct += (predicted == target).sum().item()
 
     # 平均損失
-    test_loss /= len(test_loader.dataset) 
+    test_loss /= len(test_loader.dataset)
     # 顯示測試結果
     data_count = len(test_loader.dataset)
-    percentage = 100. * correct / data_count 
+    percentage = 100.0 * correct / data_count
     print(f'準確率: {correct}/{data_count} ({percentage:.2f}%)')
+
 
 # In[8]:
 
 
 epochs = 5
-lr=1
+lr = 1
 
 # 建立模型
 model = Net().to(device)
 
 # 損失
-criterion = F.nll_loss # nn.CrossEntropyLoss()
+criterion = F.nll_loss  # nn.CrossEntropyLoss()
 
 # 設定優化器(optimizer)
 optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
@@ -185,7 +187,7 @@ optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
 loss_list = []
 for epoch in range(1, epochs + 1):
     loss_list += train(model, device, train_loader, criterion, optimizer, epoch)
-    #test(model, device, test_loader)
+    # test(model, device, test_loader)
     optimizer.step()
 
 # In[9]:
@@ -233,15 +235,17 @@ print('prediction: ', ' '.join(predictions[0:20]))
 # 顯示圖像
 import matplotlib.pyplot as plt
 
+
 def imshow(X):
     # 繪製點陣圖，cmap='gray':灰階
-    plt.imshow(X.reshape(28,28), cmap='gray')
+    plt.imshow(X.reshape(28, 28), cmap='gray')
 
     # 隱藏刻度
-    plt.axis('off') 
+    plt.axis('off')
 
     # 顯示圖形
-    plt.show() 
+    plt.show()
+
 
 # In[13]:
 
@@ -257,18 +261,18 @@ for i in range(10):
 
     # 縮為 (28, 28) 大小的影像
     image_resized = image1.resize(tuple(data_shape)[2:])
-    X1 = np.array(image_resized).reshape([1]+list(data_shape)[1:])
+    X1 = np.array(image_resized).reshape([1] + list(data_shape)[1:])
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
-    X1 = 1.0-(X1/255)
+    X1 = 1.0 - (X1 / 255)
 
     # 圖像轉換
-    X1 = (X1 - 0.1307) / 0.3081  
-    
+    X1 = (X1 - 0.1307) / 0.3081
+
     # 顯示轉換後的圖像
     # imshow(X1)
-    
+
     X1 = torch.FloatTensor(X1).to(device)
-    
+
     # 預測
     output = model(X1)
     # print(output, '\n')
@@ -290,19 +294,19 @@ for i in range(10):
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
-    image_resized = resize(image1, tuple(data_shape)[2:], anti_aliasing=True)    
-    X1 = image_resized.reshape([1]+list(data_shape)[1:]) 
+    image_resized = resize(image1, tuple(data_shape)[2:], anti_aliasing=True)
+    X1 = image_resized.reshape([1] + list(data_shape)[1:])
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
-    X1 = 1.0-X1
-    
+    X1 = 1.0 - X1
+
     # 圖像轉換
-    X1 = (X1 - 0.1307) / 0.3081  
+    X1 = (X1 - 0.1307) / 0.3081
 
     # 顯示轉換後的圖像
     # imshow(X1)
-    
+
     X1 = torch.FloatTensor(X1).to(device)
-    
+
     # 預測
     output = model(X1)
     _, predicted = torch.max(output.data, 1)
@@ -314,8 +318,7 @@ for i in range(10):
 
 
 class CustomImageDataset(torch.utils.data.Dataset):
-    def __init__(self, img_dir, transform=None, target_transform=None
-                 , to_gray=False, size=28):
+    def __init__(self, img_dir, transform=None, target_transform=None, to_gray=False, size=28):
         self.img_labels = [file_name for file_name in os.listdir(img_dir)]
         self.img_dir = img_dir
         self.transform = transform
@@ -332,19 +335,20 @@ class CustomImageDataset(torch.utils.data.Dataset):
         # 讀取圖檔
         mode = 'L' if self.to_gray else 'RGB'
         image = Image.open(img_path, mode='r').convert(mode)
-        image = Image.fromarray(1.0-(np.array(image)/255))
+        image = Image.fromarray(1.0 - (np.array(image) / 255))
 
         # print(image.shape)
         # 去除副檔名
         label = int(self.img_labels[idx].split('.')[0])
-        
+
         # 轉換
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
-        
+
         return image, label
+
 
 # ### 預測
 
@@ -352,7 +356,7 @@ class CustomImageDataset(torch.utils.data.Dataset):
 
 
 ds = CustomImageDataset('./myDigits', to_gray=True, transform=test_transforms)
-data_loader = torch.utils.data.DataLoader(ds, batch_size=10,shuffle=False)
+data_loader = torch.utils.data.DataLoader(ds, batch_size=10, shuffle=False)
 
 test(model, device, data_loader)
 
@@ -368,7 +372,7 @@ with torch.no_grad():
     for data, target in data_loader:
         print(target)
         data, target = data.to(device), target.to(device)
-        
+
         # 預測
         output = model(data)
         _, predicted = torch.max(output.data, 1)
@@ -382,6 +386,3 @@ with torch.no_grad():
 torch.save(model, 'cnn_augmentation_model.pt')
 
 # In[ ]:
-
-
-

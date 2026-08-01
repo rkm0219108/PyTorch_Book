@@ -36,13 +36,15 @@ G.add_node(1)
 G.add_nodes_from([2, 3])
 
 # 加 2 個節點，並添加顏色屬性
-G.add_nodes_from([
-    (4, {"color": "red"}),
-    (5, {"color": "green"}),
-])
+G.add_nodes_from(
+    [
+        (4, {"color": "red"}),
+        (5, {"color": "green"}),
+    ]
+)
 
 # 產生 0~9 共 10 個節點
-H = nx.path_graph(10) 
+H = nx.path_graph(10)
 # 將 H 圖形所有節點，併入 G 圖形
 G.add_nodes_from(H)
 
@@ -62,7 +64,7 @@ G.add_edge(1, 2)
 
 # 另一種寫法
 e = (2, 3)
-G.add_edge(*e)  
+G.add_edge(*e)
 
 # 一次加 2 條邊
 G.add_edges_from([(1, 2), (1, 3)])
@@ -110,7 +112,7 @@ G.remove_edges_from([(1, 2), (2, 3)])
 
 
 # 繪製圖形
-nx.draw(G, with_labels=True, cmap = plt.get_cmap('rainbow'))
+nx.draw(G, with_labels=True, cmap=plt.get_cmap('rainbow'))
 
 # In[10]:
 
@@ -119,7 +121,7 @@ nx.draw(G, with_labels=True, cmap = plt.get_cmap('rainbow'))
 G = nx.Graph([(1, 2, {"color": "yellow"})])
 
 # 繪製圖形
-nx.draw(G, with_labels=True, cmap = plt.get_cmap('rainbow'))
+nx.draw(G, with_labels=True, cmap=plt.get_cmap('rainbow'))
 
 # In[11]:
 
@@ -151,7 +153,8 @@ nx.draw(G, with_labels=True)
 
 
 # 其他屬性
-nx.draw(G,
+nx.draw(
+    G,
     with_labels=True,
     node_size=1000,
     node_color="#ffff8f",
@@ -163,7 +166,7 @@ nx.draw(G,
 
 
 # save as PNG
-plt.savefig("./graph/1.png");
+plt.savefig("./graph/1.png")
 
 # ## 以屬性為邊的寬度
 
@@ -175,15 +178,13 @@ G = nx.Graph()
 
 G.add_edge("1", "2")
 G.add_edge("1", "6")
-G.add_edges_from([("1", "3"), 
-                  ("3", "4")])
-G.add_edges_from([("1", "5", {"weight" : 3}), 
-                  ("2", "4", {"weight" : 5})])
+G.add_edges_from([("1", "3"), ("3", "4")])
+G.add_edges_from([("1", "5", {"weight": 3}), ("2", "4", {"weight": 5})])
 
 # 權重計算
-weights = [1 if G[u][v] == {} else G[u][v]['weight'] for u,v in G.edges()]
+weights = [1 if G[u][v] == {} else G[u][v]['weight'] for u, v in G.edges()]
 # 以權重作為線條的寬度
-nx.draw(G, with_labels=True, cmap = plt.get_cmap('rainbow'), width=weights)
+nx.draw(G, with_labels=True, cmap=plt.get_cmap('rainbow'), width=weights)
 
 # ## 有向圖(Directed Graph)
 
@@ -191,7 +192,7 @@ nx.draw(G, with_labels=True, cmap = plt.get_cmap('rainbow'), width=weights)
 
 
 DG = nx.DiGraph()
-DG.add_edge(2, 1)   
+DG.add_edge(2, 1)
 DG.add_edge(1, 3)
 DG.add_edge(2, 4)
 DG.add_edge(1, 2)
@@ -200,14 +201,14 @@ DG.add_edge(1, 2)
 
 
 # Plot the graph
-nx.draw(DG, with_labels=True, cmap = plt.get_cmap('rainbow'))
+nx.draw(DG, with_labels=True, cmap=plt.get_cmap('rainbow'))
 
 # In[19]:
 
 
 DG = nx.DiGraph()
 DG.add_weighted_edges_from([(1, 2, 0.5), (2, 3, 0.75)])
-DG.out_degree(1, weight='weight') # 指定 OutEdgeView 觀看的屬性
+DG.out_degree(1, weight='weight')  # 指定 OutEdgeView 觀看的屬性
 list(DG.successors(1))
 
 # In[20]:
@@ -220,7 +221,7 @@ list(DG.neighbors(2))
 
 
 # Plot the graph
-nx.draw(DG, with_labels=True, cmap = plt.get_cmap('rainbow'))
+nx.draw(DG, with_labels=True, cmap=plt.get_cmap('rainbow'))
 
 # ## 載入XML檔案
 
@@ -228,7 +229,8 @@ nx.draw(DG, with_labels=True, cmap = plt.get_cmap('rainbow'))
 
 
 clothing_graph = nx.read_graphml("./graph/clothing_graph.graphml")
-nx.draw_planar(clothing_graph,
+nx.draw_planar(
+    clothing_graph,
     arrowsize=12,
     with_labels=True,
     node_size=1000,
@@ -243,7 +245,8 @@ nx.draw_planar(clothing_graph,
 # In[23]:
 
 
-nx.draw_circular(clothing_graph,
+nx.draw_circular(
+    clothing_graph,
     arrowsize=12,
     with_labels=True,
     node_size=1000,
@@ -256,7 +259,8 @@ nx.draw_circular(clothing_graph,
 # In[24]:
 
 
-nx.draw_kamada_kawai(clothing_graph,
+nx.draw_kamada_kawai(
+    clothing_graph,
     arrowsize=12,
     with_labels=True,
     node_size=1000,
@@ -269,7 +273,8 @@ nx.draw_kamada_kawai(clothing_graph,
 # In[25]:
 
 
-nx.draw_spring(clothing_graph,
+nx.draw_spring(
+    clothing_graph,
     arrowsize=12,
     with_labels=True,
     node_size=1000,
@@ -287,7 +292,7 @@ nx.draw_spring(clothing_graph,
 # 載入內建資料
 G_karate = nx.karate_club_graph()
 # 指定佈局，取得節點座標
-pos = nx.spring_layout(G_karate) 
+pos = nx.spring_layout(G_karate)
 # 繪製圖形
 nx.draw(G_karate, node_color="#ffff8f", with_labels=True, pos=pos)
 
@@ -344,22 +349,23 @@ nx.shortest_path(G_karate)[0][23]
 
 
 # 圖的邊，weight為距離
-edges = [(1,2, {'weight':4}),
-        (1,3,{'weight':2}),
-        (2,3,{'weight':1}),
-        (2,4, {'weight':5}),
-        (3,4, {'weight':8}),
-        (3,5, {'weight':10}),
-        (4,5,{'weight':2}),
-        (4,6,{'weight':8}),
-        (5,6,{'weight':5})]
+edges = [
+    (1, 2, {'weight': 4}),
+    (1, 3, {'weight': 2}),
+    (2, 3, {'weight': 1}),
+    (2, 4, {'weight': 5}),
+    (3, 4, {'weight': 8}),
+    (3, 5, {'weight': 10}),
+    (4, 5, {'weight': 2}),
+    (4, 6, {'weight': 8}),
+    (5, 6, {'weight': 5}),
+]
 # 邊的名稱
-edge_labels = {(1,2):4, (1,3):2, (2,3):1, (2,4):5, (3,4):8
-               , (3,5):10, (4,5):2, (4,6):8, (5,6):5}
-   
-# 生成圖        
+edge_labels = {(1, 2): 4, (1, 3): 2, (2, 3): 1, (2, 4): 5, (3, 4): 8, (3, 5): 10, (4, 5): 2, (4, 6): 8, (5, 6): 5}
+
+# 生成圖
 G = nx.Graph()
-for i in range(1,7):
+for i in range(1, 7):
     G.add_node(i)
 G.add_edges_from(edges)
 
@@ -368,8 +374,8 @@ pos = nx.planar_layout(G)
 nx.draw(G, node_color="#ffff8f", with_labels=True, pos=pos)
 
 # 在邊顯示權重(weight)
-labels = nx.get_edge_attributes(G,'weight')
-nx.draw_networkx_edge_labels(G,pos,edge_labels=labels);
+labels = nx.get_edge_attributes(G, 'weight')
+nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
 
 # In[10]:
 
@@ -402,7 +408,7 @@ from networkx.algorithms import tree
 # 最小生成樹
 mst = tree.minimum_spanning_edges(G_karate, algorithm='prim', data=False)
 edgelist = list(mst)
-sorted(edgelist)     # 排序
+sorted(edgelist)  # 排序
 
 # ## 極大團(Maximal Clique)偵測
 
@@ -412,7 +418,7 @@ sorted(edgelist)     # 排序
 from networkx.algorithms import approximation as aprx
 
 max_clique = aprx.max_clique(G_karate)
-max_clique 
+max_clique
 
 # In[36]:
 
@@ -426,7 +432,7 @@ nx.draw_circular(max_clique_subgraph, node_color="#ffff8f", with_labels=True)
 # In[37]:
 
 
-G = nx.complete_graph(5) # 5 個節點
+G = nx.complete_graph(5)  # 5 個節點
 nx.draw(G, node_color="#ffff8f", with_labels=True)
 
 # ## 社群偵測(Community Detection)
@@ -437,7 +443,7 @@ nx.draw(G, node_color="#ffff8f", with_labels=True)
 from networkx.algorithms import community
 
 # 內建資料，兩個社群，各有 5 個節點，1個相連的節點
-G = nx.barbell_graph(5, 1) 
+G = nx.barbell_graph(5, 1)
 nx.draw_kamada_kawai(G, node_color="#ffff8f", with_labels=True)
 
 # ## Girvan/Newman分群法
@@ -463,13 +469,17 @@ next_level_communities
 from networkx.algorithms import community
 import itertools
 
-k = 4 # 分成 2 ~ k+1 群
+k = 4  # 分成 2 ~ k+1 群
 # Girvan Newman algorithm
 comp = community.girvan_newman(G)
 for communities in itertools.islice(comp, k):
-    print(tuple(sorted(c) for c in communities), ":\t\t", 
-          community.modularity(G, communities), ":\t", 
-          community.partition_quality(G, communities))
+    print(
+        tuple(sorted(c) for c in communities),
+        ":\t\t",
+        community.modularity(G, communities),
+        ":\t",
+        community.partition_quality(G, communities),
+    )
 
 # ## Louvain 分群法
 
@@ -493,22 +503,19 @@ for k in range(2, 6):
 # In[ ]:
 
 
-!pip install python-louvain
+# !pip install python-louvain
 
 # In[53]:
 
 
 import community
+
 partition = community.best_partition(G_karate)
 pos = nx.spring_layout(G_karate)
 plt.figure(figsize=(8, 8))
 plt.axis('off')
-nx.draw_networkx_nodes(G_karate, pos, node_size=600, cmap=plt.cm.RdYlBu
-                       , node_color=list(partition.values()))
+nx.draw_networkx_nodes(G_karate, pos, node_size=600, cmap=plt.cm.RdYlBu, node_color=list(partition.values()))
 nx.draw_networkx_edges(G_karate, pos, alpha=0.3)
-plt.show(G_karate)
+plt.show()
 
 # In[ ]:
-
-
-

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# 
+#
 # Neural Transfer Using PyTorch
 # =============================
-# 
-# 
+#
+#
 # #### 作者: [Alexis Jacq](https://alexis-jacq.github.io)
 # #### 原始程式碼：[NEURAL TRANSFER USING PYTORCH](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html#neural-transfer-using-pytorch)
 
@@ -38,31 +38,33 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 如果無 GPU 使用較小尺寸的圖像
-imsize = 512 if torch.cuda.is_available() else 128  
+imsize = 512 if torch.cuda.is_available() else 128
 
 # 轉換
-loader = transforms.Compose([
-    transforms.Resize((imsize, imsize)),  # 統一圖像尺寸
-    transforms.ToTensor()])  
+loader = transforms.Compose([transforms.Resize((imsize, imsize)), transforms.ToTensor()])  # 統一圖像尺寸
+
 
 # 讀取圖檔，轉為張量
 def image_loader(image_name):
     image = Image.open(image_name)
-    image = loader(image).unsqueeze(0) # 增加一維
+    image = loader(image).unsqueeze(0)  # 增加一維
     return image.to(device, torch.float)
 
+
 unloader = transforms.ToPILImage()  # 張量轉為 PIL Image 格式
+
 
 # 顯示圖像
 def imshow(tensor, title=None):
     image = tensor.cpu().clone()  # 複製張量
-    image = image.squeeze(0)      # 減少一維
+    image = image.squeeze(0)  # 減少一維
     image = unloader(image)
     plt.axis('off')
     plt.imshow(image)
     if title is not None:
         plt.title(title)
-    plt.pause(0.001) # 顯示多張圖須停頓，等畫面更新
+    plt.pause(0.001)  # 顯示多張圖須停頓，等畫面更新
+
 
 # ## 載入內容圖檔、風格圖檔
 
@@ -81,7 +83,10 @@ imshow(content_img, title='Content Image')
 
 
 class ContentLoss(nn.Module):
-    def __init__(self, target,):
+    def __init__(
+        self,
+        target,
+    ):
         super(ContentLoss, self).__init__()
         # we 'detach' the target content from the tree used
         # to dynamically compute the gradient: this is a stated value,
@@ -93,6 +98,7 @@ class ContentLoss(nn.Module):
         self.loss = F.mse_loss(input, self.target)
         return input
 
+
 # ## 定義 gram matrix
 
 # In[21]:
@@ -102,13 +108,14 @@ def gram_matrix(input):
     # a: 批量(=1)
     # b: feature map 數量
     # (c,d): feature maps維度大小 (N=c*d)
-    a, b, c, d = input.size()  
+    a, b, c, d = input.size()
 
     features = input.view(a * b, c * d)  # resise F_XL into \hat F_XL
 
     G = torch.mm(features, features.t())  # compute the gram product
 
     return G.div(a * b * c * d)
+
 
 # ## 定義風格損失函數
 
@@ -125,12 +132,13 @@ class StyleLoss(nn.Module):
         self.loss = F.mse_loss(G, self.target)
         return input
 
+
 # ## 載入VGG 19模型
 
 # In[23]:
 
 
-cnn = models.vgg19(pretrained=True).features.to(device).eval()
+cnn = models.vgg19(weights=models.VGG19_Weights.DEFAULT).features.to(device).eval()
 
 # ## 標準化
 
@@ -139,6 +147,7 @@ cnn = models.vgg19(pretrained=True).features.to(device).eval()
 
 cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
 cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
+
 
 # 標準化函數
 class Normalization(nn.Module):
@@ -153,6 +162,7 @@ class Normalization(nn.Module):
     def forward(self, img):
         # normalize img
         return (img - self.mean) / self.std
+
 
 # ## 定義內容圖和風格圖輸出的卷積層名稱
 
@@ -169,10 +179,15 @@ style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 
 # 定義卷積層後的損失計算函數
-def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
-                               style_img, content_img,
-                               content_layers=content_layers_default,
-                               style_layers=style_layers_default):
+def get_style_model_and_losses(
+    cnn,
+    normalization_mean,
+    normalization_std,
+    style_img,
+    content_img,
+    content_layers=content_layers_default,
+    style_layers=style_layers_default,
+):
     # 標準化
     normalization = Normalization(normalization_mean, normalization_std).to(device)
 
@@ -220,9 +235,10 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
         if isinstance(model[i], ContentLoss) or isinstance(model[i], StyleLoss):
             break
 
-    model = model[:(i + 1)]
+    model = model[: (i + 1)]
 
     return model, style_losses, content_losses
+
 
 # ## 以梯度下降法訓練模型
 
@@ -230,16 +246,26 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
 
 
 def get_input_optimizer(input_img):
-    # 設定 input image 要優化 
+    # 設定 input image 要優化
     optimizer = optim.LBFGS([input_img])
     return optimizer
 
-def run_style_transfer(cnn, normalization_mean, normalization_std,
-                       content_img, style_img, input_img, num_steps=300,
-                       style_weight=1000000, content_weight=1):
+
+def run_style_transfer(
+    cnn,
+    normalization_mean,
+    normalization_std,
+    content_img,
+    style_img,
+    input_img,
+    num_steps=300,
+    style_weight=1000000,
+    content_weight=1,
+):
     print('Building the style transfer model..')
-    model, style_losses, content_losses = get_style_model_and_losses(cnn,
-        normalization_mean, normalization_std, style_img, content_img)
+    model, style_losses, content_losses = get_style_model_and_losses(
+        cnn, normalization_mean, normalization_std, style_img, content_img
+    )
 
     # 優化 input image, 而不是求權重
     input_img.requires_grad_(True)
@@ -249,10 +275,11 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
     print('優化 ..')
     run = [0]
     while run[0] <= num_steps:
+
         def closure():
             # 限定像素值介於 [0, 1]
             with torch.no_grad():
-                input_img.clamp_(0, 1) 
+                input_img.clamp_(0, 1)
 
             # 計算損失
             optimizer.zero_grad()
@@ -275,8 +302,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
             run[0] += 1
             if run[0] % 50 == 0:
                 print("run {}:".format(run))
-                print('Style Loss : {:4f} Content Loss: {:4f}'.format(
-                    style_score.item(), content_score.item()))
+                print('Style Loss : {:4f} Content Loss: {:4f}'.format(style_score.item(), content_score.item()))
                 print()
 
             return style_score + content_score
@@ -288,12 +314,12 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
     return input_img
 
+
 # In[42]:
 
 
 input_img = content_img.clone()
-output = run_style_transfer(cnn, cnn_normalization_mean, cnn_normalization_std,
-                            content_img, style_img, input_img)
+output = run_style_transfer(cnn, cnn_normalization_mean, cnn_normalization_std, content_img, style_img, input_img)
 
 plt.ion()
 
@@ -319,8 +345,7 @@ imshow(content_img, title='Content Image')
 
 
 input_img = content_img.clone()
-output = run_style_transfer(cnn, cnn_normalization_mean, cnn_normalization_std,
-                            content_img, style_img, input_img)
+output = run_style_transfer(cnn, cnn_normalization_mean, cnn_normalization_std, content_img, style_img, input_img)
 
 plt.ion()
 
@@ -332,6 +357,3 @@ plt.ioff()
 plt.show()
 
 # In[ ]:
-
-
-

@@ -9,7 +9,7 @@
 # 載入套件
 import numpy as np
 import pandas as pd
-from sklearn import datasets 
+from sklearn import datasets
 import torch
 
 # ## 載入 IRIS 資料集
@@ -18,7 +18,7 @@ import torch
 
 
 dataset = datasets.load_iris()
-df = pd.DataFrame(dataset.data, columns = dataset.feature_names)
+df = pd.DataFrame(dataset.data, columns=dataset.feature_names)
 df.head()
 
 # ## 資料分割成訓練及測試資料
@@ -27,8 +27,8 @@ df.head()
 
 
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(df.values,
-                                        dataset.target, test_size=0.2)
+
+X_train, X_test, y_train, y_test = train_test_split(df.values, dataset.target, test_size=0.2)
 
 # ## 進行 one-hot encoding 轉換
 
@@ -62,10 +62,7 @@ X_train.shape, y_train_encoding.shape
 # In[100]:
 
 
-model = torch.nn.Sequential(
-    torch.nn.Linear(4, 3), 
-    torch.nn.Softmax(dim=1)
-)
+model = torch.nn.Sequential(torch.nn.Linear(4, 3), torch.nn.Softmax(dim=1))
 
 # ## 定義損失函數、優化器
 
@@ -80,28 +77,27 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 # In[102]:
 
 
-epochs=1000
+epochs = 1000
 accuracy = []
 losses = []
 for i in range(epochs):
     y_pred = model(X_train)
     loss = loss_function(y_pred, y_train_encoding)
 
-    #print(np.argmax(y_pred.detach().numpy(), axis=1))
-    accuracy.append((np.argmax(y_pred.detach().numpy(), axis=1) == y_train)
-                    .sum()/y_train.shape[0]*100)
+    # print(np.argmax(y_pred.detach().numpy(), axis=1))
+    accuracy.append((np.argmax(y_pred.detach().numpy(), axis=1) == y_train).sum() / y_train.shape[0] * 100)
     losses.append(loss.item())
-    
+
     # 梯度重置
     optimizer.zero_grad()
 
     # 反向傳導
-    loss.backward()  
+    loss.backward()
 
     # 執行下一步
     optimizer.step()
-    
-    if i%100 == 0:
+
+    if i % 100 == 0:
         print(loss.item())
 
 # ## 繪製訓練過程的損失及準確率趨勢圖
@@ -111,20 +107,21 @@ for i in range(epochs):
 
 import matplotlib.pyplot as plt
 
-# fix 中文亂碼 
+# fix 中文亂碼
 from matplotlib.font_manager import FontProperties
-plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 微軟正黑體
+
+plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 微軟正黑體
 plt.rcParams['axes.unicode_minus'] = False
 
-plt.figure(figsize=(12,6))
-plt.subplot(1,2,1)
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
 plt.title('損失', fontsize=20)
-plt.plot(range(0,epochs), losses)
+plt.plot(range(0, epochs), losses)
 
-plt.subplot(1,2,2)
+plt.subplot(1, 2, 2)
 plt.title('準確率', fontsize=20)
-plt.plot(range(0,epochs), accuracy)
-plt.ylim(0,100)
+plt.plot(range(0, epochs), accuracy)
+plt.ylim(0, 100)
 plt.show()
 
 # ## 模型評估
@@ -134,10 +131,7 @@ plt.show()
 
 predict_test = model(X_test)
 _, y_pred = torch.max(predict_test, 1)
-        
+
 print(f'測試資料準確度: {((y_pred.numpy() == y_test).sum()/y_test.shape[0]):.2f}')
 
 # In[ ]:
-
-
-

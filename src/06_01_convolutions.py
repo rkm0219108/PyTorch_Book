@@ -11,13 +11,13 @@
 import numpy as np
 
 # 測試資料
-source_map = np.array(list('1110001110001110011001100')).astype(np.int)
-source_map = source_map.reshape(5,5)
+source_map = np.array(list('1110001110001110011001100')).astype(int)
+source_map = source_map.reshape(5, 5)
 print('原始資料：')
 print(source_map)
 
 # 濾波器(Filter)
-filter1 = np.array(list('101010101')).astype(np.int).reshape(3,3)
+filter1 = np.array(list('101010101')).astype(int).reshape(3, 3)
 print('\n濾波器:')
 print(filter1)
 
@@ -32,7 +32,7 @@ result = np.zeros((width, height))
 # 計算每一格
 for i in range(width):
     for j in range(height):
-        value1 =source_map[i:i+filter1.shape[0], j:j+filter1.shape[1]] * filter1
+        value1 = source_map[i : i + filter1.shape[0], j : j + filter1.shape[1]] * filter1
         result[i, j] = np.sum(value1)
 print(result)
 
@@ -53,10 +53,11 @@ convolve2d(source_map, filter1, mode='valid')
 # 卷積的影像轉換函數，padding='same'
 from skimage.exposure import rescale_intensity
 
+
 def convolve(image, kernel):
     # 取得圖像與濾波器的寬高
-    (iH, iW) = image.shape[:2]
-    (kH, kW) = kernel.shape[:2]
+    iH, iW = image.shape[:2]
+    kH, kW = kernel.shape[:2]
 
     # 計算 padding='same' 單邊所需的補零行數
     pad = int((kW - 1) / 2)
@@ -65,16 +66,17 @@ def convolve(image, kernel):
 
     # 卷積
     for y in np.arange(pad, iH + pad):
-        for x in np.arange(pad, iW + pad):            
-            roi = image[y - pad:y + pad + 1, x - pad:x + pad + 1]  # 裁切圖像            
-            k = (roi * kernel).sum()                               # 卷積計算
-            output[y - pad, x - pad] = k                           # 更新計算結果的矩陣 
+        for x in np.arange(pad, iW + pad):
+            roi = image[y - pad : y + pad + 1, x - pad : x + pad + 1]  # 裁切圖像
+            k = (roi * kernel).sum()  # 卷積計算
+            output[y - pad, x - pad] = k  # 更新計算結果的矩陣
 
     # 調整影像色彩深淺範圍至 (0, 255)
     output = rescale_intensity(output, in_range=(0, 255))
     output = (output * 255).astype("uint8")
-   
-    return output     # 回傳結果影像
+
+    return output  # 回傳結果影像
+
 
 # ## 灰階化(Gray)
 
@@ -128,10 +130,7 @@ cv2.destroyAllWindows()
 
 
 # sharpening filter
-sharpen = np.array((
-    [0, -1, 0],
-    [-1, 5, -1],
-    [0, -1, 0]), dtype="int")
+sharpen = np.array(([0, -1, 0], [-1, 5, -1], [0, -1, 0]), dtype="int")
 
 # 卷積
 convoleOutput = convolve(gray, sharpen)
@@ -148,10 +147,7 @@ cv2.destroyAllWindows()
 
 
 # Laplacian filter
-laplacian = np.array((
-    [0, 1, 0],
-    [1, -4, 1],
-    [0, 1, 0]), dtype="int")
+laplacian = np.array(([0, 1, 0], [1, -4, 1], [0, 1, 0]), dtype="int")
 
 # 卷積
 convoleOutput = convolve(gray, laplacian)
@@ -168,10 +164,7 @@ cv2.destroyAllWindows()
 
 
 # Sobel x-axis filter
-sobelX = np.array((
-    [-1, 0, 1],
-    [-2, 0, 2],
-    [-1, 0, 1]), dtype="int")
+sobelX = np.array(([-1, 0, 1], [-2, 0, 2], [-1, 0, 1]), dtype="int")
 
 # 卷積
 convoleOutput = convolve(gray, sobelX)
@@ -188,10 +181,7 @@ cv2.destroyAllWindows()
 
 
 # Sobel y-axis filter
-sobelY = np.array((
-    [-1, -2, -1],
-    [0, 0, 0],
-    [1, 2, 1]), dtype="int")
+sobelY = np.array(([-1, -2, -1], [0, 0, 0], [1, 2, 1]), dtype="int")
 
 # 卷積
 convoleOutput = convolve(gray, sobelY)
@@ -203,6 +193,3 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # In[ ]:
-
-
-

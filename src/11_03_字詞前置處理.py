@@ -13,8 +13,7 @@ import nltk
 
 
 # 測試文章段落
-text="Today is a great day. It is even better than yesterday." + \
-     " And yesterday was the best day ever."
+text = "Today is a great day. It is even better than yesterday." + " And yesterday was the best day ever."
 
 # ## 分割字句
 
@@ -57,14 +56,14 @@ lem = nltk.WordNetLemmatizer()
 
 # 標點符號(Punctuation)
 import string
+
 print('標點符號:', string.punctuation)
 
 # 測試文章段落
-text="Today is a great day. It is even better than yesterday." + \
-     " And yesterday was the best day ever."
+text = "Today is a great day. It is even better than yesterday." + " And yesterday was the best day ever."
 # 讀取停用詞
-stopword_list = set(nltk.corpus.stopwords.words('english') 
-                    + list(string.punctuation))
+stopword_list = set(nltk.corpus.stopwords.words('english') + list(string.punctuation))
+
 
 # 移除停用詞(Removing Stopwords)
 def remove_stopwords(text, is_lower_case=False):
@@ -73,10 +72,11 @@ def remove_stopwords(text, is_lower_case=False):
     tokens = nltk.word_tokenize(text)
     tokens = [token.strip() for token in tokens]
     filtered_tokens = [token for token in tokens if token not in stopword_list]
-    filtered_text = ' '.join(filtered_tokens)    
+    filtered_text = ' '.join(filtered_tokens)
     return filtered_text, filtered_tokens
 
-filtered_text, filtered_tokens = remove_stopwords(text) 
+
+filtered_text, filtered_tokens = remove_stopwords(text)
 filtered_text
 
 # ## BOW 測試
@@ -85,38 +85,42 @@ filtered_text
 
 
 # 測試文章段落
-with open('./NLP_data/news.txt','r+', encoding='UTF-8') as f:
+with open('./NLP_data/news.txt', 'r+', encoding='UTF-8') as f:
     text = f.read()
 
-filtered_text, filtered_tokens = remove_stopwords(text, True) 
+filtered_text, filtered_tokens = remove_stopwords(text, True)
 
 import collections
+
 # 生字表的集合
 word_freqs = collections.Counter()
 for word in filtered_tokens:
     word_freqs[word] += 1
-print(word_freqs.most_common(20))         
+print(word_freqs.most_common(20))
 
 # In[29]:
 
 
 # 移除停用詞(Removing Stopwords)
 lem = nltk.WordNetLemmatizer()
+
+
 def remove_stopwords_regex(text, is_lower_case=False):
     if is_lower_case:
         text = text.lower()
-    tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+') # 篩選文數字(Alphanumeric)
+    tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')  # 篩選文數字(Alphanumeric)
     tokens = tokenizer.tokenize(text)
-    tokens = [lem.lemmatize(token.strip()) for token in tokens] # 詞形還原
+    tokens = [lem.lemmatize(token.strip()) for token in tokens]  # 詞形還原
     filtered_tokens = [token for token in tokens if token not in stopword_list]
-    filtered_text = ' '.join(filtered_tokens)    
+    filtered_text = ' '.join(filtered_tokens)
     return filtered_text, filtered_tokens
 
-filtered_text, filtered_tokens = remove_stopwords_regex(text, True) 
+
+filtered_text, filtered_tokens = remove_stopwords_regex(text, True)
 word_freqs = collections.Counter()
 for word in filtered_tokens:
     word_freqs[word] += 1
-print(word_freqs.most_common(20))         
+print(word_freqs.most_common(20))
 
 # In[32]:
 
@@ -150,7 +154,7 @@ synonyms[0].examples()
 
 
 # 找出相反詞(Antonyms)
-antonyms=[]
+antonyms = []
 for syn in nltk.corpus.wordnet.synsets('ugly'):
     for l in syn.lemmas():
         if l.antonyms():
@@ -163,12 +167,9 @@ antonyms
 
 
 # 找出詞性標籤(POS Tagging)
-text='I am a human being, capable of doing terrible things'
-sentences=nltk.sent_tokenize(text)
+text = 'I am a human being, capable of doing terrible things'
+sentences = nltk.sent_tokenize(text)
 for sent in sentences:
     print(nltk.pos_tag(nltk.word_tokenize(sent)))
 
 # In[ ]:
-
-
-

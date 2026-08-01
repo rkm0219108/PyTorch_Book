@@ -11,6 +11,7 @@
 import matplotlib.pyplot as plt
 import torch
 import torchvision.models as models
+from torchvision.models import AlexNet_Weights
 
 from flashtorch.utils import apply_transforms, load_image
 from flashtorch.saliency import Backprop
@@ -24,14 +25,14 @@ image = load_image('./images_test/owl.jpg')
 
 plt.imshow(image)
 plt.title('Original image')
-plt.axis('off');
+plt.axis('off')
 
 # ## 載入預先訓練的模型 AlexNet
 
 # In[4]:
 
 
-model = models.alexnet(pretrained=True)
+model = models.alexnet(weights=AlexNet_Weights.DEFAULT)
 
 # ## 建立反向傳導的物件
 

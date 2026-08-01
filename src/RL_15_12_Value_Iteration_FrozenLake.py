@@ -8,7 +8,7 @@
 
 # 載入相關套件
 import numpy as np
-import gym
+import gymnasium as gym
 
 # In[2]:
 
@@ -48,7 +48,7 @@ def value_iteration(env, theta=0.0001, discount_factor=1.0):
             # 比較更新前後的差值，取最大值
             delta = max(delta, np.abs(best_action_value - V[s]))
             # 更新狀態值函數
-            V[s] = best_action_value        
+            V[s] = best_action_value
         # 若最大差值 < 門檻值，則停止評估
         if delta < theta:
             break
@@ -62,8 +62,9 @@ def value_iteration(env, theta=0.0001, discount_factor=1.0):
         best_action = np.argmax(A)
         # 永遠採取最佳行動
         policy[s, best_action] = 1.0
-    
-    return policy, V            
+
+    return policy, V
+
 
 # In[5]:
 
@@ -80,8 +81,8 @@ print(policy)
 print("")
 
 print("4x4 策略機率分配 (0=up, 1=right, 2=down, 3=left):")
-print(np.reshape(np.argmax(policy, axis=1), (int(nS ** 0.5), int(nS ** 0.5))))
+print(np.reshape(np.argmax(policy, axis=1), (int(nS**0.5), int(nS**0.5))))
 print("")
 
 print("4x4 狀態值函數:")
-print(v.reshape((int(nS ** 0.5), int(nS ** 0.5))))
+print(v.reshape((int(nS**0.5), int(nS**0.5))))

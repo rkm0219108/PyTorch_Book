@@ -10,6 +10,7 @@
 
 import torch
 from torchvision import models
+from torchvision.models import VGG16_Weights, ResNet50_Weights
 from torch import nn
 import numpy as np
 from torchsummary import summary
@@ -27,7 +28,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # In[51]:
 
 
-model = models.vgg16(pretrained=True)
+model = models.vgg16(weights=VGG16_Weights.DEFAULT)
 
 # ## 顯示神經層名稱
 
@@ -35,9 +36,9 @@ model = models.vgg16(pretrained=True)
 
 
 children_counter = 0
-for n,c in model.named_children():
-    print("Children Counter: ",children_counter," Layer Name: ",n)
-    children_counter+=1
+for n, c in model.named_children():
+    print("Children Counter: ", children_counter, " Layer Name: ", n)
+    children_counter += 1
 
 # ## 顯示神經層明細
 
@@ -93,14 +94,15 @@ from torchvision import transforms
 filename = './images_test/cat.jpg'
 input_image = Image.open(filename)
 
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                         std=[0.229, 0.224, 0.225])
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
 input_tensor = transform(input_image)
-input_batch = input_tensor.unsqueeze(0).to(device) # 增加一維(筆數)
+input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 # 預測
 model.eval()
@@ -132,14 +134,15 @@ categories[torch.argmax(probabilities).item()]
 filename = './images_test/tiger2.jpg'
 input_image = Image.open(filename)
 
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                         std=[0.229, 0.224, 0.225])
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
 input_tensor = transform(input_image)
-input_batch = input_tensor.unsqueeze(0).to(device) # 增加一維(筆數)
+input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 # 預測
 model.eval()
@@ -165,20 +168,21 @@ with open("imagenet_classes.txt", "r") as f:
 
 
 # 載入 resnet50 模型
-model = models.resnet50(pretrained=True).to(device)
+model = models.resnet50(weights=ResNet50_Weights.DEFAULT).to(device)
 
 # 預測
 filename = './images_test/cat.jpg'
 input_image = Image.open(filename)
 
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                         std=[0.229, 0.224, 0.225])
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
 input_tensor = transform(input_image)
-input_batch = input_tensor.unsqueeze(0).to(device) # 增加一維(筆數)
+input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 model.eval()
 with torch.no_grad():
@@ -195,21 +199,22 @@ print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
 
 # 載入 resnet50 模型
-model = models.resnet50(pretrained=True).to(device)
+model = models.resnet50(weights=ResNet50_Weights.DEFAULT).to(device)
 
 # 預測
 filename = './images_test/cat.jpg'
 input_image = Image.open(filename)
 
-transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                         std=[0.229, 0.224, 0.225])
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
 input_tensor = transform(input_image)
-input_batch = input_tensor.unsqueeze(0).to(device) # 增加一維(筆數)
+input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 model.eval()
 with torch.no_grad():
@@ -237,6 +242,7 @@ sum(probabilities.cpu().numpy())
 
 
 import numpy as np
+
 probabilities.cpu().numpy().argsort()[-5:][::-1]
 
 # In[71]:
@@ -250,14 +256,15 @@ np.array(categories)[probabilities.cpu().numpy().argsort()[-5:][::-1]]
 filename = './images_test/tiger2.jpg'
 input_image = Image.open(filename)
 
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                         std=[0.229, 0.224, 0.225])
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
 input_tensor = transform(input_image)
-input_batch = input_tensor.unsqueeze(0).to(device) # 增加一維(筆數)
+input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 # 預測
 model.eval()
@@ -270,6 +277,3 @@ max_item = torch.argmax(probabilities).item()
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
 # In[ ]:
-
-
-

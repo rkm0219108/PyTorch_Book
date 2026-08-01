@@ -7,7 +7,7 @@
 
 
 # 載入套件
-import numpy as np 
+import numpy as np
 import torch
 
 # ## 產生隨機資料
@@ -17,12 +17,12 @@ import torch
 
 # 產生線性隨機資料100筆，介於 0-50
 n = 100
-X = np.linspace(0, 50, n) 
-y = np.linspace(0, 50, n) 
-  
+X = np.linspace(0, 50, n)
+y = np.linspace(0, 50, n)
+
 # 資料加一點雜訊(noise)
-X += np.random.uniform(-10, 10, n) 
-y += np.random.uniform(-10, 10, n) 
+X += np.random.uniform(-10, 10, n)
+y += np.random.uniform(-10, 10, n)
 
 # ## 定義模型
 
@@ -32,10 +32,10 @@ y += np.random.uniform(-10, 10, n)
 # 定義模型
 def create_model(input_feature, output_feature):
     model = torch.nn.Sequential(
-        torch.nn.Linear(input_feature, output_feature),
-        torch.nn.Flatten(0, -1) # 所有維度轉成一維 
+        torch.nn.Linear(input_feature, output_feature), torch.nn.Flatten(0, -1)  # 所有維度轉成一維
     )
     return model
+
 
 # ## 定義訓練函數
 
@@ -46,35 +46,36 @@ def train(X, y, epochs=100, lr=1e-4):
     model = create_model(1, 1)
 
     # 定義損失函數
-    loss_fn = torch.nn.MSELoss(reduction='sum') 
+    loss_fn = torch.nn.MSELoss(reduction='sum')
 
     # 定義優化器
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr) 
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    loss_list, w_list, b_list=[], [], []
-    for epoch in range(epochs):   # 執行訓練週期
-        y_pred = model(X)        # 預測值
-        
+    loss_list, w_list, b_list = [], [], []
+    for epoch in range(epochs):  # 執行訓練週期
+        y_pred = model(X)  # 預測值
+
         # 計算損失函數值
         # print(y_pred.shape, y.shape)
-        MSE = loss_fn(y_pred, y) 
-        
+        MSE = loss_fn(y_pred, y)
+
         # 梯度重置：改由優化器(Optimizer)控制
         optimizer.zero_grad()
-        
+
         # 反向傳導
-        MSE.backward()  
-        
+        MSE.backward()
+
         # 權重更新：改用 model.parameters 取代 w、b 逐一更新
         optimizer.step()
-        
+
         # 記錄訓練結果
-        if (epoch+1) % 1000 == 0 or epochs < 1000:
+        if (epoch + 1) % 1000 == 0 or epochs < 1000:
             w_list.append(model[0].weight[:, 0].item())  # w.item()：轉成常數
             b_list.append(model[0].bias.item())
             loss_list.append(MSE.item())
-        
+
     return w_list, b_list, loss_list
+
 
 # ## 執行訓練
 
@@ -114,7 +115,7 @@ lr.coef_[0], lr.intercept_
 # In[8]:
 
 
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 plt.scatter(X, y, label='data')
 plt.plot(X, w_list[-1] * X + b_list[-1], 'r-', label='predicted')
@@ -124,7 +125,7 @@ plt.legend()
 
 
 # NumPy 求得的迴歸線
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 plt.scatter(X, y, label='data')
 plt.plot(X, coef[0] * X + coef[1], 'r-', label='predicted')
@@ -147,6 +148,3 @@ loss_list
 w_list
 
 # In[ ]:
-
-
-

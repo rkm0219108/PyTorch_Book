@@ -22,7 +22,7 @@ demo()
 # In[2]:
 
 
-!pip install wikipedia
+# !pip install wikipedia
 
 # In[ ]:
 
@@ -30,6 +30,7 @@ demo()
 # 載入相關套件
 from chatbot import Chat, register_call
 import wikipedia
+
 
 # 註冊可接收的關鍵字及負責回應的模組
 @register_call("whoIs")
@@ -44,7 +45,8 @@ def who_is(session, query):
                 return wikipedia.summary(new_query)
             except Exception:
                 pass
-    return "I don't know about "+query
+    return "I don't know about " + query
+
 
 # In[9]:
 
@@ -57,7 +59,7 @@ warnings.filterwarnings('ignore')
 
 
 # 第一個問題
-first_question="Hi, how are you?"
+first_question = "Hi, how are you?"
 
 # 使用的樣板
 Chat("chatbot_data/Example.template").converse(first_question)
@@ -65,7 +67,7 @@ Chat("chatbot_data/Example.template").converse(first_question)
 # In[12]:
 
 
-first_question="你好嗎?"
+first_question = "你好嗎?"
 Chat("chatbot_data/Example.template").converse(first_question)
 
 # In[7]:
@@ -75,13 +77,14 @@ Chat("chatbot_data/Example.template").converse(first_question)
 @register_call("increment_count")
 def memory_get_set_example(session, query):
     # 一律轉成小寫
-    name=query.strip().lower()
+    name = query.strip().lower()
     # 取得記憶的次數
     old_count = session.memory.get(name, '0')
     new_count = int(old_count) + 1
     # 設定記憶次數
-    session.memory[name]=str(new_count)
+    session.memory[name] = str(new_count)
     return f"count  {new_count}"
+
 
 # In[8]:
 
@@ -105,6 +108,3 @@ example:
 """)
 
 # In[ ]:
-
-
-

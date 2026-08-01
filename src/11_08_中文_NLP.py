@@ -16,14 +16,14 @@ import jieba
 text = "小明硕士毕业于中国科学院计算所，后在日本京都大学深造"
 # cut_all=True：全模式
 seg_list = jieba.cut(text, cut_all=True)
-print("全模式: " + "/ ".join(seg_list))  
+print("全模式: " + "/ ".join(seg_list))
 
 # cut_all=False：精確模式
 seg_list = jieba.cut(text, cut_all=False)
-print("精確模式: " + "/ ".join(seg_list))  
+print("精確模式: " + "/ ".join(seg_list))
 
 # cut_for_search：搜索引擎模式
-seg_list = jieba.cut_for_search(text)  
+seg_list = jieba.cut_for_search(text)
 print('搜索引擎模式: ', ', '.join(seg_list))
 
 # ## 繁體字分詞
@@ -39,14 +39,14 @@ text = "新竹的交通大學在新竹的大學路上"
 
 # cut_all=True：全模式
 seg_list = jieba.cut(text, cut_all=True)
-print("全模式: " + "/ ".join(seg_list))  
+print("全模式: " + "/ ".join(seg_list))
 
 # cut_all=False：精確模式
 seg_list = jieba.cut(text, cut_all=False)
-print("精確模式: " + "/ ".join(seg_list))  
+print("精確模式: " + "/ ".join(seg_list))
 
 # cut_for_search：搜索引擎模式
-seg_list = jieba.cut_for_search(text)  
+seg_list = jieba.cut_for_search(text)
 print('搜索引擎模式: ', ', '.join(seg_list))
 
 # ## 分詞，並顯示字詞位置
@@ -70,13 +70,13 @@ text = "張惠妹在演唱會演唱三天三夜"
 
 # 加詞前的分詞
 seg_list = jieba.cut(text, cut_all=False)
-print("加詞前的分詞: " + "/ ".join(seg_list))  
+print("加詞前的分詞: " + "/ ".join(seg_list))
 
 # 加詞
 jieba.add_word('三天三夜')
 
 seg_list = jieba.cut(text, cut_all=False)
-print("加詞後的分詞: " + "/ ".join(seg_list))  
+print("加詞後的分詞: " + "/ ".join(seg_list))
 
 # ## 關鍵字萃取
 
@@ -90,7 +90,7 @@ with open('./jieba/news.txt', encoding='utf8') as f:
 # 加詞前的分詞
 import jieba.analyse
 
-jieba.analyse.extract_tags(text, topK=10)  
+jieba.analyse.extract_tags(text, topK=10)
 
 # ## 關鍵字萃取
 
@@ -104,10 +104,10 @@ with open('./jieba/news.txt', encoding='utf8') as f:
 import jieba.analyse
 
 # 設定停用詞
-jieba.analyse.set_stop_words('./jieba/stop_words.txt')     
-    
+jieba.analyse.set_stop_words('./jieba/stop_words.txt')
+
 # 加詞前的分詞
-jieba.analyse.extract_tags(text, topK=10)  
+jieba.analyse.extract_tags(text, topK=10)
 
 # ## 詞性(POS)標註
 
@@ -118,11 +118,8 @@ jieba.analyse.extract_tags(text, topK=10)
 text = "張惠妹在演唱會演唱三天三夜"
 
 # 詞性(POS)標註
-words = jieba.posseg.cut(text)     
+words = jieba.posseg.cut(text)
 for word, flag in words:
     print(f'{word} {flag}')
 
 # In[ ]:
-
-
-

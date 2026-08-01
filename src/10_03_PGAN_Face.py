@@ -22,9 +22,9 @@ use_gpu = True if torch.cuda.is_available() else False
 
 # trained on high-quality celebrity faces "celebA" dataset
 # this model outputs 512 x 512 pixel images
-model = torch.hub.load('facebookresearch/pytorch_GAN_zoo:hub',
-                       'PGAN', model_name='celebAHQ-512',
-                       pretrained=True, useGPU=use_gpu)
+model = torch.hub.load(
+    'facebookresearch/pytorch_GAN_zoo:hub', 'PGAN', model_name='celebAHQ-512', pretrained=True, useGPU=use_gpu
+)
 
 # this model outputs 256 x 256 pixel images
 # model = torch.hub.load('facebookresearch/pytorch_GAN_zoo:hub',
@@ -45,13 +45,9 @@ with torch.no_grad():
     generated_images = model.test(noise)
 
 # clamp 使像素值介於 [0, 1] 之間
-grid = torchvision.utils.make_grid(generated_images.clamp(min=-1, max=1)
-                                   , scale_each=True, normalize=True)
+grid = torchvision.utils.make_grid(generated_images.clamp(min=-1, max=1), scale_each=True, normalize=True)
 # permute 設定色彩通道在最後一維
 plt.imshow(grid.permute(1, 2, 0).cpu().numpy())
-plt.axis('off');
+plt.axis('off')
 
 # In[ ]:
-
-
-

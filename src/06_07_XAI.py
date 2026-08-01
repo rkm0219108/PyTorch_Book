@@ -8,13 +8,14 @@
 # In[ ]:
 
 
-!pip install torchsummary
+# !pip install torchsummary
 
 # In[1]:
 
 
 import torch
 from torchvision import models
+from torchvision.models import ResNet18_Weights
 from torch import nn
 import numpy as np
 from torchsummary import summary
@@ -32,7 +33,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # In[3]:
 
 
-rn18 = models.resnet18(pretrained=True)
+rn18 = models.resnet18(weights=ResNet18_Weights.DEFAULT)
 
 # ## 顯示神經層名稱
 
@@ -40,9 +41,9 @@ rn18 = models.resnet18(pretrained=True)
 
 
 children_counter = 0
-for n,c in rn18.named_children():
-    print("Children Counter: ",children_counter," Layer Name: ",n)
-    children_counter+=1
+for n, c in rn18.named_children():
+    print("Children Counter: ", children_counter, " Layer Name: ", n)
+    children_counter += 1
 
 # ## 顯示神經層明細
 
@@ -67,10 +68,10 @@ class new_model(nn.Module):
     def __init__(self, output_layer):
         super().__init__()
         self.output_layer = output_layer
-        self.pretrained = models.resnet18(pretrained=True)
+        self.pretrained = models.resnet18(weights=ResNet18_Weights.DEFAULT)
         self.children_list = []
         # 依序取得每一層
-        for n,c in self.pretrained.named_children():
+        for n, c in self.pretrained.named_children():
             self.children_list.append(c)
             # 找到特定層即終止
             if n == self.output_layer:
@@ -80,20 +81,21 @@ class new_model(nn.Module):
         # 建構新模型
         self.net = nn.Sequential(*self.children_list)
         self.pretrained = None
-        
-    def forward(self,x):
+
+    def forward(self, x):
         x = self.net(x)
         return x
-    
-model = new_model(output_layer = 'layer1')
-model = model.to(device)    
+
+
+model = new_model(output_layer='layer1')
+model = model.to(device)
 
 # In[10]:
 
 
 from torchsummary import summary
 
-summary(model,input_size=(3, 224, 224))
+summary(model, input_size=(3, 224, 224))
 
 # In[18]:
 
@@ -133,35 +135,33 @@ def show_grid(out):
                 ax.set_xticks([])
                 ax.set_yticks([])
                 # plot filter channel in grayscale
-                plt.imshow(fmap[ix-1, :, :], cmap='gray')
+                plt.imshow(fmap[ix - 1, :, :], cmap='gray')
                 ix += 1
         # show the figure
         plt.show()
-        
+
+
 show_grid(out)
 
 # In[13]:
 
 
-model = new_model(output_layer = 'layer2').to(device)
+model = new_model(output_layer='layer2').to(device)
 out = model(img)
 show_grid(out)
 
 # In[14]:
 
 
-model = new_model(output_layer = 'layer3').to(device)
+model = new_model(output_layer='layer3').to(device)
 out = model(img)
 show_grid(out)
 
 # In[15]:
 
 
-model = new_model(output_layer = 'layer4').to(device)
+model = new_model(output_layer='layer4').to(device)
 out = model(img)
 show_grid(out)
 
 # In[ ]:
-
-
-

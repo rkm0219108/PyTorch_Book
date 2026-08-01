@@ -23,7 +23,7 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = "" # 預設路徑
+PATH_DATASETS = ""  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -33,18 +33,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # In[3]:
 
 
-transform=transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(mean=(0.1307,), std=(0.3081,))
-    ])
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=(0.1307,), std=(0.3081,))])
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST(PATH_DATASETS, train=True, download=True, 
-                 transform=transform)
+train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transform)
 
 # 下載測試資料
-test_ds = MNIST(PATH_DATASETS, train=False, download=True, 
-                 transform=transform)
+test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=transform)
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -68,38 +63,46 @@ print(train_ds.data.shape, test_ds.data.shape)
 
 import math
 
-# W, F, P, S：image Width, Filter width, Padding, Stride 
+# W, F, P, S：image Width, Filter width, Padding, Stride
 # def Conv_Width(W, F, P, S):
 #     return math.floor(((W - F) + 2 * P) / S) + 1
 
 # # def Pool_Width(W, F, S):
 #     return math.floor((W - F) / S) + 1
 
+
 def Conv_Width(W, F, P, S):
     return math.floor(((W - F + 2 * P) / S) + 1)
+
 
 def Conv_Output_Volume(W, F, P, S, out):
     return Conv_Width(W, F, P, S) ** 2 * out
 
+
 # C: no of channels
 def Conv_Parameter_Count(F, C, out):
-    return F ** 2 * C * out
+    return F**2 * C * out
+
 
 def Pool_Width(W, F, P, S):
     return Conv_Width(W, F, P, S)
 
-# filter_count: no of filter in last conv 
+
+# filter_count: no of filter in last conv
 # stride count default value = Filter width
 def Pool_Output_Volume(W, F, P, S, filter_count):
     return Conv_Output_Volume(W, F, P, S, filter_count)
 
+
 def Pool_Parameter_Count(W, F, S):
     return 0
+
 
 def Conv_Pool_Width(W, F, P, S, F2, P2, S2, n):
     for i in range(n):
         W = Pool_Width(Conv_Width(W, F, P, S), F2, P2, S2)
     return W
+
 
 # In[6]:
 
@@ -140,29 +143,30 @@ class Net(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
+
 # In[8]:
 
 
 def train(model, device, train_loader, optimizer, epoch):
     model.train()
-    loss_list = []    
+    loss_list = []
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-        
+
         optimizer.zero_grad()
         output = model(data)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        
-        if (batch_idx+1) % 10 == 0:
+
+        if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
-            batch = (batch_idx+1) * len(data)
+            batch = (batch_idx + 1) * len(data)
             data_count = len(train_loader.dataset)
-            percentage = (100. * (batch_idx+1) / len(train_loader))
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' +
-                  f'  Loss: {loss.item():.6f}')
+            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
     return loss_list
+
 
 # In[9]:
 
@@ -180,12 +184,12 @@ def test(model, device, test_loader):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     # 平均損失
-    test_loss /= len(test_loader.dataset) 
+    test_loss /= len(test_loader.dataset)
     # 顯示測試結果
     data_count = len(test_loader.dataset)
-    percentage = 100. * correct / data_count 
-    print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + 
-          f' ({percentage:.2f}%)\n')
+    percentage = 100.0 * correct / data_count
+    print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.2f}%)\n')
+
 
 # In[10]:
 
@@ -205,9 +209,9 @@ optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
 loss_list = []
 for epoch in range(1, epochs + 1):
     loss_list += train(model, device, train_loader, optimizer, epoch)
-    #test(model, device, test_loader)
+    # test(model, device, test_loader)
     optimizer.step()
-    
+
 
 # In[11]:
 
@@ -250,7 +254,7 @@ print('prediction: ', ' '.join(predictions[0:20]))
 # 顯示第 9 筆的機率
 import numpy as np
 
-i=8
+i = 8
 data = test_ds[i][0]
 data = data.reshape(1, *data.shape).to(device)
 print(data.shape)
@@ -262,10 +266,10 @@ print(f'0~9預測機率: {np.argmax(predictions.cpu().detach().numpy(), axis=-1)
 
 
 # 顯示第 9 筆圖像
-X2 = test_ds[i][0] 
-plt.imshow(X2.reshape(28,28), cmap='gray')
+X2 = test_ds[i][0]
+plt.imshow(X2.reshape(28, 28), cmap='gray')
 plt.axis('off')
-plt.show() 
+plt.show()
 
 # In[16]:
 
@@ -294,20 +298,20 @@ model = torch.load('cnn_mnist_model.pth')
 from skimage import io
 from skimage.transform import resize
 
-no=7
+no = 7
 uploaded_file = f'./myDigits/{no}.png'
 image1 = io.imread(uploaded_file, as_gray=True)
 
 # 縮為 (28, 28) 大小的影像
 data_shape = data.shape
-image_resized = resize(image1, data_shape[2:], anti_aliasing=True)    
-X1 = image_resized.reshape(*data_shape) 
+image_resized = resize(image1, data_shape[2:], anti_aliasing=True)
+X1 = image_resized.reshape(*data_shape)
 
 # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
-X1 = 1.0-X1
+X1 = 1.0 - X1
 
 # 圖像轉換
-X1 = (X1 - 0.1307) / 0.3081  
+X1 = (X1 - 0.1307) / 0.3081
 
 for i in range(X1[0][0].shape[0]):
     for j in range(X1[0][0].shape[1]):
@@ -321,23 +325,23 @@ for i in range(X1[0][0].shape[0]):
 import matplotlib.pyplot as plt
 
 # 繪製點陣圖，cmap='gray':灰階
-plt.imshow(X1.reshape(28,28), cmap='gray')
+plt.imshow(X1.reshape(28, 28), cmap='gray')
 
 # 隱藏刻度
-plt.axis('off') 
+plt.axis('off')
 
 # 顯示圖形
-plt.show() 
+plt.show()
 
 # In[20]:
 
 
 # 將非0的數字轉為1，顯示第1張圖片
 X2 = X1[0][0].copy()
-X2[X2>(0.1 + 0.1307) / 0.3081]=1 # 0.1 將淺色忽略
+X2[X2 > (0.1 + 0.1307) / 0.3081] = 1  # 0.1 將淺色忽略
 print(type(X2), X2[0].shape)
 # 將轉換後二維內容顯示出來，隱約可以看出數字為 5
-text_image=[]
+text_image = []
 for i in range(X2.shape[0]):
     text_image.append(''.join(X2[i].astype(int).astype(str)))
 text_image
@@ -371,23 +375,20 @@ for i in range(10):
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
-    image_resized = resize(image1, data_shape[2:], anti_aliasing=True)    
-    X1 = image_resized.reshape(*data_shape) 
+    image_resized = resize(image1, data_shape[2:], anti_aliasing=True)
+    X1 = image_resized.reshape(*data_shape)
 
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
-    X1 = 1.0-X1
-    
+    X1 = 1.0 - X1
+
     # 圖像轉換
-    X1 = (X1 - 0.1307) / 0.3081  
-    
+    X1 = (X1 - 0.1307) / 0.3081
+
     X1 = torch.FloatTensor(X1).to(device)
-    
+
     # 預測
     predictions = torch.softmax(model(X1), dim=1)
     # print(np.around(predictions.cpu().detach().numpy(), 2))
     print(f'actual/prediction: {i} {np.argmax(predictions.detach().cpu().numpy())}')
 
 # In[ ]:
-
-
-

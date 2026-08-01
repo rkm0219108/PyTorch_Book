@@ -29,7 +29,7 @@ model = VGG16(weights='imagenet')
 
 # 任選一張圖片，例如大象側面照
 img_path = './images_test/cat.jpg'
-# 載入圖檔，並縮放寬高為 (224, 224) 
+# 載入圖檔，並縮放寬高為 (224, 224)
 img = image.load_img(img_path, target_size=(224, 224))
 
 # 加一維，變成 (1, 224, 224)
@@ -46,7 +46,7 @@ print('Predicted:', decode_predictions(preds, top=3)[0])
 
 
 img_path = './images_test/tiger2.jpg'
-# 載入圖檔，並縮放寬高為 (224, 224) 
+# 載入圖檔，並縮放寬高為 (224, 224)
 img = image.load_img(img_path, target_size=(224, 224))
 # 加一維，變成 (1, 224, 224, 3)，最後一維是色彩
 x = image.img_to_array(img)
@@ -77,7 +77,7 @@ model = ResNet50(weights='imagenet')
 
 # 任意一張圖片，例如老虎大頭照
 img_path = './images_test/cat.jpg'
-# 載入圖檔，並縮放寬高為 (224, 224) 
+# 載入圖檔，並縮放寬高為 (224, 224)
 img = image.load_img(img_path, target_size=(224, 224))
 
 # 加一維，變成 (1, 224, 224)
@@ -94,7 +94,7 @@ print('Predicted:', decode_predictions(preds, top=3)[0])
 
 
 img_path = './images_test/tiger2.jpg'
-# 載入圖檔，並縮放寬高為 (224, 224) 
+# 載入圖檔，並縮放寬高為 (224, 224)
 img = image.load_img(img_path, target_size=(224, 224))
 # 加一維，變成 (1, 224, 224, 3)，最後一維是色彩
 x = image.img_to_array(img)
@@ -107,6 +107,3 @@ preds = model.predict(x)
 print('Predicted:', decode_predictions(preds, top=3)[0])
 
 # In[ ]:
-
-
-

@@ -15,7 +15,7 @@ from transformers import pipeline
 
 
 # bug fixed
-!pip install torch-scatter==2.0.8
+# get_ipython().system('pip install torch-scatter==2.0.8')
 
 # In[2]:
 
@@ -39,8 +39,7 @@ print(classifier('the movie is not bad.'))
 
 
 # 一次測試多筆
-results = classifier(["We are very happy.",
-                      "We hope you don't hate it."])
+results = classifier(["We are very happy.", "We hope you don't hate it."])
 for result in results:
     print(f"label: {result['label']}, with score: {round(result['score'], 4)}")
 
@@ -71,6 +70,3 @@ print(classifier('Je déteste ce film.'))
 print(classifier('le film n\'est pas mal.'))
 
 # In[ ]:
-
-
-

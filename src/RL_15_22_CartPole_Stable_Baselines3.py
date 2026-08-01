@@ -6,43 +6,44 @@
 # In[2]:
 
 
-!pip install stable-baselines3[extra]
-!pip install pyglet
+# get_ipython().system('pip install stable-baselines3[extra]')
+# get_ipython().system('pip install pyglet')
 
 # In[1]:
 
 
 # 載入相關套件
-import gym
-from gym import envs
+import gymnasium as gym
+from gymnasium import envs
 from stable_baselines3 import A2C
 
 # In[5]:
 
 
 # 載入 木棒台車(CartPole) 遊戲
-env = gym.make("CartPole-v1")
+env = gym.make("CartPole-v1", render_mode="human")
 
 # 載入 A2C 演算法
 model = A2C('MlpPolicy', env, verbose=0)
 model.learn(total_timesteps=10000)
 
 # 訓練 10 週期
-all_rewards=[] # 每回合總報酬
+all_rewards = []  # 每回合總報酬
 total_rewards = 0
-obs = env.reset()
-no=0
+obs, info = env.reset()
+no = 0
 while no < 10:
     action, _state = model.predict(obs, deterministic=True)
-    obs, reward, done, info = env.step(action)
+    obs, reward, terminated, truncated, info = env.step(action)
+    done = terminated or truncated
     # 累計報酬
     total_rewards += reward
     env.render()
     if done:
-        obs = env.reset()
+        obs, info = env.reset()
         all_rewards.append(total_rewards)
         total_rewards = 0
-        no+=1
+        no += 1
 env.close()
 
 # In[6]:
@@ -55,6 +56,3 @@ for i, rewards in enumerate(all_rewards):
     print(f'{i}\t{rewards}\t{result}')
 
 # In[ ]:
-
-
-

@@ -14,9 +14,9 @@ import torch
 # 建立模型
 model = torch.nn.Sequential(
     torch.nn.Flatten(),
-    torch.nn.Linear(28 * 28, 256), 
+    torch.nn.Linear(28 * 28, 256),
     torch.nn.Dropout(0.2),
-    torch.nn.Linear(256, 10), 
+    torch.nn.Linear(256, 10),
 )
 
 criterion = torch.nn.CrossEntropyLoss()
@@ -25,8 +25,8 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
 
 optimizer.zero_grad()
-input = torch.randn(3, 28 * 28, requires_grad=True) 
-target = torch.empty(3, dtype=torch.long).random_(5) # 目標值
+input = torch.randn(3, 28 * 28, requires_grad=True)
+target = torch.empty(3, dtype=torch.long).random_(5)  # 目標值
 loss = criterion(model(input), target)
 loss.backward()
 optimizer.step()
@@ -37,9 +37,9 @@ optimizer.step()
 
 
 loss = torch.nn.CrossEntropyLoss()  # 產生物件
-input = torch.randn(3, 5, requires_grad=True) 
-target = torch.empty(3, dtype=torch.long).random_(5) # 目標值
-output = loss(input, target) # 計算預測值與目標值之均方誤差
+input = torch.randn(3, 5, requires_grad=True)
+target = torch.empty(3, dtype=torch.long).random_(5)  # 目標值
+output = loss(input, target)  # 計算預測值與目標值之均方誤差
 output.backward()
 output
 
@@ -48,13 +48,10 @@ output
 
 # 計算機率
 loss = torch.nn.CrossEntropyLoss()  # 產生物件
-input = torch.randn(3, 5, requires_grad=True) 
-target = torch.randn(3, 5).softmax(dim=1) # 目標值
-output = loss(input, target) # 計算預測值與目標值之均方誤差
+input = torch.randn(3, 5, requires_grad=True)
+target = torch.randn(3, 5).softmax(dim=1)  # 目標值
+output = loss(input, target)  # 計算預測值與目標值之均方誤差
 output.backward()
 output
 
 # In[ ]:
-
-
-

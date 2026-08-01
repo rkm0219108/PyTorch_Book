@@ -4,20 +4,21 @@ import pickle
 import os
 
 # 參數設定
-BOARD_ROWS = 3 # 列數
-BOARD_COLS = 3 # 行數
+BOARD_ROWS = 3  # 列數
+BOARD_COLS = 3  # 行數
+
 
 # 環境類別
 class Environment:
     def __init__(self, p1, p2):
         # 變數初始化
         self.board = np.zeros((BOARD_ROWS, BOARD_COLS))
-        self.p1 = p1 # 第一個玩家
-        self.p2 = p2 # 第二個玩家
-        self.isEnd = False    # 是否結束
-        self.boardHash = None # 棋盤
+        self.p1 = p1  # 第一個玩家
+        self.p2 = p2  # 第二個玩家
+        self.isEnd = False  # 是否結束
+        self.boardHash = None  # 棋盤
 
-        self.playerSymbol = 1 # 第一個玩家使用X
+        self.playerSymbol = 1  # 第一個玩家使用X
 
     # 記錄棋盤狀態
     def getHash(self):
@@ -34,7 +35,7 @@ class Environment:
             if sum(self.board[i, :]) == -3:
                 self.isEnd = True
                 return -1
-                
+
         # 連成一行
         for i in range(BOARD_COLS):
             if sum(self.board[:, i]) == 3:
@@ -43,11 +44,10 @@ class Environment:
             if sum(self.board[:, i]) == -3:
                 self.isEnd = True
                 return -1
-                
+
         # 連成對角線
         diag_sum1 = sum([self.board[i, i] for i in range(BOARD_COLS)])
-        diag_sum2 = sum([self.board[i, BOARD_COLS - i - 1] for i in 
-                                                     range(BOARD_COLS)])
+        diag_sum2 = sum([self.board[i, BOARD_COLS - i - 1] for i in range(BOARD_COLS)])
         diag_sum = max(abs(diag_sum1), abs(diag_sum2))
         if diag_sum == 3:
             self.isEnd = True
@@ -69,7 +69,7 @@ class Environment:
         for i in range(BOARD_ROWS):
             for j in range(BOARD_COLS):
                 if self.board[i, j] == 0:
-                    positions.append((i, j))  
+                    positions.append((i, j))
         return positions
 
     # 更新棋盤
@@ -82,13 +82,13 @@ class Environment:
     def giveReward(self):
         result = self.is_done()
         # backpropagate reward
-        if result == 1: # 第一玩家贏，P1加一分
+        if result == 1:  # 第一玩家贏，P1加一分
             self.p1.feedReward(1)
             self.p2.feedReward(0)
-        elif result == -1: # 第二玩家贏，P2加一分
+        elif result == -1:  # 第二玩家贏，P2加一分
             self.p1.feedReward(0)
             self.p2.feedReward(1)
-        else: # 勝負未分，第一玩家加 0.1分，第二玩家加 0.5分
+        else:  # 勝負未分，第一玩家加 0.1分，第二玩家加 0.5分
             self.p1.feedReward(0.1)
             self.p2.feedReward(0.5)
 
@@ -104,12 +104,11 @@ class Environment:
         for i in range(rounds):
             if i % 1000 == 0:
                 print(f"Rounds {i}")
-                
+
             while not self.isEnd:
                 # Player 1
                 positions = self.availablePositions()
-                p1_action = self.p1.chooseAction(positions, 
-                                self.board, self.playerSymbol)
+                p1_action = self.p1.chooseAction(positions, self.board, self.playerSymbol)
                 # take action and upate board state
                 self.updateState(p1_action)
                 board_hash = self.getHash()
@@ -117,7 +116,7 @@ class Environment:
 
                 # 檢查是否勝負已分
                 win = self.is_done()
-                    
+
                 # 勝負已分
                 if win is not None:
                     self.giveReward()
@@ -128,8 +127,7 @@ class Environment:
                 else:
                     # Player 2
                     positions = self.availablePositions()
-                    p2_action = self.p2.chooseAction(positions, 
-                                    self.board, self.playerSymbol)
+                    p2_action = self.p2.chooseAction(positions, self.board, self.playerSymbol)
                     self.updateState(p2_action)
                     board_hash = self.getHash()
                     self.p2.addState(board_hash)
@@ -150,9 +148,8 @@ class Environment:
         while not self.isEnd:
             # Player 1
             positions = self.availablePositions()
-            if not (is_first and start_player==2):
-                p1_action = self.p1.chooseAction(positions, 
-                    self.board, self.playerSymbol)
+            if not (is_first and start_player == 2):
+                p1_action = self.p1.chooseAction(positions, self.board, self.playerSymbol)
                 # take action and upate board state
                 self.updateState(p1_action)
             is_first = False
@@ -181,7 +178,7 @@ class Environment:
                         print("平手!")
                     self.reset()
                     break
-    
+
     # 顯示棋盤目前狀態
     def showBoard(self):
         # p1: x  p2: o
@@ -198,6 +195,7 @@ class Environment:
                 out += token + ' | '
             print(out)
         print('-------------')
+
 
 # 電腦類別
 class Player:
@@ -225,9 +223,8 @@ class Player:
                 next_board = current_board.copy()
                 next_board[p] = symbol
                 next_boardHash = self.getHash(next_board)
-                value = 0 if self.states_value.get(next_boardHash) is None \
-                          else self.states_value.get(next_boardHash)
-                
+                value = 0 if self.states_value.get(next_boardHash) is None else self.states_value.get(next_boardHash)
+
                 # 依最大值函數行動
                 if value >= value_max:
                     value_max = value
@@ -248,8 +245,7 @@ class Player:
         for st in reversed(self.states):
             if self.states_value.get(st) is None:
                 self.states_value[st] = 0
-            self.states_value[st] += self.lr * (self.decay_gamma * reward 
-                                                - self.states_value[st])
+            self.states_value[st] += self.lr * (self.decay_gamma * reward - self.states_value[st])
             reward = self.states_value[st]
 
     # 存檔
@@ -264,11 +260,12 @@ class Player:
         self.states_value = pickle.load(fr)
         fr.close()
 
+
 # 玩家類別
 class HumanPlayer:
     def __init__(self, name):
         self.name = name
-    
+
     # 行動
     def chooseAction(self, positions):
         while True:
@@ -294,14 +291,15 @@ class HumanPlayer:
     def reset(self):
         pass
 
+
 # 畫圖說明輸入規則
 def first_draw():
     rv = '\n'
-    no=0
+    no = 0
     for y in range(3):
         for x in range(3):
             idx = y * 3 + x
-            no+=1
+            no += 1
             rv += str(no)
             if x < 2:
                 rv += '|'
@@ -310,8 +308,10 @@ def first_draw():
             rv += '-----\n'
     return rv
 
+
 if __name__ == "__main__":  # 主程式
     import sys
+
     if len(sys.argv) > 1:
         start_player = int(sys.argv[1])
     else:
@@ -321,21 +321,21 @@ if __name__ == "__main__":  # 主程式
     p1 = Player("p1")
     p2 = Player("p2")
     env = Environment(p1, p2)
-    
+
     # 訓練
     if not os.path.exists(f'policy_p{start_player}'):
         print("開始訓練...")
         env.play(50000)
         p1.savePolicy()
         p2.savePolicy()
-   
+
     print(first_draw())  # 棋盤說明
-    
+
     # 載入訓練成果
     p1 = Player("computer", exp_rate=0)
     p1.loadPolicy(f'policy_p{start_player}')
     p2 = HumanPlayer("human")
     env = Environment(p1, p2)
-    
+
     # 開始比賽
     env.play2(start_player)

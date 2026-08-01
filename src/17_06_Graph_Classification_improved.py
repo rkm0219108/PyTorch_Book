@@ -50,9 +50,9 @@ print(f'Is undirected: {data.is_undirected()}')
 
 
 torch.manual_seed(12345)
-dataset = dataset.shuffle()   # 洗牌
+dataset = dataset.shuffle()  # 洗牌
 
-train_dataset = dataset[:150] # 前 150 筆作為訓練資料
+train_dataset = dataset[:150]  # 前 150 筆作為訓練資料
 test_dataset = dataset[150:]  # 後 38 筆作為測試資料
 
 print(f'Number of training graphs: {len(train_dataset)}')
@@ -93,6 +93,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import global_mean_pool
 from torch_geometric.nn import GraphConv
 
+
 class GCN(torch.nn.Module):
     def __init__(self, hidden_channels):
         super().__init__()
@@ -113,8 +114,9 @@ class GCN(torch.nn.Module):
 
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
-        
+
         return x
+
 
 model = GCN(hidden_channels=64).to(device)
 print(model)
@@ -129,16 +131,18 @@ import numpy as np
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 criterion = torch.nn.CrossEntropyLoss()
 
+
 def train():
     model.train()
 
     for data in train_loader:
         data = data.to(device)
-        out = model(data.x, data.edge_index, data.batch) 
+        out = model(data.x, data.edge_index, data.batch)
         loss = criterion(out, data.y)  # 計算損失
-        loss.backward()  
-        optimizer.step()  
-        optimizer.zero_grad()  
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+
 
 def test(loader):
     model.eval()
@@ -146,12 +150,12 @@ def test(loader):
     correct = 0
     pred_all = np.array([])
     actual_all = np.array([])
-    for data in loader:  
+    for data in loader:
         data = data.to(device)
-        out = model(data.x, data.edge_index, data.batch)  
-        pred = out.argmax(dim=1)                # 找最大機率
+        out = model(data.x, data.edge_index, data.batch)
+        pred = out.argmax(dim=1)  # 找最大機率
         correct += int((pred == data.y).sum())  # 計算正確個數
-        correct_ratio = correct / len(loader.dataset)        # 計算正確比率
+        correct_ratio = correct / len(loader.dataset)  # 計算正確比率
         pred_all = np.concatenate((pred_all, pred.cpu().numpy()))
         actual_all = np.concatenate((actual_all, data.y.cpu().numpy()))
     return correct_ratio, pred_all, actual_all
@@ -161,8 +165,7 @@ for epoch in range(1, 171):
     train()
     train_acc = test(train_loader)
     test_acc = test(test_loader)
-    print(f'Epoch: {epoch:03d}, 訓練準確率: {train_acc[0]:.4f}, ' +
-          f'測試準確率: {test_acc[0]:.4f}')
+    print(f'Epoch: {epoch:03d}, 訓練準確率: {train_acc[0]:.4f}, ' + f'測試準確率: {test_acc[0]:.4f}')
 
 # ## 混淆矩陣(Confusion matrix)
 
@@ -181,28 +184,27 @@ confusion_matrix(test_acc[2], test_acc[1])
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
+
 def visualize(h, color):
     # 降維至2個主成份
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
 
-    plt.figure(figsize=(10,10))
+    plt.figure(figsize=(10, 10))
     plt.xticks([])
     plt.yticks([])
 
     plt.scatter(z[:, 0], z[:, 1], s=70, c=color, cmap="Set2")
     plt.show()
 
-# 預測    
+
+# 預測
 model.eval()
 test_loader_all = DataLoader(dataset[:], batch_size=len(dataset), shuffle=False)
-for data in test_loader_all:  
+for data in test_loader_all:
     data = data.to(device)
-    out = model(data.x, data.edge_index, data.batch)  
-    pred = out.argmax(dim=1)                # 找最大機率
+    out = model(data.x, data.edge_index, data.batch)
+    pred = out.argmax(dim=1)  # 找最大機率
 # 繪圖
 visualize(out.cpu(), color=data.cpu().y)
 
 # In[ ]:
-
-
-

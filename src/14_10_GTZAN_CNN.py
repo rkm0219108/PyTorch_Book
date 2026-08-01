@@ -26,7 +26,7 @@ import audio_util
 # In[2]:
 
 
-PATH_DATASETS = "./audio" # 預設路徑
+PATH_DATASETS = "./audio"  # 預設路徑
 BATCH_SIZE = 5  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -87,30 +87,32 @@ hop_length = 512
 n_mels = 256
 n_mfcc = 256
 
+
 class GTZAN_DS(Dataset):
     def __init__(self, dataset1):
         self.dataset1 = dataset_GTZAN
-        
+
     def __len__(self):
-          return len(self.dataset1)  
+        return len(self.dataset1)
 
     def __getitem__(self, n):
-        waveform , sample_rate, label = self.dataset1[n]
+        waveform, sample_rate, label = self.dataset1[n]
         mfcc_transform = T.MFCC(
             sample_rate=sample_rate,
-            n_mfcc=n_mfcc,   # MFCC 個數
+            n_mfcc=n_mfcc,  # MFCC 個數
             melkwargs={
-              'n_fft': n_fft,
-              'n_mels': n_mels,
-              'hop_length': hop_length,
-              'mel_scale': 'htk',
-            }
+                'n_fft': n_fft,
+                'n_mels': n_mels,
+                'hop_length': hop_length,
+                'mel_scale': 'htk',
+            },
         )
         mfcc = mfcc_transform(waveform)
         # print(mfcc.shape)
         mfcc = mfcc[:, :, :1280]
         return mfcc, gtzan_genres.index(label)
-    
+
+
 dataset = GTZAN_DS(dataset_GTZAN)
 
 # ## 步驟4：資料分割
@@ -132,7 +134,7 @@ len(train_ds), len(test_ds)
 
 
 train_loader = DataLoader(train_ds, BATCH_SIZE, shuffle=False)
-test_loader = DataLoader(test_ds, BATCH_SIZE*2, shuffle=False)
+test_loader = DataLoader(test_ds, BATCH_SIZE * 2, shuffle=False)
 
 # ## 步驟5：建立模型結構
 
@@ -148,23 +150,26 @@ class ConvNet(nn.Module):
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.layer2 = nn.Sequential(
             nn.Conv2d(16, 32, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.fc1 = nn.Linear(655360, num_classes)
         # self.fc2 = nn.Linear(1280, num_classes)
-        
+
     def forward(self, x):
         out = self.layer1(x)
         out = self.layer2(out)
         out = out.reshape(out.size(0), -1)
         out = self.fc1(out)
-        #out = self.fc2(out)
+        # out = self.fc2(out)
         out = F.log_softmax(out, dim=1)
         return out
+
 
 model = ConvNet().to(device)
 
@@ -174,13 +179,13 @@ model = ConvNet().to(device)
 
 
 epochs = 10
-lr=0.01
+lr = 0.01
 
 # 設定優化器(optimizer)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 model.train()
-loss_list = []    
+loss_list = []
 for epoch in range(1, epochs + 1):
     for batch_idx, (data, target) in enumerate(train_loader):
         # if batch_idx == 0 and epoch == 1: print(type(data), type(target))
@@ -193,13 +198,12 @@ for epoch in range(1, epochs + 1):
         loss.backward()
         optimizer.step()
 
-        if (batch_idx+1) % 10 == 0:
+        if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
-            batch = (batch_idx+1) * len(data)
+            batch = (batch_idx + 1) * len(data)
             data_count = len(train_loader.dataset)
-            percentage = (100. * (batch_idx+1) / len(train_loader))
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' +
-                  f'  Loss: {loss.item():.6f}')
+            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
 
 # In[13]:
 
@@ -223,13 +227,13 @@ with torch.no_grad():
     for data, target in test_loader:
         data, target = data.to(device), target.to(device)
         output = model(data)
-        
+
         # sum up batch loss
         test_loss += F.nll_loss(output, target).item()
-        
+
         # 預測
         output = model(data)
-        
+
         # 計算正確數
         _, predicted = torch.max(output.data, 1)
         predictions.extend(predicted.cpu().numpy())
@@ -237,13 +241,12 @@ with torch.no_grad():
         correct += (predicted == target).sum().item()
 
 # 平均損失
-test_loss /= len(test_loader.dataset) 
+test_loss /= len(test_loader.dataset)
 # 顯示測試結果
 batch = batch_idx * len(data)
 data_count = len(test_loader.dataset)
-percentage = 100. * correct / data_count 
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + 
-      f' ({percentage:.2f}%)\n')
+percentage = 100.0 * correct / data_count
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.2f}%)\n')
 
 # ## 步驟8：評估
 
@@ -253,10 +256,11 @@ print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' +
 
 
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
 cm = confusion_matrix(target_list, predictions)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=gtzan_genres)
 disp.plot()
-plt.xticks(rotation=90);
+plt.xticks(rotation=90)
 
 # In[15]:
 
@@ -287,6 +291,3 @@ torch.save(model, 'Music_genre_classification.pth')
 model = torch.load('Music_genre_classification.pth')
 
 # In[ ]:
-
-
-

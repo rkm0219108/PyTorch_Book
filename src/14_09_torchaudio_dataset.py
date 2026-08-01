@@ -23,8 +23,7 @@ import audio_util
 
 
 yesno_data = torchaudio.datasets.YESNO('./audio', download=True)
-data_loader = torch.utils.data.DataLoader(yesno_data,
-                                  batch_size=1, shuffle=True)
+data_loader = torch.utils.data.DataLoader(yesno_data, batch_size=1, shuffle=True)
 
 # ## 顯示第一筆資料
 
@@ -49,9 +48,8 @@ for i in [1, 3, 5]:
 
 
 wav_file = "./audio/yesno1.wav"
-torchaudio.save(
-    path, yesno_data[0][0], yesno_data[0][1])
-inspect_file(path)
+torchaudio.save(wav_file, yesno_data[0][0], yesno_data[0][1])
+audio_util.inspect_file(wav_file)
 
 # ## 播放音檔(wav)
 
@@ -59,7 +57,7 @@ inspect_file(path)
 
 
 # autoplay=True：自動播放，不須按 PLAY 鍵
-IPython.display.Audio(wav_file, autoplay=False) 
+IPython.display.Audio(wav_file, autoplay=False)
 
 # ## 下載 GTZAN資料集，並建立 Dataset、DataLoader
 
@@ -67,8 +65,7 @@ IPython.display.Audio(wav_file, autoplay=False)
 
 
 dataset1 = torchaudio.datasets.GTZAN('./audio', download=True)
-data_loader = torch.utils.data.DataLoader(dataset1,
-                                    batch_size=1, shuffle=True)
+data_loader = torch.utils.data.DataLoader(dataset1, batch_size=1, shuffle=True)
 
 # ## 顯示第一筆資料
 
@@ -144,6 +141,3 @@ for i in range(0, 20000, 2000):
     audio_util.play_audio(waveform, sample_rate)
 
 # In[ ]:
-
-
-

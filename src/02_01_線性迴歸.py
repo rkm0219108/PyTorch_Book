@@ -11,6 +11,7 @@
 
 # OLS 公式
 from IPython.display import Image
+
 Image('./formula/regression_wb.png')
 
 # In[4]:
@@ -26,8 +27,7 @@ import pandas as pd
 # 載入資料集
 df = pd.read_csv('./data/population.csv')
 
-w = ((df['pop'] - df['pop'].mean()) * df['year']).sum() \
-     / ((df['year'] - df['year'].mean())**2).sum()
+w = ((df['pop'] - df['pop'].mean()) * df['year']).sum() / ((df['year'] - df['year'].mean()) ** 2).sum()
 b = df['pop'].mean() - w * df['year'].mean()
 
 print(f'w={w}, b={b}')
@@ -49,9 +49,9 @@ import numpy as np
 X = df[['year']].values
 
 # b = b * 1
-one=np.ones((len(df), 1))
+one = np.ones((len(df), 1))
 
-# 將 x 與 one 合併 
+# 將 x 與 one 合併
 X = np.concatenate((X, one), axis=1)
 
 y = df[['pop']].values
@@ -65,16 +65,17 @@ print(f'w={w[0, 0]}, b={w[1, 0]}')
 # In[18]:
 
 
+from typing import cast
 import numpy as np
-from sklearn.datasets import load_boston
+from sklearn.datasets import fetch_california_housing
 
 # 載入 Boston 房價資料集
-X, y = load_boston(return_X_y=True)
+X, y = cast(tuple[np.ndarray, np.ndarray], fetch_california_housing(return_X_y=True))
 
 # b = b * 1
-one=np.ones((X.shape[0], 1))
+one = np.ones((X.shape[0], 1))
 
-# 將 x 與 one 合併 
+# 將 x 與 one 合併
 X = np.concatenate((X, one), axis=1)
 
 # 求解
@@ -88,7 +89,7 @@ w
 
 from sklearn.linear_model import LinearRegression
 
-X, y = load_boston(return_X_y=True)
+X, y = cast(tuple[np.ndarray, np.ndarray], fetch_california_housing(return_X_y=True))
 
 lr = LinearRegression()
 lr.fit(X, y)
@@ -101,18 +102,17 @@ lr.coef_, lr.intercept_
 
 
 import numpy as np
-from sklearn.datasets import load_boston
 import torch
 
 # 載入 Boston 房價資料集
-X, y = load_boston(return_X_y=True)
+X, y = cast(tuple[np.ndarray, np.ndarray], fetch_california_housing(return_X_y=True))
 
 X_tensor = torch.from_numpy(X)
 
 # b = b * 1
-one=torch.ones((X.shape[0], 1))
+one = torch.ones((X.shape[0], 1))
 
-# 將 x 與 one 合併 
+# 將 x 與 one 合併
 X = torch.cat((X_tensor, one), axis=1)
 
 
@@ -121,8 +121,3 @@ w = torch.linalg.inv(X.T @ X) @ X.T @ y
 # w = (X.T @ X).inverse() @ X.T @ y # 也可以
 
 w
-
-# In[ ]:
-
-
-

@@ -21,7 +21,7 @@ from torchvision.datasets import MNIST
 # In[2]:
 
 
-PATH_DATASETS = "" # 預設路徑
+PATH_DATASETS = ""  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -32,12 +32,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST(PATH_DATASETS, train=True, download=True, 
-                 transform=transforms.ToTensor())
+train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST(PATH_DATASETS, train=False, download=True, 
-                 transform=transforms.ToTensor())
+test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -66,11 +64,11 @@ train_ds.data[0]
 
 # 將非0的數字轉為1，顯示第1張圖片
 data = train_ds.data[0].clone()
-data[data>0]=1
+data[data > 0] = 1
 data = data.numpy()
 
 # 將轉換後二維內容顯示出來，隱約可以看出數字為 5
-text_image=[]
+text_image = []
 for i in range(data.shape[0]):
     text_image.append(''.join(data[i].astype(str)))
 text_image
@@ -80,11 +78,11 @@ text_image
 
 # 將非0的數字轉為1，顯示第2張圖片
 data = train_ds.data[1].clone()
-data[data>0]=1
+data[data > 0] = 1
 data = data.numpy()
 
 # 將轉換後二維內容顯示出來，隱約可以看出數字為 5
-text_image=[]
+text_image = []
 for i in range(data.shape[0]):
     text_image.append(''.join(data[i].astype(str)))
 text_image
@@ -99,13 +97,13 @@ import matplotlib.pyplot as plt
 X = train_ds.data[0]
 
 # 繪製點陣圖，cmap='gray':灰階
-plt.imshow(X.reshape(28,28), cmap='gray')
+plt.imshow(X.reshape(28, 28), cmap='gray')
 
 # 隱藏刻度
-plt.axis('off') 
+plt.axis('off')
 
 # 顯示圖形
-plt.show() 
+plt.show()
 
 # ## 步驟3：特徵工程，此步驟無需進行
 
@@ -125,9 +123,9 @@ plt.show()
 # 建立模型
 model = torch.nn.Sequential(
     torch.nn.Flatten(),
-    torch.nn.Linear(28 * 28, 256), 
+    torch.nn.Linear(28 * 28, 256),
     torch.nn.Dropout(0.2),
-    torch.nn.Linear(256, 10), 
+    torch.nn.Linear(256, 10),
     # 使用nn.CrossEntropyLoss()時，不需要將輸出經過softmax層，否則計算的損失會有誤
     # torch.nn.Softmax(dim=1)
 ).to(device)
@@ -138,7 +136,7 @@ model = torch.nn.Sequential(
 
 
 epochs = 5
-lr=0.1
+lr = 0.1
 
 # 建立 DataLoader
 train_loader = DataLoader(train_ds, batch_size=600)
@@ -150,7 +148,7 @@ optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
 criterion = nn.CrossEntropyLoss()
 
 model.train()
-loss_list = []    
+loss_list = []
 correct = y_count = 0
 for epoch in range(epochs):
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -159,25 +157,27 @@ for epoch in range(epochs):
 
         optimizer.zero_grad()
         output = model(data)
-        
-        pred = output.argmax(dim=1, keepdim=True)  
+
+        pred = output.argmax(dim=1, keepdim=True)
         # 正確筆數
         correct += pred.eq(target.view_as(pred)).sum().item()
         y_count += pred.shape[0]
-        
+
         # if batch_idx == 0 and epoch == 1: print(output.shape, target.shape)
         loss = criterion(output, target)
         loss_list.append(loss.item())
         loss.backward()
         optimizer.step()
 
-        if (batch_idx+1) % 10 == 0:
+        if (batch_idx + 1) % 10 == 0:
             acc = correct / y_count
             correct = y_count = 0
-            batch = (batch_idx+1) * len(data)
+            batch = (batch_idx + 1) * len(data)
             data_count = len(train_loader.dataset)
-            print(f'Epoch {epoch + 1}: [{batch:5d} / {data_count}]' +
-                  f'  Accuracy: {acc*100:.2f}%,  Loss: {loss.item():.6f}')
+            print(
+                f'Epoch {epoch + 1}: [{batch:5d} / {data_count}]'
+                + f'  Accuracy: {acc*100:.2f}%,  Loss: {loss.item():.6f}'
+            )
 
 # ## CrossEntropyLoss 可接納 output, target 維度不同，[600, 10]及[600]
 
@@ -209,7 +209,7 @@ for data, target in test_loader:
     test_loss += criterion(output, target).item()
 
     # 預測
-    pred = output.argmax(dim=1, keepdim=True)  
+    pred = output.argmax(dim=1, keepdim=True)
 
     # 正確筆數
     correct += pred.eq(target.view_as(pred)).sum().item()
@@ -217,24 +217,22 @@ for data, target in test_loader:
 # 顯示測試結果
 batch = batch_idx * len(data)
 data_count = len(test_loader.dataset)
-percentage = 100. * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + 
-      f' ({percentage:.0f}%)\n')
+percentage = 100.0 * correct / data_count
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
 
 # ## 使用 torchmetrics
 
 # In[15]:
 
 
-!pip install torchmetrics
+# !pip install torchmetrics
 
 # In[16]:
 
 
 import torchmetrics
 
-torchmetrics.functional.accuracy(pred.reshape(-1), test_ds.targets.to(device)
-                                 , num_classes=10)
+torchmetrics.functional.accuracy(pred.reshape(-1), test_ds.targets.to(device), task="multiclass", num_classes=10)
 
 # ## 實際比對測試資料的前20筆
 
@@ -249,7 +247,7 @@ for data, target in test_loader:
     output = pred.argmax(dim=1, keepdim=True)
     predictions = output.cpu().numpy()
     break
-    
+
 # 比對
 print('實際值:', ' '.join(target.numpy().astype(str)))
 print('預測值:', ' '.join(predictions.astype(str).reshape(-1)))
@@ -260,10 +258,10 @@ print('預測值:', ' '.join(predictions.astype(str).reshape(-1)))
 # 顯示第 9 筆的機率
 import numpy as np
 
-i=8
+i = 8
 data = test_ds[i][0]
 data = data.reshape(1, *data.shape).to(device)
-#print(data.shape)
+# print(data.shape)
 predictions = torch.softmax(model(data), dim=1)
 print(f'預測機率: {np.around(predictions.detach().cpu().numpy(), 2)}')
 print(f'預測類別: {model(data).argmax(dim=1).item()}')
@@ -273,9 +271,9 @@ print(f'預測類別: {model(data).argmax(dim=1).item()}')
 
 # 顯示第 9 筆圖像
 X2 = test_ds[i][0]
-plt.imshow(X2.reshape(28,28), cmap='gray')
+plt.imshow(X2.reshape(28, 28), cmap='gray')
 plt.axis('off')
-plt.show() 
+plt.show()
 
 # ## 步驟8：評估，暫不進行
 
@@ -317,16 +315,14 @@ from PIL import Image
 
 # 讀取影像並轉為單色
 # image to a Torch tensor
-transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1),
-    transforms.Resize([28, 28]),
-    transforms.PILToTensor()
-])
+transform = transforms.Compose(
+    [transforms.Grayscale(num_output_channels=1), transforms.Resize([28, 28]), transforms.PILToTensor()]
+)
 for i in range(10):
     uploaded_file = f'./myDigits/{i}.png'
     image = Image.open(uploaded_file)
     X1 = transform(image)
-    X1 = torch.FloatTensor(255.0-X1).to(device)
+    X1 = torch.FloatTensor(255.0 - X1).to(device)
     print(f'actual/prediction: {i} {model(X1).argmax(dim=1).item()}')
 
 # ## 其他：顯示模型彙總資訊(summary)、繪製圖形顯示模型結構
@@ -346,17 +342,15 @@ for name, module in model.named_children():
 # In[ ]:
 
 
-!pip install torchinfo 
+# !pip install torchinfo
 
 # In[ ]:
 
 
 from torchinfo import summary
-summary(model, (60000, 28, 28)) # input dimension size
+
+summary(model, (60000, 28, 28))  # input dimension size
 
 # ## PyTorch 無法繪製模型
 
 # In[ ]:
-
-
-

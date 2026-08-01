@@ -9,7 +9,7 @@
 
 
 # 載入相關套件
-import cv2 
+import cv2
 import pytesseract
 import matplotlib.pyplot as plt
 
@@ -23,7 +23,7 @@ image = cv2.imread('./images_ocr/receipt.png')
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-plt.figure(figsize=(10,6))
+plt.figure(figsize=(10, 6))
 plt.imshow(image_RGB)
 plt.axis('off')
 plt.show()
@@ -80,7 +80,7 @@ image = cv2.imread('./images_ocr/chinese.png')
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-plt.figure(figsize=(10,6))
+plt.figure(figsize=(10, 6))
 plt.imshow(image_RGB)
 plt.axis('off')
 plt.show()
@@ -105,7 +105,7 @@ image = cv2.imread('./images_ocr/chinese_2.png')
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-plt.figure(figsize=(10,6))
+plt.figure(figsize=(10, 6))
 plt.imshow(image_RGB)
 plt.axis('off')
 plt.show()
@@ -119,6 +119,3 @@ custom_config = r'-l chi_tra+jpn+eng --psm 6'
 print(pytesseract.image_to_string(image, config=custom_config))
 
 # In[ ]:
-
-
-

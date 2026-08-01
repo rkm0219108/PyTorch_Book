@@ -9,6 +9,7 @@
 
 
 # 載入相關套件
+# NOTE: chatterbot 套件已不再維護，可能與新版相依套件不相容
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 
@@ -28,7 +29,7 @@ conversation = [
     "I'm doing great.",
     "That is good to hear",
     "Thank you.",
-    "You're welcome."
+    "You're welcome.",
 ]
 
 trainer = ListTrainer(chatbot)
@@ -62,9 +63,9 @@ bot = ChatBot(
     logic_adapters=[
         'chatterbot.logic.MathematicalEvaluation',
         'chatterbot.logic.TimeLogicAdapter',
-        'chatterbot.logic.BestMatch'
+        'chatterbot.logic.BestMatch',
     ],
-    database_uri='sqlite:///database.sqlite3'
+    database_uri='sqlite:///database.sqlite3',
 )
 
 # In[6]:
@@ -114,7 +115,7 @@ bot = ChatBot(
         'chatterbot.logic.MathematicalEvaluation',
         'chatterbot.logic.BestMatch',
     ],
-    database_uri='sqlite:///database.sqlite3'
+    database_uri='sqlite:///database.sqlite3',
 )
 
 # In[10]:
@@ -125,6 +126,3 @@ response = bot.get_response("我要訂位")
 print(f'回答：{response}')
 
 # In[ ]:
-
-
-

@@ -3,7 +3,7 @@
 
 # # 以LSTM演算法預測股價
 
-# ## 載入相關套件 
+# ## 載入相關套件
 
 # In[1]:
 
@@ -45,7 +45,7 @@ df.tail()
 
 df2 = df.set_index('Date')
 df2.Close.plot(legend=None)
-plt.xticks(rotation=30);
+plt.xticks(rotation=30)
 
 # In[6]:
 
@@ -56,18 +56,21 @@ len(df2)
 
 
 from sklearn.preprocessing import MinMaxScaler
-look_back = 1 # 以前N期資料為 X，當期資料為 Y
+
+look_back = 1  # 以前N期資料為 X，當期資料為 Y
+
 
 # 函數：以前N期資料為 X，當前期資料為 Y
 def create_dataset(data1, look_back):
     x, y = [], []
-    for i in range(len(data1)-look_back-1):
-        _x = data1[i:(i+look_back)]
-        _y = data1[i+look_back]
+    for i in range(len(data1) - look_back - 1):
+        _x = data1[i : (i + look_back)]
+        _y = data1[i + look_back]
         x.append(_x)
         y.append(_y)
 
     return torch.Tensor(np.array(x)), torch.Tensor(np.array(y))
+
 
 dataset = df2[['Close']].values.astype('float32')
 
@@ -78,7 +81,7 @@ dataset = scaler.fit_transform(dataset)
 # 資料分割
 train_size = int(len(dataset) * 0.67)
 test_size = len(dataset) - train_size
-train_data, test_data = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
+train_data, test_data = dataset[0:train_size, :], dataset[train_size : len(dataset), :]
 
 trainX, trainY = create_dataset(train_data, look_back)
 testX, testY = create_dataset(test_data, look_back)
@@ -109,8 +112,7 @@ class TimeSeriesModel(nn.Module):
         super().__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.rnn = nn.LSTM(1, self.hidden_size, num_layers=self.num_layers
-                           , batch_first=True)
+        self.rnn = nn.LSTM(1, self.hidden_size, num_layers=self.num_layers, batch_first=True)
         self.fc = nn.Linear(self.hidden_size, 1)
         self.init_weights()
 
@@ -120,19 +122,20 @@ class TimeSeriesModel(nn.Module):
         self.fc.bias.data.zero_()
 
     def forward(self, x):
-        #print(x.shape)
+        # print(x.shape)
         # rnn_out, h_out = self.rnn(x)
-        h_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)        
+        h_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
         c_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
         out, (h_out, _) = self.rnn(x, (h_0, c_0))
-        #print(h_out.shape)
-        
+        # print(h_out.shape)
+
         # 取最後一層的 h，並轉成二維
-#         h_out = h_out[-1].view(-1, self.hidden_size)  
-#         return self.fc(h_out)
+        #         h_out = h_out[-1].view(-1, self.hidden_size)
+        #         return self.fc(h_out)
         # 取最後一個輸出，並轉成二維
-        flatten_output = out[:, -1].view(-1, self.hidden_size)  
+        flatten_output = out[:, -1].view(-1, self.hidden_size)
         return self.fc(flatten_output)
+
 
 model = TimeSeriesModel(look_back, hidden_size=4, num_layers=1).to(device)
 
@@ -144,6 +147,7 @@ model = TimeSeriesModel(look_back, hidden_size=4, num_layers=1).to(device)
 num_epochs = 2000
 learning_rate = 0.01
 
+
 def train(trainX, trainY):
     criterion = torch.nn.MSELoss()  # MSE
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -151,12 +155,14 @@ def train(trainX, trainY):
     for epoch in range(num_epochs):
         optimizer.zero_grad()
         outputs = model(trainX)
-        if epoch <= 0: print(outputs.shape)
-        loss = criterion(outputs, trainY)    
+        if epoch <= 0:
+            print(outputs.shape)
+        loss = criterion(outputs, trainY)
         loss.backward()
         optimizer.step()
         if epoch % 100 == 0:
             print(f"Epoch: {epoch}, loss: {loss.item():.5f}")
+
 
 train(trainX, trainY)
 
@@ -179,7 +185,7 @@ trainY.shape, trainPredict.shape
 
 
 from sklearn.metrics import mean_squared_error
-import math 
+import math
 
 # 還原常態化的訓練及測試資料
 trainPredict = scaler.inverse_transform(trainPredict)
@@ -202,22 +208,22 @@ print(f'Test RMSE:  {testScore:.2f}')
 # 訓練資料的 X/Y
 trainPredictPlot = np.empty_like(dataset)
 trainPredictPlot[:, :] = np.nan
-trainPredictPlot[1:len(trainPredict)+look_back, :] = trainPredict
+trainPredictPlot[1 : len(trainPredict) + look_back, :] = trainPredict
 
 # 測試資料 X/Y
 testPredictPlot = np.empty_like(dataset)
 testPredictPlot[:, :] = np.nan
-testPredictPlot[-testPredict.shape[0]-1:-1, :] = testPredict
+testPredictPlot[-testPredict.shape[0] - 1 : -1, :] = testPredict
 
 # 繪圖
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 plt.plot(scaler.inverse_transform(dataset), label='Actual')
 plt.plot(trainPredictPlot, label='train predict')
 plt.plot(testPredictPlot, label='test predict')
 plt.legend()
 plt.show()
 
-# ## 改變Loopback=3：X由前1期改為前3期 
+# ## 改變Loopback=3：X由前1期改為前3期
 
 # In[23]:
 
@@ -234,7 +240,7 @@ train(trainX, trainY)
 
 
 from sklearn.metrics import mean_squared_error
-import math 
+import math
 
 model.eval()
 trainPredict = model(trainX).detach().numpy()
@@ -259,15 +265,15 @@ print(f'Test RMSE:  {testScore:.2f}')
 # 訓練資料的 X/Y
 trainPredictPlot = np.empty_like(dataset)
 trainPredictPlot[:, :] = np.nan
-trainPredictPlot[1:trainPredict.shape[0]+1:, :] = trainPredict
+trainPredictPlot[1 : trainPredict.shape[0] + 1 :, :] = trainPredict
 
 # 測試資料 X/Y
 testPredictPlot = np.empty_like(dataset)
 testPredictPlot[:, :] = np.nan
-testPredictPlot[-testPredict.shape[0]-1:-1, :] = testPredict
+testPredictPlot[-testPredict.shape[0] - 1 : -1, :] = testPredict
 
 # 繪圖
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 plt.plot(scaler.inverse_transform(dataset), label='Actual')
 plt.plot(trainPredictPlot, label='train predict')
 plt.plot(testPredictPlot, label='test predict')
@@ -291,7 +297,7 @@ train(trainX, trainY)
 
 
 from sklearn.metrics import mean_squared_error
-import math 
+import math
 
 model.eval()
 trainPredict = model(trainX).detach().numpy()
@@ -316,15 +322,15 @@ print(f'Test RMSE:  {testScore:.2f}')
 # 訓練資料的 X/Y
 trainPredictPlot = np.empty_like(dataset)
 trainPredictPlot[:, :] = np.nan
-trainPredictPlot[1:trainPredict.shape[0]+1:, :] = trainPredict
+trainPredictPlot[1 : trainPredict.shape[0] + 1 :, :] = trainPredict
 
 # 測試資料 X/Y
 testPredictPlot = np.empty_like(dataset)
 testPredictPlot[:, :] = np.nan
-testPredictPlot[-testPredict.shape[0]-1:-1, :] = testPredict
+testPredictPlot[-testPredict.shape[0] - 1 : -1, :] = testPredict
 
 # 繪圖
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 plt.plot(scaler.inverse_transform(dataset), label='Actual')
 plt.plot(trainPredictPlot, label='train predict')
 plt.plot(testPredictPlot, label='test predict')
@@ -340,20 +346,21 @@ plt.show()
 def create_dataset(data1, look_back, forward_days):
     x, y = [], []
     for i in range(len(data1) - look_back - forward_days + 1):
-        _x = data1[i:(i+look_back)]
-        _y = data1[i+look_back:(i+look_back+forward_days)]
+        _x = data1[i : (i + look_back)]
+        _y = data1[i + look_back : (i + look_back + forward_days)]
         x.append(_x)
         y.append(_y)
 
     x, y = np.array(x), np.array(y)
     return torch.Tensor(x), torch.Tensor(y.reshape(y.shape[0], y.shape[1]))
 
+
 # ## 建立資料集
 
 # In[30]:
 
 
-look_back = 10 # 以前10期資料為 X
+look_back = 10  # 以前10期資料為 X
 forward_days = 10  # 預測天數
 trainX, trainY = create_dataset(train_data, look_back, forward_days)
 testX, testY = create_dataset(test_data, look_back, forward_days)
@@ -378,8 +385,7 @@ class TimeSeriesModel(nn.Module):
         super().__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.rnn = nn.LSTM(1, self.hidden_size, num_layers=self.num_layers
-                           , batch_first=True)
+        self.rnn = nn.LSTM(1, self.hidden_size, num_layers=self.num_layers, batch_first=True)
         self.fc = nn.Linear(self.hidden_size, forward_days)
         self.init_weights()
 
@@ -389,22 +395,22 @@ class TimeSeriesModel(nn.Module):
         self.fc.bias.data.zero_()
 
     def forward(self, x):
-        #print(x.shape)
+        # print(x.shape)
         # rnn_out, h_out = self.rnn(x)
-        h_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)        
+        h_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
         c_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
         out, (h_out, _) = self.rnn(x, (h_0, c_0))
-        #print(h_out.shape)
-        
+        # print(h_out.shape)
+
         # 取最後一層的 h，並轉成二維
-        # h_out = h_out[-1].view(-1, self.hidden_size)  
+        # h_out = h_out[-1].view(-1, self.hidden_size)
         # return self.fc(h_out)
         # 取最後一個輸出，並轉成二維
-        flatten_output = out[:, -1].view(-1, self.hidden_size)  
+        flatten_output = out[:, -1].view(-1, self.hidden_size)
         return self.fc(flatten_output)
 
-model = TimeSeriesModel(look_back, forward_days, hidden_size=20,
-                        num_layers=1).to(device)
+
+model = TimeSeriesModel(look_back, forward_days, hidden_size=20, num_layers=1).to(device)
 
 # ## 模型訓練
 
@@ -418,12 +424,14 @@ def train(trainX, trainY):
     for epoch in range(num_epochs):
         optimizer.zero_grad()
         outputs = model(trainX)
-        if epoch <= 0: print(outputs.shape, trainY.shape)
-        loss = criterion(outputs, trainY)    
+        if epoch <= 0:
+            print(outputs.shape, trainY.shape)
+        loss = criterion(outputs, trainY)
         loss.backward()
         optimizer.step()
         if epoch % 100 == 0:
             print(f"Epoch: {epoch}, loss: {loss.item():.5f}")
+
 
 train(trainX, trainY)
 
@@ -431,7 +439,7 @@ train(trainX, trainY)
 
 
 from sklearn.metrics import mean_squared_error
-import math 
+import math
 
 model.eval()
 trainPredict = model(trainX).detach().numpy()
@@ -455,18 +463,17 @@ print(f'Test RMSE:  {testScore:.2f}')
 # In[41]:
 
 
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 # 真實資料
 plt.plot(range(len(dataset)), scaler.inverse_transform(dataset), 'b', label='Actual')
 
 # 訓練資料
 for i in range(trainPredict.shape[0]):
-    plt.plot(range(i, i+forward_days), trainPredict[i], 'orange')
+    plt.plot(range(i, i + forward_days), trainPredict[i], 'orange')
 
-# 測試資料    
+# 測試資料
 for i in range(testPredict.shape[0]):
-    plt.plot(range(i+trainPredict.shape[0], i+trainPredict.shape[0]+forward_days), 
-             testPredict[i], 'r')
+    plt.plot(range(i + trainPredict.shape[0], i + trainPredict.shape[0] + forward_days), testPredict[i], 'r')
 plt.show()
 
 # ## 只繪製 20 條預測值
@@ -475,17 +482,14 @@ plt.show()
 
 
 n = 20
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 # 真實資料
-plt.plot(range(forward_days*n), scaler.inverse_transform(dataset[:forward_days*n]), 'b', label='Actual')
+plt.plot(range(forward_days * n), scaler.inverse_transform(dataset[: forward_days * n]), 'b', label='Actual')
 
 # 訓練資料
 for i in range(n):
-    plt.plot(range(i*forward_days, (i+1)*forward_days), trainPredict[i*forward_days], 'r')
+    plt.plot(range(i * forward_days, (i + 1) * forward_days), trainPredict[i * forward_days], 'r')
 
 plt.show()
 
 # In[ ]:
-
-
-

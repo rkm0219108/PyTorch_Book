@@ -27,7 +27,7 @@ import numpy as np
 # In[2]:
 
 
-PATH_DATASETS = "./audio" # 預設路徑
+PATH_DATASETS = "./audio"  # 預設路徑
 BATCH_SIZE = 10  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -63,11 +63,11 @@ f'{661794 / 22050} 秒'
 
 
 # 切成 5 段
-waveform , sample_rate, label = dataset_GTZAN[0]
+waveform, sample_rate, label = dataset_GTZAN[0]
 segment_length = int(waveform.shape[1] / 5)
 for i in range(5):
-    audio_util.play_audio(waveform[:, i*segment_length:(i+1)*segment_length], sample_rate)
-    print(waveform[:, i*segment_length:(i+1)*segment_length].shape[1])
+    audio_util.play_audio(waveform[:, i * segment_length : (i + 1) * segment_length], sample_rate)
+    print(waveform[:, i * segment_length : (i + 1) * segment_length].shape[1])
 
 # In[9]:
 
@@ -101,32 +101,34 @@ gtzan_genres = [
 slice_count = 5
 n_mfcc = 40
 
+
 class GTZAN_DS(Dataset):
     def __init__(self, dataset1):
         self.dataset1 = dataset_GTZAN
-        
+
     def __len__(self):
-          return len(self.dataset1)  
+        return len(self.dataset1)
 
     def __getitem__(self, n):
-        waveform , sample_rate, label = self.dataset1[n]
-            
+        waveform, sample_rate, label = self.dataset1[n]
+
         mfcc_transform = T.MFCC(
             sample_rate=sample_rate,
-            n_mfcc=n_mfcc,   # MFCC 個數
+            n_mfcc=n_mfcc,  # MFCC 個數
         )
-        
-        mfcc_list=[]
+
+        mfcc_list = []
         segment_length = int(waveform.shape[1] / slice_count)
         for i in range(5):
-            mfcc = mfcc_transform(waveform[:, i*segment_length:(i+1)*segment_length])
+            mfcc = mfcc_transform(waveform[:, i * segment_length : (i + 1) * segment_length])
             # print(mfcc.shape)
             mfcc_list.append(mfcc[:, :, :660])
-            
+
         # 5段合成
         mfcc_tensor = torch.cat(mfcc_list, dim=0)
         return mfcc_tensor, gtzan_genres.index(label)
-    
+
+
 dataset = GTZAN_DS(dataset_GTZAN)
 
 # In[12]:
@@ -179,23 +181,26 @@ class ConvNet(nn.Module):
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.layer2 = nn.Sequential(
             nn.Conv2d(16, 32, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.fc1 = nn.Linear(52800, num_classes)
         # self.fc2 = nn.Linear(1280, num_classes)
-        
+
     def forward(self, x):
         out = self.layer1(x)
         out = self.layer2(out)
         out = out.reshape(out.size(0), -1)
         out = self.fc1(out)
-        #out = self.fc2(out)
+        # out = self.fc2(out)
         out = F.log_softmax(out, dim=1)
         return out
+
 
 model = ConvNet().to(device)
 
@@ -234,25 +239,25 @@ def score_model():
             target_list.extend(target.cpu().numpy())
 
     # 平均損失
-    test_loss /= len(test_loader.dataset) 
+    test_loss /= len(test_loader.dataset)
     # 顯示測試結果
     batch = batch_idx * len(data)
-    data_count = len(test_loader.dataset) * slice_count # 5倍筆數
-    percentage = 100. * correct / data_count 
-    print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + 
-          f' ({percentage:.2f}%)\n')
+    data_count = len(test_loader.dataset) * slice_count  # 5倍筆數
+    percentage = 100.0 * correct / data_count
+    print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.2f}%)\n')
     return prediction_list, target_list
+
 
 # In[20]:
 
 
 epochs = 40
-lr=0.01
+lr = 0.01
 
 # 設定優化器(optimizer)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-loss_list = []    
+loss_list = []
 for epoch in range(1, epochs + 1):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -270,13 +275,12 @@ for epoch in range(1, epochs + 1):
         loss.backward()
         optimizer.step()
 
-        if (batch_idx+1) % 10 == 0:
+        if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
-            batch = (batch_idx+1) * len(data)
-            data_count = len(train_loader.dataset) * slice_count # 5倍筆數
-            percentage = (100. * (batch_idx+1) / len(train_loader))
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' +
-                  f'  Loss: {loss.item():.6f}')
+            batch = (batch_idx + 1) * len(data)
+            data_count = len(train_loader.dataset) * slice_count  # 5倍筆數
+            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
     score_model()
 
 # In[21]:
@@ -307,10 +311,11 @@ prediction_list, target_list = score_model()
 
 
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
 cm = confusion_matrix(target_list, prediction_list)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=gtzan_genres)
 disp.plot()
-plt.xticks(rotation=90);
+plt.xticks(rotation=90)
 
 # In[25]:
 
@@ -322,7 +327,7 @@ with torch.no_grad():
     for i in range(20):
         data, target = test_ds[i]
         # 重複 label，並重整 data，1筆變成5筆
-        #print(data.shape)
+        # print(data.shape)
         data = data.reshape(slice_count, 1, data.shape[1], data.shape[2])
         data = data.to(device)
         output = torch.argmax(model(data), axis=-1)
@@ -344,6 +349,3 @@ torch.save(model, 'Music_genre_classification_2.pth')
 model = torch.load('Music_genre_classification_2.pth')
 
 # In[ ]:
-
-
-

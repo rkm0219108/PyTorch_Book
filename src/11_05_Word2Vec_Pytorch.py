@@ -32,8 +32,8 @@ from sklearn.metrics.pairwise import euclidean_distances
 
 
 torch.manual_seed(1)  # 固定亂數種子
-CONTEXT_SIZE = 3      # 上下文個數
-EMBEDDING_DIM = 10    # 嵌入層輸出維度
+CONTEXT_SIZE = 3  # 上下文個數
+EMBEDDING_DIM = 10  # 嵌入層輸出維度
 
 # ## 文字處理函數
 
@@ -42,13 +42,14 @@ EMBEDDING_DIM = 10    # 嵌入層輸出維度
 
 # 以值(value)找鍵值(key)
 def get_key(word_id):
-    for key,val in word_to_ix.items():
-        if(val == word_id):
+    for key, val in word_to_ix.items():
+        if val == word_id:
             return key
     return ''
 
-# 分詞及前置處理        
-def read_data(file_path, remove_stopwords = False):
+
+# 分詞及前置處理
+def read_data(file_path, remove_stopwords=False):
     tokenizer = RegexpTokenizer(r'\w+')
     if file_path.lower().startswith('http'):
         data = urllib.request.urlopen(file_path)
@@ -60,9 +61,10 @@ def read_data(file_path, remove_stopwords = False):
         stop_words = set(stopwords.words('english'))
     else:
         stop_words = set([])
-    stop_words.update(['.',',',':',';','(',')','#','--','...','"'])
-    cleaned_words = [ i for i in tokenized_data if i not in stop_words ]
-    return(cleaned_words)
+    stop_words.update(['.', ',', ':', ';', '(', ')', '#', '--', '...', '"'])
+    cleaned_words = [i for i in tokenized_data if i not in stop_words]
+    return cleaned_words
+
 
 # ## 測試本文(Text)
 
@@ -72,7 +74,7 @@ def read_data(file_path, remove_stopwords = False):
 test_sentence = read_data('./nlp_data/word2vec_test.txt')
 
 # 或讀取其他檔案
-#test_sentence = 'https://www.gutenberg.org/files/57884/57884-0.txt')
+# test_sentence = 'https://www.gutenberg.org/files/57884/57884-0.txt')
 
 # ## N-grams 處理
 
@@ -81,8 +83,8 @@ test_sentence = read_data('./nlp_data/word2vec_test.txt')
 
 ngrams = []
 for i in range(len(test_sentence) - CONTEXT_SIZE):
-    tup = [test_sentence[j] for j in np.arange(i , i + CONTEXT_SIZE) ]
-    ngrams.append((tup,test_sentence[i + CONTEXT_SIZE]))
+    tup = [test_sentence[j] for j in np.arange(i, i + CONTEXT_SIZE)]
+    ngrams.append((tup, test_sentence[i + CONTEXT_SIZE]))
 
 print(ngrams[0], ngrams[1])
 
@@ -93,7 +95,7 @@ print(ngrams[0], ngrams[1])
 
 # 取得詞彙表(vocabulary)
 vocab = set(test_sentence)
-print("單字個數：",len(vocab))
+print("單字個數：", len(vocab))
 
 # 建立字典，以單字取得代碼
 word_to_ix = {word: i for i, word in enumerate(vocab)}
@@ -112,13 +114,13 @@ class CBOWModeler(nn.Module):
 
     def forward(self, inputs):
         # embeds -> linear -> relu -> linear -> log_softmax
-        embeds = self.embeddings(inputs).view((1, -1))  
+        embeds = self.embeddings(inputs).view((1, -1))
         out1 = F.relu(self.linear1(embeds))
-        out2 = self.linear2(out1)           
+        out2 = self.linear2(out1)
         log_probs = F.log_softmax(out2, dim=1)
         return log_probs
 
-    def predict(self,input):
+    def predict(self, input):
         # 以上下文預測
         context_idxs = torch.LongTensor([word_to_ix[w] for w in input])
         res = self.forward(context_idxs)
@@ -126,9 +128,9 @@ class CBOWModeler(nn.Module):
         res_val, res_ind = res.sort(descending=True)
         res_val = res_val[0][:3]  # 前3個預測值
         res_ind = res_ind[0][:3]  # 前3個預測索引值
-        for arg in zip(res_val,res_ind):
-            print([(key,val,arg[0]) for key,val in word_to_ix.items() 
-                                           if val == arg[1]])
+        for arg in zip(res_val, res_ind):
+            print([(key, val, arg[0]) for key, val in word_to_ix.items() if val == arg[1]])
+
 
 # ## 訓練
 
@@ -145,7 +147,7 @@ for epoch in range(400):
     for context, target in ngrams:
         # 以單字取得代碼
         context_idxs = torch.LongTensor([word_to_ix[w] for w in context])
-        
+
         # 梯度下降
         model.zero_grad()
         log_probs = model(context_idxs)
@@ -160,9 +162,9 @@ for epoch in range(400):
 # In[97]:
 
 
-model.predict(['of','all','human'])
+model.predict(['of', 'all', 'human'])
 
-# ## Skip-gram 
+# ## Skip-gram
 
 # <img src='./nlp_data/Skip-gram.png' width=500 align='left'>
 
@@ -173,8 +175,8 @@ model.predict(['of','all','human'])
 
 ngrams = []
 for i in range(len(test_sentence) - CONTEXT_SIZE):
-    tup = [test_sentence[j] for j in np.arange(i + 1 , i + CONTEXT_SIZE + 1) ]
-    ngrams.append((test_sentence[i],tup))
+    tup = [test_sentence[j] for j in np.arange(i + 1, i + CONTEXT_SIZE + 1)]
+    ngrams.append((test_sentence[i], tup))
 print(ngrams[0], ngrams[1])
 
 # ## Skip-Gram 模型
@@ -188,25 +190,25 @@ class SkipgramModeler(nn.Module):
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.linear1 = nn.Linear(embedding_dim, 128)
         self.linear2 = nn.Linear(128, context_size * vocab_size)
-        #self.parameters['context_size'] = context_size
+        # self.parameters['context_size'] = context_size
 
     def forward(self, inputs):
         # embeds -> linear -> relu -> linear -> log_softmax
-        embeds = self.embeddings(inputs).view((1, -1)) 
-        out1 = F.relu(self.linear1(embeds)) 
-        out2 = self.linear2(out1)           
-        log_probs = F.log_softmax(out2, dim=1).view(CONTEXT_SIZE,-1)
+        embeds = self.embeddings(inputs).view((1, -1))
+        out1 = F.relu(self.linear1(embeds))
+        out2 = self.linear2(out1)
+        log_probs = F.log_softmax(out2, dim=1).view(CONTEXT_SIZE, -1)
         return log_probs
 
-    def predict(self,input):
+    def predict(self, input):
         context_idxs = torch.LongTensor([word_to_ix[input]])
         res = self.forward(context_idxs)
         res_arg = torch.argmax(res)
         res_val, res_ind = res.sort(descending=True)
-        indices = [res_ind[i][0] for i in np.arange(0,3)]
+        indices = [res_ind[i][0] for i in np.arange(0, 3)]
         for arg in indices:
-            print([(key, val) for key,val in word_to_ix.items() 
-                   if val == arg ])
+            print([(key, val) for key, val in word_to_ix.items() if val == arg])
+
 
 # ## 訓練
 
@@ -219,7 +221,7 @@ model = SkipgramModeler(len(vocab), EMBEDDING_DIM, CONTEXT_SIZE)
 optimizer = optim.SGD(model.parameters(), lr=0.001)
 
 # Freeze embedding layer
-#model.freeze_layer('embeddings')
+# model.freeze_layer('embeddings')
 
 for epoch in range(550):
     total_loss = 0
@@ -244,6 +246,3 @@ for epoch in range(550):
 model.predict('psychologically')
 
 # In[ ]:
-
-
-

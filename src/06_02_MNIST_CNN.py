@@ -23,7 +23,7 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = "" # 預設路徑
+PATH_DATASETS = ""  # 預設路徑
 BATCH_SIZE = 1000  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -34,12 +34,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST(PATH_DATASETS, train=True, download=True, 
-                 transform=transforms.ToTensor())
+train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST(PATH_DATASETS, train=False, download=True, 
-                 transform=transforms.ToTensor())
+test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -58,27 +56,34 @@ print(train_ds.data.shape, test_ds.data.shape)
 # 卷積/池化層公式計算
 import math
 
-# W, F, P, S：image Width, Filter width, Padding, Stride 
+
+# W, F, P, S：image Width, Filter width, Padding, Stride
 def Conv_Width(W, F, P, S):
     return math.floor(((W - F + 2 * P) / S) + 1)
+
 
 def Conv_Output_Volume(W, F, P, S, out):
     return Conv_Width(W, F, P, S) ** 2 * out
 
+
 # C: no of channels
 def Conv_Parameter_Count(F, C, out):
-    return F ** 2 * C * out
+    return F**2 * C * out
+
 
 def Pool_Width(W, F, P, S):
     return Conv_Width(W, F, P, S)
 
-# filter_count: no of filter in last conv 
+
+# filter_count: no of filter in last conv
 # stride count default value = Filter width
 def Pool_Output_Volume(W, F, P, S, filter_count):
     return Conv_Output_Volume(W, F, P, S, filter_count)
 
+
 def Pool_Parameter_Count(W, F, S):
     return 0
+
 
 # In[5]:
 
@@ -88,10 +93,12 @@ print(Pool_Width(Conv_Width(32, 3, 1, 1), 2, 0, 2))
 print(Pool_Width(Conv_Width(16, 3, 1, 1), 2, 0, 2))
 print(Pool_Width(Conv_Width(8, 3, 1, 1), 2, 0, 2))
 
+
 def Conv_Pool_Width(W, F, P, S, F2, P2, S2, n):
     for i in range(n):
         W = Pool_Width(Conv_Width(W, F, P, S), F2, P2, S2)
     return W
+
 
 Conv_Pool_Width(32, 3, 1, 1, 2, 0, 2, 3)
 
@@ -105,7 +112,7 @@ Conv_Width(28, 3, 0, 1)
 
 # Input: 227x227x3 images, CONV1: 96 11x11 filters applied at stride 4
 print(Conv_Width(227, 11, 0, 4), Conv_Output_Volume(227, 11, 0, 4, 96), Conv_Parameter_Count(11, 3, 96))
-print(math.floor((227-11)/4)+1, 55*55*96, (11*11*3)*96)
+print(math.floor((227 - 11) / 4) + 1, 55 * 55 * 96, (11 * 11 * 3) * 96)
 
 # In[8]:
 
@@ -115,7 +122,7 @@ c1_Width = Conv_Width(28, 5, 2, 1)
 p1_Width = Pool_Width(c1_Width, 2, 0, 2)
 c2_Width = Conv_Width(p1_Width, 5, 2, 1)
 p2_out = Pool_Output_Volume(c2_Width, 2, 0, 2, 32)
-p2_out, 7*7*32
+p2_out, 7 * 7 * 32
 
 # In[9]:
 
@@ -129,14 +136,16 @@ class ConvNet(nn.Module):
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.layer2 = nn.Sequential(
             nn.Conv2d(16, 32, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        self.fc = nn.Linear(7*7*32, num_classes)
-        
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+        self.fc = nn.Linear(7 * 7 * 32, num_classes)
+
     def forward(self, x):
         out = self.layer1(x)
         out = self.layer2(out)
@@ -144,6 +153,7 @@ class ConvNet(nn.Module):
         out = self.fc(out)
         out = F.log_softmax(out, dim=1)
         return out
+
 
 model = ConvNet().to(device)
 
@@ -153,7 +163,7 @@ model = ConvNet().to(device)
 
 
 epochs = 10
-lr=0.1
+lr = 0.1
 
 # 建立 DataLoader
 train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE)
@@ -162,11 +172,11 @@ train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 model.train()
-loss_list = []    
+loss_list = []
 for epoch in range(1, epochs + 1):
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-#         if batch_idx == 0 and epoch == 1: print(data[0])
+        #         if batch_idx == 0 and epoch == 1: print(data[0])
 
         optimizer.zero_grad()
         output = model(data)
@@ -174,13 +184,12 @@ for epoch in range(1, epochs + 1):
         loss.backward()
         optimizer.step()
 
-        if (batch_idx+1) % 10 == 0:
+        if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
-            batch = (batch_idx+1) * len(data)
+            batch = (batch_idx + 1) * len(data)
             data_count = len(train_loader.dataset)
-            percentage = (100. * (batch_idx+1) / len(train_loader))
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' +
-                  f'  Loss: {loss.item():.6f}')
+            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
 
 # In[11]:
 
@@ -205,25 +214,24 @@ with torch.no_grad():
     for data, target in test_loader:
         data, target = data.to(device), target.to(device)
         output = model(data)
-        
+
         # sum up batch loss
         test_loss += F.nll_loss(output, target).item()
-        
+
         # 預測
         output = model(data)
-        
+
         # 計算正確數
         _, predicted = torch.max(output.data, 1)
         correct += (predicted == target).sum().item()
 
 # 平均損失
-test_loss /= len(test_loader.dataset) 
+test_loss /= len(test_loader.dataset)
 # 顯示測試結果
 batch = batch_idx * len(data)
 data_count = len(test_loader.dataset)
-percentage = 100. * correct / data_count 
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + 
-      f' ({percentage:.2f}%)\n')
+percentage = 100.0 * correct / data_count
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.2f}%)\n')
 
 # In[13]:
 
@@ -247,7 +255,7 @@ print('prediction: ', ' '.join(predictions[0:20]))
 # 顯示第 9 筆的機率
 import numpy as np
 
-i=18
+i = 18
 data = test_ds[i][0]
 data = data.reshape(1, *data.shape).to(device)
 print(data.shape)
@@ -259,10 +267,10 @@ print(f'0~9預測機率: {np.argmax(predictions.cpu().detach().numpy(), axis=-1)
 
 
 # 顯示第 9 筆圖像
-X2 = test_ds[i][0] 
-plt.imshow(X2.reshape(28,28), cmap='gray')
+X2 = test_ds[i][0]
+plt.imshow(X2.reshape(28, 28), cmap='gray')
 plt.axis('off')
-plt.show() 
+plt.show()
 
 # In[16]:
 
@@ -291,17 +299,17 @@ model = torch.load('cnn_model.pth')
 from skimage import io
 from skimage.transform import resize
 
-no=9
+no = 9
 uploaded_file = f'./myDigits/{no}.png'
 image1 = io.imread(uploaded_file, as_gray=True)
 
 # 縮為 (28, 28) 大小的影像
 data_shape = data.shape
-image_resized = resize(image1, data_shape[2:], anti_aliasing=True)    
-X1 = image_resized.reshape(*data_shape) #/ 255.0
-#print(X1[0])
+image_resized = resize(image1, data_shape[2:], anti_aliasing=True)
+X1 = image_resized.reshape(*data_shape)  # / 255.0
+# print(X1[0])
 # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
-X1 = 1.0-X1
+X1 = 1.0 - X1
 
 for i in range(X1[0][0].shape[0]):
     for j in range(X1[0][0].shape[1]):
@@ -315,23 +323,23 @@ for i in range(X1[0][0].shape[0]):
 import matplotlib.pyplot as plt
 
 # 繪製點陣圖，cmap='gray':灰階
-plt.imshow(X1.reshape(28,28), cmap='gray')
+plt.imshow(X1.reshape(28, 28), cmap='gray')
 
 # 隱藏刻度
-plt.axis('off') 
+plt.axis('off')
 
 # 顯示圖形
-plt.show() 
+plt.show()
 
 # In[20]:
 
 
 # 將非0的數字轉為1，顯示第1張圖片
 X2 = X1[0][0].copy()
-X2[X2>0.1]=1
+X2[X2 > 0.1] = 1
 print(type(X2), X2[0].shape)
 # 將轉換後二維內容顯示出來，隱約可以看出數字為 5
-text_image=[]
+text_image = []
 for i in range(X2.shape[0]):
     text_image.append(''.join(X2[i].astype(int).astype(str)))
 text_image
@@ -366,14 +374,14 @@ for i in range(10):
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
-    image_resized = resize(image1, tuple(data_shape)[2:], anti_aliasing=True)    
-    X1 = image_resized.reshape(*data_shape) 
-    
+    image_resized = resize(image1, tuple(data_shape)[2:], anti_aliasing=True)
+    X1 = image_resized.reshape(*data_shape)
+
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
-    X1 = 1.0-X1
-    
+    X1 = 1.0 - X1
+
     X1 = torch.FloatTensor(X1).to(device)
-    
+
     # 預測
     predictions = torch.softmax(model(X1), dim=1)
     # print(np.around(predictions.cpu().detach().numpy(), 2))
@@ -389,6 +397,3 @@ for name, module in model.named_children():
     print(f'{name}: {module}')
 
 # In[ ]:
-
-
-

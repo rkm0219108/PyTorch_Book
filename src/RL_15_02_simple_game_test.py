@@ -8,16 +8,16 @@ agent = Agent()
 # 進行實驗
 for _ in range(10):
     env.__init__()  # 重置
-    total_reward=0  # 累計報酬
+    total_reward = 0  # 累計報酬
     action_list = []
     while not env.is_done():
         # 採取行動
         action = agent.action(env)
         action_list += [action]
-        
+
         # 更新下一步
         state, reward = env.step(action)
-        
+
         # 計算累計報酬
         total_reward += reward
 

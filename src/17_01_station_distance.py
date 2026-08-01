@@ -42,6 +42,3 @@ for x in distance_array:
     print()
 
 # In[ ]:
-
-
-

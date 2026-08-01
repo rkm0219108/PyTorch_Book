@@ -9,9 +9,9 @@
 
 
 # 安裝套件及預先訓練的模型
-!pip install -U spacy
-!python -m spacy download en_core_web_sm # 小型的英文模型
-!python -m spacy download zh_core_web_sm # 小型的中文模型
+# !pip install -U spacy
+# !python -m spacy download en_core_web_sm # 小型的英文模型
+# !python -m spacy download zh_core_web_sm # 小型的中文模型
 
 # ## 載入相關套件及預先訓練的模型
 
@@ -40,8 +40,7 @@ for token in doc:
 
 # 取得詳細的詞性標籤(POS Tagging)
 for token in doc:
-    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-            token.shape_, token.is_alpha, token.is_stop)
+    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_, token.is_alpha, token.is_stop)
 
 # In[5]:
 
@@ -55,8 +54,10 @@ displacy.serve(doc, style="dep")
 
 
 # 標示實體
-text = "When Sebastian Thrun started working on self-driving cars " + \
-       "at Google in 2007, few people outside of the company took him seriously."
+text = (
+    "When Sebastian Thrun started working on self-driving cars "
+    + "at Google in 2007, few people outside of the company took him seriously."
+)
 
 doc = nlp(text)
 # style="ent"：實體
@@ -130,6 +131,3 @@ burgers = doc1[5]
 print(french_fries, "<->", burgers, french_fries.similarity(burgers))
 
 # In[ ]:
-
-
-

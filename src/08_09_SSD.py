@@ -32,7 +32,7 @@ ssd_model.eval()
 # In[6]:
 
 
-classes_to_labels = utils.get_coco_object_dictionary()    
+classes_to_labels = utils.get_coco_object_dictionary()
 classes_to_labels
 
 # ## 預測
@@ -44,8 +44,8 @@ classes_to_labels
 uris = [
     'http://images.cocodataset.org/val2017/000000397133.jpg',
     'http://images.cocodataset.org/val2017/000000037777.jpg',
-    'http://images.cocodataset.org/val2017/000000252219.jpg'
-] 
+    'http://images.cocodataset.org/val2017/000000252219.jpg',
+]
 
 # 轉為張量
 inputs = [utils.prepare_input(uri) for uri in uris]
@@ -60,8 +60,7 @@ with torch.no_grad():
 
 # 篩選預測機率 > 0.4 的定界框
 results_per_input = utils.decode_results(detections_batch)
-best_results_per_input = [utils.pick_best(results, 0.40) 
-                          for results in results_per_input]     
+best_results_per_input = [utils.pick_best(results, 0.40) for results in results_per_input]
 
 # In[8]:
 
@@ -75,21 +74,20 @@ for image_idx in range(len(best_results_per_input)):
     # 顯示原圖
     image = inputs[image_idx] / 2 + 0.5
     ax.imshow(image)
-    
+
     # 顯示偵測結果
     bboxes, classes, confidences = best_results_per_input[image_idx]
     for idx in range(len(bboxes)):
         left, bot, right, top = bboxes[idx]
-        x, y, w, h = [val * 300 for val in \
-                      [left, bot, right - left, top - bot]]
-        rect = patches.Rectangle((x, y), w, h, linewidth=1, 
-                                 edgecolor='r', facecolor='none')
+        x, y, w, h = [val * 300 for val in [left, bot, right - left, top - bot]]
+        rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='r', facecolor='none')
         ax.add_patch(rect)
-        ax.text(x, y, "{} {:.0f}%".format(classes_to_labels[classes[idx] - 1], 
-              confidences[idx]*100), bbox=dict(facecolor='white', alpha=0.5))
+        ax.text(
+            x,
+            y,
+            "{} {:.0f}%".format(classes_to_labels[classes[idx] - 1], confidences[idx] * 100),
+            bbox=dict(facecolor='white', alpha=0.5),
+        )
 plt.show()
 
 # In[ ]:
-
-
-

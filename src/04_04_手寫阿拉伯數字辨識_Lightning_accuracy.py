@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# 
+#
 # # [Introduction to PytorchLightning](https://colab.research.google.com/github/PytorchLightning/lightning-tutorials/blob/publication/.notebooks/lightning_examples/mnist-hello-world.ipynb#scrollTo=6a0ca038)
 # * **Author:** PL team
 # * **License:** CC BY-SA
@@ -13,7 +13,8 @@
 import os
 
 import torch
-from pytorch_lightning import LightningModule, Trainer
+from lightning.pytorch import LightningModule, Trainer
+from lightning.pytorch.callbacks import TQDMProgressBar
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
@@ -68,7 +69,7 @@ class LitMNIST(LightningModule):
             nn.Linear(hidden_size, self.num_classes),
         )
 
-        self.accuracy = Accuracy()
+        self.accuracy = Accuracy(task="multiclass", num_classes=self.num_classes)
 
     def forward(self, x):
         x = self.model(x)
@@ -129,14 +130,16 @@ class LitMNIST(LightningModule):
     def test_dataloader(self):
         return DataLoader(self.mnist_test, batch_size=BATCH_SIZE)
 
+
 # In[8]:
 
 
 model = LitMNIST()
 trainer = Trainer(
-    gpus=AVAIL_GPUS,
+    accelerator="gpu" if AVAIL_GPUS else "cpu",
+    devices=AVAIL_GPUS if AVAIL_GPUS else 1,
     max_epochs=3,
-    progress_bar_refresh_rate=20,
+    callbacks=[TQDMProgressBar(refresh_rate=20)],
 )
 trainer.fit(model)
 
@@ -152,5 +155,5 @@ trainer.test()
 
 
 # Start tensorboard.
-%load_ext tensorboard
-%tensorboard --logdir lightning_logs/
+# %load_ext tensorboard
+# %tensorboard --logdir lightning_logs/

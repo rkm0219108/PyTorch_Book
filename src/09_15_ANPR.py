@@ -23,7 +23,7 @@ from PIL import Image
 
 
 # 載入圖檔
-image = cv2.imread('./images_ocr/2.jpg',cv2.IMREAD_COLOR)
+image = cv2.imread('./images_ocr/2.jpg', cv2.IMREAD_COLOR)
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -37,10 +37,9 @@ plt.show()
 
 
 # 車牌號碼 OCR 辨識
-char_whitelist='ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
-text = pytesseract.image_to_string(image, config=
-           f'-c tessedit_char_whitelist={char_whitelist} --psm 6 ')
-print("車牌號碼：",text)
+char_whitelist = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
+text = pytesseract.image_to_string(image, config=f'-c tessedit_char_whitelist={char_whitelist} --psm 6 ')
+print("車牌號碼：", text)
 
 # ## 轉為灰階，萃取輪廓
 
@@ -48,9 +47,9 @@ print("車牌號碼：",text)
 
 
 # 萃取輪廓
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) # 轉為灰階
-gray = cv2.bilateralFilter(gray, 11, 17, 17)   # 模糊化，去除雜訊
-edged = cv2.Canny(gray, 30, 200)               # 萃取輪廓
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # 轉為灰階
+gray = cv2.bilateralFilter(gray, 11, 17, 17)  # 模糊化，去除雜訊
+edged = cv2.Canny(gray, 30, 200)  # 萃取輪廓
 
 # 顯示圖檔
 plt.imshow(edged, cmap='gray')
@@ -65,7 +64,7 @@ plt.show()
 # 取得等高線區域，並排序，取前10個區域
 cnts = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 cnts = imutils.grab_contours(cnts)
-cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:10]
+cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
 
 # In[33]:
 
@@ -104,7 +103,7 @@ if screenCnt is None:
     print("No contour detected")
 else:
     detected = 1
-    
+
 if detected == 1:
     cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 3)
     print(f'車牌座標=\n{screenCnt}')
@@ -115,8 +114,14 @@ if detected == 1:
 
 
 # 去除車牌以外的圖像
-mask = np.zeros(gray.shape,np.uint8)
-new_image = cv2.drawContours(mask,[screenCnt],0,255,-1,)
+mask = np.zeros(gray.shape, np.uint8)
+new_image = cv2.drawContours(
+    mask,
+    [screenCnt],
+    0,
+    255,
+    -1,
+)
 new_image = cv2.bitwise_and(image, image, mask=mask)
 
 # 轉為浮點數
@@ -129,8 +134,8 @@ top = min([x[0][1] for x in src_pts])
 bottom = max([x[0][1] for x in src_pts])
 
 # 計算車牌寬高
-width = right - left  
-height = bottom - top 
+width = right - left
+height = bottom - top
 print(f'寬度={width}, 高度={height}')
 
 # ## 仿射(affine transformation)，將車牌轉為矩形
@@ -148,7 +153,7 @@ elif src_pts[0][0][0] < src_pts[1][0][0] and src_pts[0][0][1] > src_pts[3][0][1]
 else:
     print('起始點為左上角')
     dst_pts = np.array([[0, 0], [0, height], [width, height], [width, 0]], dtype=np.float32)
-    
+
 # 仿射
 M = cv2.getPerspectiveTransform(src_pts, dst_pts)
 Cropped = cv2.warpPerspective(gray, M, (int(width), int(height)))
@@ -159,10 +164,9 @@ Cropped = cv2.warpPerspective(gray, M, (int(width), int(height)))
 
 
 # 車牌號碼 OCR 辨識
-char_whitelist='ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
-text = pytesseract.image_to_string(Cropped, config=
-           f'-c tessedit_char_whitelist={char_whitelist} --psm 6 ')
-print("車牌號碼：",text)
+char_whitelist = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
+text = pytesseract.image_to_string(Cropped, config=f'-c tessedit_char_whitelist={char_whitelist} --psm 6 ')
+print("車牌號碼：", text)
 
 # ## 顯示原圖及車牌
 
@@ -170,8 +174,8 @@ print("車牌號碼：",text)
 
 
 # 顯示原圖及車牌
-cv2.imshow('Orignal image',image)
-cv2.imshow('Cropped image',Cropped)
+cv2.imshow('Orignal image', image)
+cv2.imshow('Cropped image', Cropped)
 
 # 車牌存檔
 cv2.imwrite('Cropped.jpg', Cropped)
@@ -183,6 +187,3 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # In[ ]:
-
-
-

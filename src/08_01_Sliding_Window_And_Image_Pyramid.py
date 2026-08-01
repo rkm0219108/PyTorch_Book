@@ -8,8 +8,8 @@
 
 
 # 需安裝 OpenCV、imutils
-!pip install opencv-python
-!pip install imutils
+# !pip install opencv-python
+# !pip install imutils
 
 # In[1]:
 
@@ -39,15 +39,17 @@ def pyramid(image, scale=1.5, minSize=(30, 30)):
         # 傳回縮小後的圖像
         yield image
 
+
 # In[3]:
 
 
-# 滑動視窗        
-def sliding_window(image, stepSize, windowSize):    
-    for y in range(0, image.shape[0], stepSize):     # 向下滑動 stepSize 格
-        for x in range(0, image.shape[1], stepSize): # 向右滑動 stepSize 格
+# 滑動視窗
+def sliding_window(image, stepSize, windowSize):
+    for y in range(0, image.shape[0], stepSize):  # 向下滑動 stepSize 格
+        for x in range(0, image.shape[1], stepSize):  # 向右滑動 stepSize 格
             # 傳回裁剪後的視窗
-            yield (x, y, image[y:y + windowSize[1], x:x + windowSize[0]])
+            yield (x, y, image[y : y + windowSize[1], x : x + windowSize[0]])
+
 
 # ## 測試
 
@@ -58,13 +60,12 @@ def sliding_window(image, stepSize, windowSize):
 image = cv2.imread('./images_Object_Detection/lena.jpg')
 
 # 視窗尺寸
-(winW, winH) = (128, 128)
+winW, winH = (128, 128)
 
 # 取得影像金字塔各種尺寸
 for resized in pyramid(image, scale=1.5):
     # 滑動視窗
-    for (x, y, window) in sliding_window(resized, stepSize=32, 
-                                         windowSize=(winW, winH)):
+    for x, y, window in sliding_window(resized, stepSize=32, windowSize=(winW, winH)):
         # 視窗尺寸不合即放棄，滑動至邊緣時，尺寸過小
         if window.shape[0] != winH or window.shape[1] != winW:
             continue
@@ -76,10 +77,7 @@ for resized in pyramid(image, scale=1.5):
         # 暫停
         time.sleep(0.025)
 
-# 結束時關閉視窗        
+# 結束時關閉視窗
 cv2.destroyAllWindows()
 
 # In[ ]:
-
-
-

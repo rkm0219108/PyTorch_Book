@@ -37,17 +37,17 @@ plt.show()
 
 # 偵測臉部
 cascade = cv2.CascadeClassifier("./cascade_files/haarcascade_frontalface_alt2.xml")
-faces = cascade.detectMultiScale(image , 1.5, 5)
+faces = cascade.detectMultiScale(image, 1.5, 5)
 print("faces", faces)
 
 # 建立臉部特徵點偵測的物件
-facemark = cv2.cv2.face.createFacemarkLBF()
-# 訓練模型 lbfmodel.yaml 下載自： 
+facemark = cv2.face.createFacemarkLBF()
+# 訓練模型 lbfmodel.yaml 下載自：
 # https://raw.githubusercontent.com/kurnianggoro/GSOC2017/master/data/lbfmodel.yaml
-facemark .loadModel("OpenCV/lbfmodel.yaml")
+facemark.loadModel("OpenCV/lbfmodel.yaml")
 # 偵測臉部特徵點
-ok, landmarks1 = facemark.fit(image , faces)
-print ("landmarks LBF", ok, landmarks1)
+ok, landmarks1 = facemark.fit(image, faces)
+print("landmarks LBF", ok, landmarks1)
 
 # ## 繪製特徵點並顯示圖像
 
@@ -57,7 +57,7 @@ print ("landmarks LBF", ok, landmarks1)
 # 繪製特徵點
 for p in landmarks1[0][0]:
     cv2.circle(image, tuple(p.astype(int)), 5, (0, 255, 0), -1)
-    
+
 # 顯示圖像
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 plt.imshow(image_RGB)
@@ -71,12 +71,12 @@ plt.show()
 
 # 建立臉部特徵點偵測的物件
 facemark = cv2.face.createFacemarkAAM()
-# 訓練模型 aam.xml 下載自： 
+# 訓練模型 aam.xml 下載自：
 # https://github.com/berak/tt/blob/master/aam.xml
 facemark.loadModel("OpenCV/aam.xml")
 # 偵測臉部特徵點
-ok, landmarks2 = facemark.fit(image , faces)
-print ("Landmarks AAM", ok, landmarks2)
+ok, landmarks2 = facemark.fit(image, faces)
+print("Landmarks AAM", ok, landmarks2)
 
 # ## 繪製特徵點並顯示圖像
 
@@ -86,7 +86,7 @@ print ("Landmarks AAM", ok, landmarks2)
 # 繪製特徵點
 for p in landmarks2[0][0]:
     cv2.circle(image, tuple(p.astype(int)), 5, (0, 255, 0), -1)
-    
+
 # 顯示圖像
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 plt.imshow(image_RGB)
@@ -100,12 +100,12 @@ plt.show()
 
 # 建立臉部特徵點偵測的物件
 facemark = cv2.face.createFacemarkKazemi()
-# 訓練模型 face_landmark_model.dat 下載自： 
+# 訓練模型 face_landmark_model.dat 下載自：
 # https://github.com/opencv/opencv_3rdparty/tree/contrib_face_alignment_20170818
 facemark.loadModel("./OpenCV/face_landmark_model.dat")
 # 偵測臉部特徵點
-ok, landmarks2 = facemark.fit(image , faces)
-print ("Landmarks Kazemi", ok, landmarks2)
+ok, landmarks2 = facemark.fit(image, faces)
+print("Landmarks Kazemi", ok, landmarks2)
 
 # ## 繪製特徵點並顯示圖像
 
@@ -115,7 +115,7 @@ print ("Landmarks Kazemi", ok, landmarks2)
 # 繪製特徵點
 for p in landmarks2[0][0]:
     cv2.circle(image, tuple(p.astype(int)), 5, (0, 255, 0), -1)
-    
+
 # 顯示圖像
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 plt.imshow(image_RGB)
@@ -123,6 +123,3 @@ plt.axis('off')
 plt.show()
 
 # In[ ]:
-
-
-

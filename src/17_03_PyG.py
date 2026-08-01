@@ -18,37 +18,34 @@ import networkx as nx
 
 
 # 定義邊，第一列為起點，第二列為終點，無向圖須雙向設定
-edge_index = torch.tensor([[0, 1, 1, 2],
-                           [1, 0, 2, 1]], dtype=torch.long)
+edge_index = torch.tensor([[0, 1, 1, 2], [1, 0, 2, 1]], dtype=torch.long)
 # 節點名稱
 x = torch.tensor([[-1], [0], [1]], dtype=torch.float)
 
 # 建立新圖形
 data = Data(x=x, edge_index=edge_index)
-data # 節點及邊均為二維
+data  # 節點及邊均為二維
 
 # In[4]:
 
 
 # 建立圖形如下
 from IPython.display import Image
+
 Image('./graph/pyg_image1.png')
 
 # In[5]:
 
 
 # 邊有另一種寫法較直覺，每一元素均為(起點，終點)
-edge_index = torch.tensor([[0, 1],
-                           [1, 0],
-                           [1, 2],
-                           [2, 1]], dtype=torch.long)
+edge_index = torch.tensor([[0, 1], [1, 0], [1, 2], [2, 1]], dtype=torch.long)
 
 # 節點名稱
 x = torch.tensor([[-1], [0], [1]], dtype=torch.float)
 
 # 要加 contiguous
 data = Data(x=x, edge_index=edge_index.t().contiguous())
-data # 節點及邊均為二維
+data  # 節點及邊均為二維
 
 # ## 取得圖形資訊
 
@@ -87,17 +84,22 @@ list(data["edge_index"].cpu().numpy().T)
 
 
 from torch_geometric.utils.convert import to_networkx
+
+
 def draw_pyg(Data):
     G = to_networkx(Data, to_undirected=True)
     # 繪圖
-    nx.draw(G,
+    nx.draw(
+        G,
         with_labels=True,
         node_size=1000,
         node_color="#ffff8f",
         width=0.8,
         font_size=14,
     )
-draw_pyg(data)    
+
+
+draw_pyg(data)
 
 # ## 自訂函數
 
@@ -106,12 +108,12 @@ draw_pyg(data)
 
 def draw_pyg2(data):
     G = nx.Graph()
-    
+
     # nodes
     node_list = data["x"].cpu().numpy().reshape(data["x"].shape[0])
-    node_list = node_list.astype(int) # 節點名稱改為整數
+    node_list = node_list.astype(int)  # 節點名稱改為整數
     G.add_nodes_from(node_list)
-    
+
     # edges
     edges = data["edge_index"].cpu().numpy().T
     edge_list = []
@@ -120,7 +122,8 @@ def draw_pyg2(data):
     G.add_edges_from(edge_list)
 
     # 繪圖
-    nx.draw(G,
+    nx.draw(
+        G,
         with_labels=True,
         node_size=1000,
         node_color="#ffff8f",
@@ -128,8 +131,9 @@ def draw_pyg2(data):
         font_size=14,
     )
     # plt.savefig('grap.png')
-    
-draw_pyg2(data)    
+
+
+draw_pyg2(data)
 
 # ## 載入內建資料集
 
@@ -185,8 +189,7 @@ import torch_geometric.transforms as T
 from torch_geometric.datasets import ShapeNet
 
 # KNNGraph：使用最近鄰(KNN)演算法，每一點取6個最近的節點
-dataset = ShapeNet(root='./graph/ShapeNet', categories=['Airplane'],
-                    pre_transform=T.KNNGraph(k=6))
+dataset = ShapeNet(root='./graph/ShapeNet', categories=['Airplane'], pre_transform=T.KNNGraph(k=6))
 
 dataset[0]
 
@@ -199,13 +202,10 @@ dataset[0]
 
 
 # 資料增補：RandomTranslate
-dataset = ShapeNet(root='./graph/ShapeNet', categories=['Airplane'],
-                    pre_transform=T.KNNGraph(k=6),
-                    transform=T.RandomTranslate(0.01))
+dataset = ShapeNet(
+    root='./graph/ShapeNet', categories=['Airplane'], pre_transform=T.KNNGraph(k=6), transform=T.RandomTranslate(0.01)
+)
 
 dataset[0]
 
 # In[ ]:
-
-
-

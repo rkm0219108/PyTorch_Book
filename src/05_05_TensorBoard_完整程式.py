@@ -38,35 +38,24 @@ import torch.optim as optim
 
 
 # transforms
-transform = transforms.Compose(
-    [transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))])
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
 # datasets
-trainset = torchvision.datasets.FashionMNIST('.',
-    download=True,
-    train=True,
-    transform=transform)
-testset = torchvision.datasets.FashionMNIST('.',
-    download=True,
-    train=False,
-    transform=transform)
+trainset = torchvision.datasets.FashionMNIST('.', download=True, train=True, transform=transform)
+testset = torchvision.datasets.FashionMNIST('.', download=True, train=False, transform=transform)
 
 # dataloaders
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                        shuffle=True, num_workers=2)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
 
 
-testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-                                        shuffle=False, num_workers=2)
+testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
 
 # ## 類別名稱
 
 # In[26]:
 
 
-classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
-        'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot')
+classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot')
 
 # ## 特徵縮放回復，並顯示圖形
 
@@ -76,12 +65,13 @@ classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
 def matplotlib_imshow(img, one_channel=False):
     if one_channel:
         img = img.mean(dim=0)
-    img = img / 2 + 0.5     # unnormalize
+    img = img / 2 + 0.5  # unnormalize
     npimg = img.numpy()
     if one_channel:
         plt.imshow(npimg, cmap="Greys")
     else:
         plt.imshow(np.transpose(npimg, (1, 2, 0)))
+
 
 # ## 建立模型
 
@@ -106,6 +96,7 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
 
 net = Net()
 
@@ -135,7 +126,7 @@ writer = SummaryWriter('runs/fashion_mnist_experiment_1')
 
 # get some random training images
 dataiter = iter(trainloader)
-images, labels = dataiter.next()
+images, labels = next(dataiter)
 
 # create grid of images
 img_grid = torchvision.utils.make_grid(images)
@@ -158,6 +149,7 @@ writer.add_graph(net, images)
 
 import tensorflow as tf
 import tensorboard as tb
+
 tf.io.gfile = tb.compat.tensorflow_stub.io.gfile
 
 # In[34]:
@@ -173,6 +165,7 @@ def select_n_random(data, labels, n=100):
     perm = torch.randperm(len(data))
     return data[perm][:n], labels[perm][:n]
 
+
 # select random images and their target indices
 images, labels = select_n_random(trainset.data, trainset.targets)
 
@@ -181,22 +174,20 @@ class_labels = [classes[lab] for lab in labels]
 
 # log embeddings
 features = images.view(-1, 28 * 28)
-writer.add_embedding(features,
-                    metadata=class_labels,
-                    label_img=images.unsqueeze(1))
+writer.add_embedding(features, metadata=class_labels, label_img=images.unsqueeze(1))
 writer.close()
 
 # In[35]:
 
 
 # 載入 TensorBoard notebook extension，即可在 jupyter notebook 啟動 Tensorboard
-%load_ext tensorboard
+# %load_ext tensorboard
 
 # In[36]:
 
 
 # 啟動 Tensorboard
-%tensorboard --logdir=runs
+# %tensorboard --logdir=runs
 
 # ## 使用瀏覽器輸入以下網址，即可觀看訓練資訊：
 # ## http://localhost:6006/
@@ -204,11 +195,8 @@ writer.close()
 # In[38]:
 
 
-!taskkill /IM "tensorboard.exe" /F
+# !taskkill /IM "tensorboard.exe" /F
 # 或者使用以下指令，pid 以工作管理員查詢
 # !taskkill /F /PID pid
 
 # In[ ]:
-
-
-

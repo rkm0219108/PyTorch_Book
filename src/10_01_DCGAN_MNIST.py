@@ -24,7 +24,7 @@ from torchvision import utils as vutils
 # In[2]:
 
 
-PATH_DATASETS = "" # 預設路徑
+PATH_DATASETS = ""  # 預設路徑
 BATCH_SIZE = 64  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -35,20 +35,20 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 轉換
-transform=transforms.Compose([
-   transforms.Resize(28),
-   transforms.ToTensor(),
-   transforms.Normalize((0.5,), (0.5,)),
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize(28),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,)),
+    ]
+)
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-dataset = MNIST(PATH_DATASETS, train=True, download=True, 
-                 transform=transform)
-dataloader = torch.utils.data.DataLoader(dataset
-                   , batch_size=BATCH_SIZE, shuffle=True)
+dataset = MNIST(PATH_DATASETS, train=True, download=True, transform=transform)
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 # 訓練資料的維度
-print(train_ds.data.shape)
+print(dataset.data.shape)
 
 # ## 定義神經網路參數
 
@@ -67,10 +67,11 @@ ndf = 64  # 判別神經網路濾波器個數
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
-        m.weight.data.normal_(0.0, 0.02) # 卷積層權重初始值 
+        m.weight.data.normal_(0.0, 0.02)  # 卷積層權重初始值
     elif classname.find('BatchNorm') != -1:
-        m.weight.data.normal_(1.0, 0.02) # Batch Normalization 層權重初始值 
+        m.weight.data.normal_(1.0, 0.02)  # Batch Normalization 層權重初始值
         m.bias.data.fill_(0)
+
 
 # ## 定義生成神經網路
 
@@ -97,15 +98,15 @@ class Generator(nn.Module):
             nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ngf),
             nn.ReLU(True),
-            nn.ConvTranspose2d(ngf, nc, kernel_size=1, 
-                               stride=1, padding=2, bias=False),
-            nn.Tanh()
+            nn.ConvTranspose2d(ngf, nc, kernel_size=1, stride=1, padding=2, bias=False),
+            nn.Tanh(),
         )
 
     def forward(self, input):
         output = self.main(input)
         return output
-    
+
+
 netG = Generator().to(device)
 netG.apply(weights_init)
 
@@ -131,12 +132,13 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2, inplace=True),
             # state size. (ndf*4) x 8 x 8
             nn.Conv2d(ndf * 4, 1, 4, 2, 1, bias=False),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
     def forward(self, input):
         output = self.main(input)
         return output.view(-1, 1).squeeze(1)
+
 
 netD = Discriminator().to(device)
 netD.apply(weights_init)
@@ -189,25 +191,25 @@ for epoch in range(niter):
         D_G_z1 = output.mean().item()
         errD = errD_real + errD_fake
         optimizerD.step()
-        
+
         ########################################################
         # (2) 判別神經網路: maximize log(D(G(z)))
         #######################################################
         netG.zero_grad()
-        label.fill_(real_label) 
+        label.fill_(real_label)
         output = netD(fake)
         errG = criterion(output, label)
         errG.backward()
         D_G_z2 = output.mean().item()
         optimizerG.step()
         if i % 200 == 0:
-            print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
-                   % (epoch+1, niter, i, len(dataloader),
-                     errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
-            vutils.save_image(real_cpu,'gan_output/real_samples.png' ,normalize=True)
+            print(
+                '[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
+                % (epoch + 1, niter, i, len(dataloader), errD.item(), errG.item(), D_x, D_G_z1, D_G_z2)
+            )
+            vutils.save_image(real_cpu, 'gan_output/real_samples.png', normalize=True)
             fake = netG(fixed_noise)
-            vutils.save_image(fake.detach(),'gan_output/fake_samples_epoch_%03d.png' 
-                              % (epoch), normalize=True)        
+            vutils.save_image(fake.detach(), 'gan_output/fake_samples_epoch_%03d.png' % (epoch), normalize=True)
     torch.save(netG.state_dict(), 'gan_weights/netG_epoch_%d.pth' % (epoch))
     torch.save(netD.state_dict(), 'gan_weights/netD_epoch_%d.pth' % (epoch))
 
@@ -238,7 +240,7 @@ plt.show()
 
 
 # 安裝產生 GIF 檔的套件
-!pip install -q imageio
+# !pip install -q imageio
 
 # In[30]:
 
@@ -253,11 +255,8 @@ with imageio.get_writer(anim_file, mode='I') as writer:
     filenames = sorted(filenames)
     for filename in filenames:
         image = imageio.imread(filename)
-        writer.append_data(image) 
+        writer.append_data(image)
 
 # <img src="./gan_output/dcgan.gif" align="left">
 
 # In[ ]:
-
-
-

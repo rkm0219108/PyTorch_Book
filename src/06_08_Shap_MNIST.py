@@ -8,7 +8,7 @@
 # In[1]:
 
 
-!pip install shap
+# !pip install shap
 
 # In[3]:
 
@@ -40,28 +40,25 @@ batch_size = 128
 num_epochs = 2
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST('.', train=True, download=True, 
-                 transform=transforms.ToTensor())
+train_ds = MNIST('.', train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST('.', train=False, download=True, 
-                 transform=transforms.ToTensor())
+test_ds = MNIST('.', train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
 
 train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('mnist_data', train=True, download=True,
-                   transform=transforms.Compose([
-                       transforms.ToTensor()
-                   ])),
-    batch_size=batch_size, shuffle=True)
+    datasets.MNIST('mnist_data', train=True, download=True, transform=transforms.Compose([transforms.ToTensor()])),
+    batch_size=batch_size,
+    shuffle=True,
+)
 
 test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('mnist_data', train=False, transform=transforms.Compose([
-                       transforms.ToTensor()
-                   ])),
-    batch_size=batch_size, shuffle=True)
+    datasets.MNIST('mnist_data', train=False, transform=transforms.Compose([transforms.ToTensor()])),
+    batch_size=batch_size,
+    shuffle=True,
+)
 
 # ## 建立模型
 
@@ -82,11 +79,7 @@ class Net(nn.Module):
             nn.ReLU(),
         )
         self.fc_layers = nn.Sequential(
-            nn.Linear(320, 50),
-            nn.ReLU(),
-            nn.Dropout(),
-            nn.Linear(50, 10),
-            nn.Softmax(dim=1)
+            nn.Linear(320, 50), nn.ReLU(), nn.Dropout(), nn.Linear(50, 10), nn.Softmax(dim=1)
         )
 
     def forward(self, x):
@@ -95,7 +88,8 @@ class Net(nn.Module):
         x = self.fc_layers(x)
         return x
 
-model = Net().to(device)    
+
+model = Net().to(device)
 
 # ## 定義訓練/測試函數
 
@@ -113,9 +107,16 @@ def train(model, device, train_loader, optimizer, epoch):
         loss.backward()
         optimizer.step()
         if batch_idx % 100 == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
+            print(
+                'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    epoch,
+                    batch_idx * len(data),
+                    len(train_loader.dataset),
+                    100.0 * batch_idx / len(train_loader),
+                    loss.item(),
+                )
+            )
+
 
 # 測試函數
 def test(model, device, test_loader):
@@ -126,14 +127,17 @@ def test(model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += F.nll_loss(output.log(), target).item() 
-            pred = output.max(1, keepdim=True)[1] 
+            test_loss += F.nll_loss(output.log(), target).item()
+            pred = output.max(1, keepdim=True)[1]
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-    100. * correct / len(test_loader.dataset)))            
+    print(
+        '\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+            test_loss, correct, len(test_loader.dataset), 100.0 * correct / len(test_loader.dataset)
+        )
+    )
+
 
 # ## 訓練
 
@@ -146,7 +150,7 @@ for epoch in range(1, num_epochs + 1):
     train(model, device, train_loader, optimizer, epoch)
     test(model, device, test_loader)
 
-# ## 計算 Shapley Values 
+# ## 計算 Shapley Values
 
 # In[24]:
 
@@ -160,7 +164,7 @@ background = images[:100]
 test_images = images[100:105]
 
 e = shap.DeepExplainer(model, background)
-shap_values = e.shap_values(test_images)   
+shap_values = e.shap_values(test_images)
 
 # ## 繪製5筆測試資料的特徵歸因
 
@@ -174,6 +178,3 @@ test_numpy = np.swapaxes(np.swapaxes(test_images.cpu().numpy(), 1, -1), 1, 2)
 shap.image_plot(shap_numpy, -test_numpy)
 
 # In[ ]:
-
-
-

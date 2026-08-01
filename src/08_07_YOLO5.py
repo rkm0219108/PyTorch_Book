@@ -31,8 +31,7 @@ model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True).to(devi
 
 
 # 批次處理
-imgs = ['https://ultralytics.com/images/zidane.jpg', 
-        './images_Object_Detection/car.jpg']  
+imgs = ['https://ultralytics.com/images/zidane.jpg', './images_Object_Detection/car.jpg']
 
 # 預測
 results = model(imgs)
@@ -58,6 +57,7 @@ results.show()
 
 
 from IPython.display import Image
+
 Image('./runs/detect/exp/zidane.jpg')
 
 # ## 顯示定界框及預測機率
@@ -75,6 +75,3 @@ results.xyxy[0]
 results.pandas().xyxy[0]
 
 # In[ ]:
-
-
-

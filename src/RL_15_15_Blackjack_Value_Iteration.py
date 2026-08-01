@@ -14,7 +14,7 @@ import sys
 from collections import defaultdict
 import matplotlib
 
-matplotlib.style.use('ggplot') # 設定繪圖的風格
+matplotlib.style.use('ggplot')  # 設定繪圖的風格
 
 # In[2]:
 
@@ -31,20 +31,22 @@ def make_epsilon_greedy_policy(Q, epsilon, nA):
         # 每個行動的機率初始化，均為 ε / n
         A = np.ones(nA, dtype=float) * epsilon / nA
         best_action = np.argmax(Q[observation])
-        # 最佳行動的機率再加 1 - ε 
-        A[best_action] += (1.0 - epsilon)
+        # 最佳行動的機率再加 1 - ε
+        A[best_action] += 1.0 - epsilon
         return A
+
     return policy_fn
+
 
 # In[9]:
 
 
 # 值循環函數
 def value_iteration(env, num_episodes, discount_factor=1.0, epsilon=0.1):
-    returns_sum = defaultdict(float)    # 記錄每一個狀態的報酬
+    returns_sum = defaultdict(float)  # 記錄每一個狀態的報酬
     returns_count = defaultdict(float)  # 記錄每一個狀態的訪問個數
-    Q = defaultdict(lambda: np.zeros(env.action_space.n)) # 行動值函數
-    
+    Q = defaultdict(lambda: np.zeros(env.action_space.n))  # 行動值函數
+
     # 採用 ε-greedy策略
     policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
 
@@ -53,7 +55,7 @@ def value_iteration(env, num_episodes, discount_factor=1.0, epsilon=0.1):
         # 每 1000 回合顯示除錯訊息
         if i_episode % 1000 == 0:
             print(f"\r {i_episode}/{num_episodes}回合.", end="")
-            sys.stdout.flush() # 清除畫面
+            sys.stdout.flush()  # 清除畫面
 
         # 回合(episode)資料結構為陣列，每一項目含 state, action, reward
         episode = []
@@ -74,17 +76,16 @@ def value_iteration(env, num_episodes, discount_factor=1.0, epsilon=0.1):
             # (狀態, 行動)組合初始化
             sa_pair = (state, action)
             # 找出每一步驟內的首次訪問(First Visit)
-            first_occurence_idx = next(i for i,x in enumerate(episode)
-                                       if x[0] == state and x[1] == action)
+            first_occurence_idx = next(i for i, x in enumerate(episode) if x[0] == state and x[1] == action)
             # 算累計報酬(G)
-            G = sum([x[2]*(discount_factor**i) for i,x in 
-                     enumerate(episode[first_occurence_idx:])])
+            G = sum([x[2] * (discount_factor**i) for i, x in enumerate(episode[first_occurence_idx:])])
             # 計算行動值函數
             returns_sum[sa_pair] += G
             returns_count[sa_pair] += 1.0
             Q[state][action] = returns_sum[sa_pair] / returns_count[sa_pair]
-        
+
     return Q, policy
+
 
 # In[7]:
 
@@ -103,6 +104,3 @@ for state, actions in Q.items():
 plotting.plot_value_function(V, title="Optimal Value Function")
 
 # In[ ]:
-
-
-

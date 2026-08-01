@@ -10,13 +10,14 @@ img = cv2.imread(img_path)
 # 執行 Selective Search
 cv2.setUseOptimized(True)
 cv2.setNumThreads(8)
+# 需安裝 opencv-contrib-python 才有 cv2.ximgproc
 gs = cv2.ximgproc.segmentation.createSelectiveSearchSegmentation()
 gs.setBaseImage(img)
 
 select_mode = 'f'
-if len(sys.argv)  > 2 and sys.argv[2] == 's':
+if len(sys.argv) > 2 and sys.argv[2] == 's':
     gs.switchToSingleStrategy()
-elif len(sys.argv)  > 2 and sys.argv[2] == 'q':
+elif len(sys.argv) > 2 and sys.argv[2] == 'q':
     gs.switchToSelectiveSearchQuality()
 else:
     gs.switchToSelectiveSearchFast()
@@ -30,21 +31,20 @@ while True:
     wimg = img.copy()
 
     for i in range(len(rects)):
-        if (i < nb_rects):
+        if i < nb_rects:
             x, y, w, h = rects[i]
-            cv2.rectangle(wimg, (x, y), (x + w, y + h), 
-                        (0, 255, 0), 1, cv2.LINE_AA)
+            cv2.rectangle(wimg, (x, y), (x + w, y + h), (0, 255, 0), 1, cv2.LINE_AA)
 
     cv2.imshow("Output", wimg)
     key = cv2.waitKey()
 
-    if (key == 43): # +
+    if key == 43:  # +
         nb_rects += 10
 
-    elif (key == 45 and nb_rects > 10): # -
+    elif key == 45 and nb_rects > 10:  # -
         nb_rects -= 10
 
-    elif (key == 113): # q
+    elif key == 113:  # q
         break
 
 cv2.destroyAllWindows()

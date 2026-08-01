@@ -19,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # 向量(Vector)
-v = np.array([2,1])
+v = np.array([2, 1])
 
 # 作圖
 plt.axis('equal')
@@ -41,16 +41,17 @@ plt.show()
 
 
 from IPython.display import Image
+
 Image('./images/長度(magnitude).png')
 
 # In[3]:
 
 
 # 向量(Vector)
-v = np.array([2,1])
+v = np.array([2, 1])
 
 # 向量長度(magnitude)計算
-(v[0]**2 + v[1]**2) ** (1/2)
+(v[0] ** 2 + v[1] ** 2) ** (1 / 2)
 
 # In[4]:
 
@@ -76,14 +77,14 @@ import math
 import numpy as np
 
 # 向量(Vector)
-v = np.array([2,1])
+v = np.array([2, 1])
 
 vTan = v[1] / v[0]
-print ('tan(θ) = 1/2')
+print('tan(θ) = 1/2')
 
 theta = math.atan(vTan)
-print('弳度(radian) =', round(theta,4))
-print('角度(degree) =', round(theta*180/math.pi, 2))
+print('弳度(radian) =', round(theta, 4))
+print('角度(degree) =', round(theta * 180 / math.pi, 2))
 
 # 也可以使用 math.degrees() 轉換角度
 print('角度(degree) =', round(math.degrees(theta), 2))
@@ -98,9 +99,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # 向量(Vector) + 2
-v = np.array([2,1])
-v1 = np.array([2,1]) + 2
-v2 = np.array([2,1]) - 2
+v = np.array([2, 1])
+v1 = np.array([2, 1]) + 2
+v2 = np.array([2, 1]) - 2
 
 # 原點
 origin = [0], [0]
@@ -110,8 +111,7 @@ plt.quiver(*origin, *v1, scale=10, color='r')
 plt.quiver(*origin, *v, scale=10, color='b')
 plt.quiver(*origin, *v2, scale=10, color='g')
 
-plt.annotate('orginal vector',(0.025, 0.01), xycoords='data'
-            , fontsize=16)
+plt.annotate('orginal vector', (0.025, 0.01), xycoords='data', fontsize=16)
 
 # 作圖
 plt.axis('equal')
@@ -131,9 +131,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # 向量(Vector) * 2
-v = np.array([2,1])
-v1 = np.array([2,1]) * 2
-v2 = np.array([2,1]) / 2
+v = np.array([2, 1])
+v1 = np.array([2, 1]) * 2
+v2 = np.array([2, 1]) / 2
 
 # 原點
 origin = [0], [0]
@@ -143,8 +143,7 @@ plt.quiver(*origin, *v1, scale=10, color='r')
 plt.quiver(*origin, *v, scale=10, color='b')
 plt.quiver(*origin, *v2, scale=10, color='g')
 
-plt.annotate('orginal vector',(0.025, 0.008), xycoords='data'
-            , color='b', fontsize=16)
+plt.annotate('orginal vector', (0.025, 0.008), xycoords='data', color='b', fontsize=16)
 
 # 作圖
 plt.axis('equal')
@@ -164,9 +163,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # 向量(Vector) * 2
-v = np.array([2,1])
-s = np.array([-3,2])
-v2 = v+s
+v = np.array([2, 1])
+s = np.array([-3, 2])
+v2 = v + s
 
 # 原點
 origin = [0], [0]
@@ -176,8 +175,7 @@ plt.quiver(*origin, *v, scale=10, color='b')
 plt.quiver(*origin, *s, scale=10, color='b')
 plt.quiver(*origin, *v2, scale=10, color='g')
 
-plt.annotate('orginal vector',(0.025, 0.008), xycoords='data'
-            , color='b', fontsize=16)
+plt.annotate('orginal vector', (0.025, 0.008), xycoords='data', color='b', fontsize=16)
 
 # 作圖
 plt.axis('equal')
@@ -196,13 +194,13 @@ plt.show()
 import numpy as np
 
 # 向量(Vector)
-v = np.array([2,1])
-s = np.array([-3,2])
+v = np.array([2, 1])
+s = np.array([-3, 2])
 
 # 內積
-d = v @ s # 或 np.dot(v, s)、v.dot(s)
+d = v @ s  # 或 np.dot(v, s)、v.dot(s)
 
-print (d)
+print(d)
 
 # ## 計算夾角 θ
 
@@ -214,8 +212,8 @@ import math
 import numpy as np
 
 # 向量(Vector)
-v = np.array([2,1])
-s = np.array([-3,2])
+v = np.array([2, 1])
+s = np.array([-3, 2])
 
 # 計算長度(magnitudes)
 vMag = np.linalg.norm(v)
@@ -240,10 +238,8 @@ print(theta)
 import numpy as np
 
 # 矩陣
-A = np.array([[1,2,3],
-              [4,5,6]])
-B = np.array([[6,5,4],
-              [3,2,1]])
+A = np.array([[1, 2, 3], [4, 5, 6]])
+B = np.array([[6, 5, 4], [3, 2, 1]])
 
 # 加法
 print(A + B)
@@ -262,12 +258,14 @@ print(A - B)
 
 
 # 矩陣
-A = np.array([[1,2,3],
-              [4,5,6]])
-B = np.array([[9,8],
-              [7,6],
-              [5,4],
-             ])
+A = np.array([[1, 2, 3], [4, 5, 6]])
+B = np.array(
+    [
+        [9, 8],
+        [7, 6],
+        [5, 4],
+    ]
+)
 
 # 乘法
 print(A @ B)
@@ -277,11 +275,13 @@ print(A @ B)
 
 # 乘法：A x B != B x A
 
-A = np.array([[1,2],
-              [4,5]])
-B = np.array([[9,8],
-              [7,6],
-             ])
+A = np.array([[1, 2], [4, 5]])
+B = np.array(
+    [
+        [9, 8],
+        [7, 6],
+    ]
+)
 
 print(A @ B)
 print()
@@ -294,31 +294,36 @@ print('A x B != B x A')
 # In[22]:
 
 
-A = np.array([[1,2,3],
-              [4,5,6]])
+A = np.array([[1, 2, 3], [4, 5, 6]])
 
 # 轉置矩陣
-print(A.T) # 或 np.transpose(A)
+print(A.T)  # 或 np.transpose(A)
 
 # ## 反矩陣
 
 # In[25]:
 
 
-A = np.array([[1,2,5],
-              [4,5,6],
-              [7,8,9],
-             ])
+A = np.array(
+    [
+        [1, 2, 5],
+        [4, 5, 6],
+        [7, 8, 9],
+    ]
+)
 print(np.linalg.inv(A))
 
 # In[26]:
 
 
 # 奇異矩陣(Singular matrix) 無反矩陣
-A = np.array([[1,2,3],
-              [4,5,6],
-              [7,8,9],
-             ])
+A = np.array(
+    [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+    ]
+)
 print(np.linalg.inv(A))
 
 # ## A x A反矩陣 = 單位矩陣(I)
@@ -327,9 +332,12 @@ print(np.linalg.inv(A))
 
 
 # A @ A反矩陣 = 單位矩陣(I)
-A = np.array([[9,8],
-              [7,6],
-             ])
+A = np.array(
+    [
+        [9, 8],
+        [7, 6],
+    ]
+)
 
 print(np.around(A @ np.linalg.inv(A)))
 
@@ -337,10 +345,13 @@ print(np.around(A @ np.linalg.inv(A)))
 
 
 # A @ A反矩陣 = 單位矩陣(I)
-A = np.array([[1,2,4],
-              [4,7,6],
-              [7,8,9],
-             ])
+A = np.array(
+    [
+        [1, 2, 4],
+        [4, 7, 6],
+        [7, 8, 9],
+    ]
+)
 
 print(np.around(A @ np.linalg.inv(A)))
 
@@ -353,13 +364,13 @@ print(np.around(A @ np.linalg.inv(A)))
 import numpy as np
 
 # 向量(Vector)
-v = np.array([2,1])
-s = np.array([-3,2])
+v = np.array([2, 1])
+s = np.array([-3, 2])
 
 # 內積
 d = v @ s  # 或 np.dot(v, s)、v.dot(s)
 
-print (d)
+print(d)
 
 # ## PyTorch 張量運算
 
@@ -403,11 +414,8 @@ print(tensor4)
 
 
 # 張量運算
-A = torch.tensor([[1,2,3],
-              [4,5,6]])
-B = torch.tensor([[9,8,7],
-              [7,6,5]
-             ])
+A = torch.tensor([[1, 2, 3], [4, 5, 6]])
+B = torch.tensor([[9, 8, 7], [7, 6, 5]])
 
 print(A + B)  # 加法
 print(A - B)  # 減法
@@ -415,12 +423,14 @@ print(A * B)  # 乘法
 print(A / B)  # 除法
 
 # 內積
-A = torch.tensor([[1,2,3],
-              [4,5,6]])
-B = torch.tensor([[9,8],
-              [7,6],
-              [5,4],
-             ])
+A = torch.tensor([[1, 2, 3], [4, 5, 6]])
+B = torch.tensor(
+    [
+        [9, 8],
+        [7, 6],
+        [5, 4],
+    ]
+)
 print(A @ B)
 
 # ## PyTorch張量變數轉NumPy變數
@@ -451,9 +461,8 @@ tensor
 # In[12]:
 
 
-# TensorFlow reduce_sum 的等式 
-A = torch.FloatTensor([[1,2,3],
-              [4,5,6]])
+# TensorFlow reduce_sum 的等式
+A = torch.FloatTensor([[1, 2, 3], [4, 5, 6]])
 A.sum(axis=1)
 
 # ## 變數搬移至CPU/GPU
@@ -462,15 +471,15 @@ A.sum(axis=1)
 
 
 # CPU -> GPU
-tensor_gpu = tensor.cuda() 
+tensor_gpu = tensor.cuda()
 print(tensor_gpu)
 
 # 若有多個 GPU，可指定 GPU 序號
-tensor_gpu_2 = tensor.to('cuda:0') 
+tensor_gpu_2 = tensor.to('cuda:0')
 print(tensor_gpu_2)
 
 # GPU -> CPU
-tensor_cpu = tensor_gpu.cpu() 
+tensor_cpu = tensor_gpu.cpu()
 print(tensor_cpu)
 
 # ## CPU與GPU變數不可混合運算
@@ -498,21 +507,19 @@ tensor_gpu.to(device) + tensor_cpu.to(device)
 # In[17]:
 
 
-# 定義稀疏矩陣有值的(row, column)，例如第一個值在(0, 2)，第一/二列的第一欄 
-i = torch.LongTensor([[0, 1, 1],
-                      [2, 0, 2]])
+# 定義稀疏矩陣有值的(row, column)，例如第一個值在(0, 2)，第一/二列的第一欄
+i = torch.LongTensor([[0, 1, 1], [2, 0, 2]])
 # 稀疏矩陣的值
 v = torch.FloatTensor([3, 4, 5])
 
 # 定義稀疏矩陣的尺寸(2, 3)，並轉為正常的矩陣
-torch.sparse.FloatTensor(i, v, torch.Size([2,3])).to_dense()
+torch.sparse.FloatTensor(i, v, torch.Size([2, 3])).to_dense()
 
 # In[18]:
 
 
 # 稀疏矩陣運算
-a = torch.sparse.FloatTensor(i, v, torch.Size([2,3])) + \
-    torch.sparse.FloatTensor(i, v, torch.Size([2,3]))
+a = torch.sparse.FloatTensor(i, v, torch.Size([2, 3])) + torch.sparse.FloatTensor(i, v, torch.Size([2, 3]))
 a.to_dense()
 
 # ## 指定預設的 GPU
@@ -538,6 +545,3 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # In[ ]:
-
-
-

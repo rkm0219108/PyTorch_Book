@@ -49,9 +49,13 @@ plt.show()
 
 # 建立 MTCNN 物件
 mtcnn = MTCNN(
-    image_size=160, margin=0, min_face_size=20,
-    thresholds=[0.6, 0.7, 0.7], factor=0.709, post_process=True,
-    device=device
+    image_size=160,
+    margin=0,
+    min_face_size=20,
+    thresholds=[0.6, 0.7, 0.7],
+    factor=0.709,
+    post_process=True,
+    device=device,
 )
 
 # In[6]:
@@ -70,7 +74,7 @@ image_cropped = mtcnn(image)
 image_cropped = torch.permute(image_cropped, (1, 2, 0))
 # 限定像素值範圍介於 [0, 1]
 image_cropped = image_cropped.clamp(-1, 1)
-image_cropped = (image_cropped + 1) *.5  # 使像素值介於 [0, 1] 之間
+image_cropped = (image_cropped + 1) * 0.5  # 使像素值介於 [0, 1] 之間
 
 # ## 顯示圖檔
 
@@ -103,8 +107,9 @@ resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)
 def collate_fn(x):
     return x[0]
 
+
 dataset = datasets.ImageFolder('./MTCNN')
-dataset.idx_to_class = {i:c for c, i in dataset.class_to_idx.items()}
+dataset.idx_to_class = {i: c for c, i in dataset.class_to_idx.items()}
 loader = DataLoader(dataset, collate_fn=collate_fn)
 
 # ## 使用MTCNN識別臉部，並取得臉部向量
@@ -165,8 +170,7 @@ mtcnn = MTCNN(keep_all=True, device=device)
 
 video_path = './MTCNN/video.mp4'
 video = mmcv.VideoReader(video_path)
-frames = [Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)) 
-          for frame in video]
+frames = [Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)) for frame in video]
 
 display.Video(video_path, width=640)
 
@@ -178,16 +182,16 @@ display.Video(video_path, width=640)
 frames_tracked = []
 for i, frame in enumerate(frames):
     print('\rTracking frame: {}'.format(i + 1), end='')
-    
+
     # 臉部追蹤
     boxes, _ = mtcnn.detect(frame)
-    
+
     # 臉部畫框
     frame_draw = frame.copy()
     draw = ImageDraw.Draw(frame_draw)
     for box in boxes:
         draw.rectangle(box.tolist(), outline=(255, 0, 0), width=6)
-    
+
     # 存至 frames_tracked
     frames_tracked.append(frame_draw.resize((640, 360), Image.BILINEAR))
 print('\nDone')
@@ -212,13 +216,10 @@ except KeyboardInterrupt:
 
 
 dim = frames_tracked[0].size
-fourcc = cv2.VideoWriter_fourcc(*'FMP4')    
+fourcc = cv2.VideoWriter_fourcc(*'FMP4')
 video_tracked = cv2.VideoWriter('video_tracked.mp4', fourcc, 25.0, dim)
 for frame in frames_tracked:
     video_tracked.write(cv2.cvtColor(np.array(frame), cv2.COLOR_RGB2BGR))
 video_tracked.release()
 
 # In[ ]:
-
-
-

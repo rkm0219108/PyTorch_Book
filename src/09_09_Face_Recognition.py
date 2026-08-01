@@ -50,7 +50,7 @@ for result in faces:
     # 加紅色框
     rect = Rectangle((x1, y1), width, height, fill=False, color='red')
     ax.add_patch(rect)
-        
+
 # 顯示圖像
 plt.imshow(image)
 plt.axis('off')
@@ -84,13 +84,10 @@ for face_landmarks in face_landmarks_list:
     # 繪製特徵點
     for facial_feature in face_landmarks.keys():
         d.line(face_landmarks[facial_feature], width=5, fill='green')
-    
+
 # 顯示圖像
 plt.imshow(pil_image)
 plt.axis('off')
 plt.show()
 
 # In[ ]:
-
-
-

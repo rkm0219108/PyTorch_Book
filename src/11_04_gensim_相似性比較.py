@@ -39,10 +39,7 @@ documents = [
 stoplist = set('for a of the and to in'.split())
 
 # 分詞，轉小寫
-texts = [
-    [word for word in document.lower().split() if word not in stoplist]
-    for document in documents
-]
+texts = [[word for word in document.lower().split() if word not in stoplist] for document in documents]
 texts
 
 # ## 單字出現次數統計
@@ -54,17 +51,14 @@ texts
 frequency = defaultdict(int)
 for text in texts:
     for token in text:
-        frequency[token] += 1  
-frequency        
+        frequency[token] += 1
+frequency
 
 # In[9]:
 
 
 # 移除只出現一次的單字
-texts = [
-    [token for token in text if frequency[token] > 1]
-    for text in texts
-]
+texts = [[token for token in text if frequency[token] > 1] for text in texts]
 texts
 
 # In[10]:
@@ -101,7 +95,7 @@ doc = "Human computer interaction"
 
 # 測試 LSI (Latent semantic indexing) 模型
 vec_bow = dictionary.doc2bow(doc.lower().split())
-vec_lsi = lsi[vec_bow]  
+vec_lsi = lsi[vec_bow]
 print(vec_lsi)
 
 # ## 比較例句與語料庫每一句的相似機率
@@ -113,13 +107,13 @@ print(vec_lsi)
 from gensim import similarities
 
 # 比較例句與語料庫的相似性索引
-index = similarities.MatrixSimilarity(lsi[corpus])  
+index = similarities.MatrixSimilarity(lsi[corpus])
 
 # 比較例句與語料庫的相似機率
-sims = index[vec_lsi]  
+sims = index[vec_lsi]
 
 # 顯示語料庫的索引值及相似機率
-print(list(enumerate(sims)))  
+print(list(enumerate(sims)))
 
 # ## 依相似機率降冪排序
 
@@ -132,6 +126,3 @@ for doc_position, doc_score in sims:
     print(doc_score, documents[doc_position])
 
 # In[ ]:
-
-
-

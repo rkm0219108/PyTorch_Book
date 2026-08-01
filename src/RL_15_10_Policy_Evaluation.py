@@ -7,13 +7,14 @@
 
 
 from IPython.display import Image
+
 Image('./images/grid_world.png')
 
 # In[61]:
 
 
 # 載入相關套件
-import gym 
+import gymnasium as gym
 import numpy as np
 from lib.envs.gridworld import GridworldEnv
 
@@ -56,14 +57,14 @@ def policy_eval(policy, env, epoch=1, discount_factor=1.0):
             # 計算每個行動後的狀態值函數
             for a, action_prob in enumerate(policy[s]):
                 # 取得所有可能的下一狀態值
-                for  prob, next_state, reward, done in env.P[s][a]:
-                    # 狀態值函數公式，依照所有可能的下一狀態值函數加總 
-                    v += action_prob * prob * (reward + 
-                                   discount_factor * V[next_state])
+                for prob, next_state, reward, done in env.P[s][a]:
+                    # 狀態值函數公式，依照所有可能的下一狀態值函數加總
+                    v += action_prob * prob * (reward + discount_factor * V[next_state])
             V1[s] = v
         V = np.copy(V1)
-        no+=1
+        no += 1
     return np.array(V)
+
 
 # ## 訓練1週期
 
@@ -113,10 +114,9 @@ def policy_eval(policy, env, discount_factor=1.0, theta=0.00001):
             # 計算每個行動後的狀態值函數
             for a, action_prob in enumerate(policy[s]):
                 # 取得所有可能的下一狀態值
-                for  prob, next_state, reward, done in env.P[s][a]:
-                    # 狀態值函數公式，依照所有可能的下一狀態值函數加總 
-                    v += action_prob * prob * (reward + 
-                                   discount_factor * V[next_state])
+                for prob, next_state, reward, done in env.P[s][a]:
+                    # 狀態值函數公式，依照所有可能的下一狀態值函數加總
+                    v += action_prob * prob * (reward + discount_factor * V[next_state])
             # 比較更新前後的差值，取最大值
             delta = max(delta, np.abs(v - V[s]))
             V1[s] = v
@@ -125,6 +125,7 @@ def policy_eval(policy, env, discount_factor=1.0, theta=0.00001):
         if delta < theta:
             break
     return np.array(V)
+
 
 # In[87]:
 
@@ -145,6 +146,3 @@ expected_v = np.array([0, -14, -20, -22, -14, -18, -20, -20, -20, -20, -18, -14,
 np.testing.assert_array_almost_equal(v, expected_v, decimal=2)
 
 # In[ ]:
-
-
-

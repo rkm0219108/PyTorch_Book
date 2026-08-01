@@ -70,6 +70,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 
+
 class GCN(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -85,6 +86,7 @@ class GCN(torch.nn.Module):
         x = self.conv2(x, edge_index)
 
         return F.log_softmax(x, dim=1)
+
 
 # ## 模型訓練
 
@@ -122,8 +124,7 @@ print(f'Accuracy: {acc:.4f}')
 
 from sklearn.metrics import confusion_matrix
 
-confusion_matrix(data.y[data.test_mask].cpu().numpy(), 
-                 pred[data.test_mask].cpu().numpy())
+confusion_matrix(data.y[data.test_mask].cpu().numpy(), pred[data.test_mask].cpu().numpy())
 
 # ## 降維、視覺化
 
@@ -133,24 +134,23 @@ confusion_matrix(data.y[data.test_mask].cpu().numpy(),
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
+
 def visualize(h, color):
     # 降維至2個主成份
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
 
-    plt.figure(figsize=(10,10))
+    plt.figure(figsize=(10, 10))
     plt.xticks([])
     plt.yticks([])
 
     plt.scatter(z[:, 0], z[:, 1], s=70, c=color, cmap="Set2")
     plt.show()
 
-# 預測    
+
+# 預測
 model.eval()
 out = model(data)
 # 繪圖
 visualize(out.cpu(), color=data.cpu().y)
 
 # In[ ]:
-
-
-

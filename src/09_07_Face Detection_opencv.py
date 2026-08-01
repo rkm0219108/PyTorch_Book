@@ -54,7 +54,7 @@ for box in bboxes:
     x, y, width, height = box
     x2, y2 = x + width, y + height
     # 加白色框
-    rectangle(im_rgb, (x, y), (x2, y2), (255,255,255), 2)
+    rectangle(im_rgb, (x, y), (x2, y2), (255, 255, 255), 2)
 
 # 顯示圖像
 plt.imshow(im_rgb)
@@ -91,7 +91,7 @@ for box in bboxes:
     x, y, width, height = box
     x2, y2 = x + width, y + height
     # 加紅色框
-    rectangle(im_rgb, (x, y), (x2, y2), (255,0,0), 5)
+    rectangle(im_rgb, (x, y), (x2, y2), (255, 0, 0), 5)
 
 # 顯示圖像
 plt.imshow(im_rgb)
@@ -138,19 +138,19 @@ for box in bboxes:
     x, y, width, height = box
     x2, y2 = x + width, y + height
     # 加白色框
-    rectangle(im_rgb_clone, (x, y), (x2, y2), (255,0,0), 5)
+    rectangle(im_rgb_clone, (x, y), (x2, y2), (255, 0, 0), 5)
 
 # 偵測微笑
 # scaleFactor=2.5：掃描時每次縮減掃描視窗的尺寸比例。
 # minNeighbors=20：每一個被選中的視窗至少要有鄰近且合格的視窗數
 bboxes = smile_classifier.detectMultiScale(image, 2.5, 20)
-#微笑加框
+# 微笑加框
 for box in bboxes:
     # 取得框的座標及寬高
     x, y, width, height = box
     x2, y2 = x + width, y + height
     # 加白色框
-    rectangle(im_rgb_clone, (x, y), (x2, y2), (255,0,0), 5)
+    rectangle(im_rgb_clone, (x, y), (x2, y2), (255, 0, 0), 5)
 #     break
 
 # 顯示圖像
@@ -183,7 +183,7 @@ for box in bboxes:
     x, y, width, height = box
     x2, y2 = x + width, y + height
     # 加白色框
-    rectangle(im_rgb_clone, (x, y), (x2, y2), (255,0,0), 5)
+    rectangle(im_rgb_clone, (x, y), (x2, y2), (255, 0, 0), 5)
 
     # 偵測眼睛
     face_box = image[y:y2, x:x2]
@@ -194,7 +194,7 @@ for box in bboxes:
         x, y, width, height = box_eye
         x2, y2 = x + width, y + height
         # 加白色框
-        rectangle(im_rgb_clone, (x+box[0], y+box[1]), (x2+box[0], y2+box[1]), (255,0,0), 5)
+        rectangle(im_rgb_clone, (x + box[0], y + box[1]), (x2 + box[0], y2 + box[1]), (255, 0, 0), 5)
 
     # 偵測微笑
     # scaleFactor=2.5：掃描時每次縮減掃描視窗的尺寸比例。
@@ -206,7 +206,7 @@ for box in bboxes:
         x, y, width, height = box_smile
         x2, y2 = x + width, y + height
         # 加白色框
-        rectangle(im_rgb_clone, (x+box[0], y+box[1]), (x2+box[0], y2+box[1]), (255,0,0), 5)
+        rectangle(im_rgb_clone, (x + box[0], y + box[1]), (x2 + box[0], y2 + box[1]), (255, 0, 0), 5)
 
 # 顯示圖像
 plt.imshow(im_rgb_clone)
@@ -214,6 +214,3 @@ plt.axis('off')
 plt.show()
 
 # In[ ]:
-
-
-

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import math
 import IPython
-from IPython.display import Audio
+from IPython.display import Audio, display
 
 
 # 取得一段語音的描述統計量
@@ -20,6 +20,7 @@ def print_stats(waveform, sample_rate=None):
     print()
     print(waveform)
     print()
+
 
 # 繪製語音的波形
 def plot_waveform(waveform, sample_rate, title="Waveform", xlim=None, ylim=None):
@@ -43,6 +44,7 @@ def plot_waveform(waveform, sample_rate, title="Waveform", xlim=None, ylim=None)
     figure.suptitle(title)
     plt.show(block=False)
 
+
 # 繪製語音的頻譜
 def plot_specgram(waveform, sample_rate, title="Spectrogram", xlim=None):
     waveform = waveform.numpy()
@@ -62,6 +64,7 @@ def plot_specgram(waveform, sample_rate, title="Spectrogram", xlim=None):
     figure.suptitle(title)
     plt.show(block=False)
 
+
 # 播放語音
 def play_audio(waveform, sample_rate):
     waveform = waveform.numpy()
@@ -73,6 +76,7 @@ def play_audio(waveform, sample_rate):
         display(Audio((waveform[0], waveform[1]), rate=sample_rate))
     else:
         raise ValueError("不支援超過雙聲道的音檔.")
+
 
 # 取得檔案資訊
 def inspect_file(path):

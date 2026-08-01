@@ -3,7 +3,7 @@
 
 # 載入相關套件
 from flask import Flask, request, jsonify, make_response
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 # 宣告 Flask 物件
 app = Flask(__name__)
@@ -31,25 +31,25 @@ def hotel_booking():
     entityDate = entityDate[:10].replace('/', '-')
     
     # 開啟資料庫連線
-    engine = create_engine('sqlite:///test.db', convert_unicode=True)
+    engine = create_engine('sqlite:///test.db')
     con = engine.connect()
 
     if intent == 'booking':
         # 根據城市、日期查詢
         sql_cmd = f"select room_count from  hotels "
-        sql_cmd += f"where city = '{entityCity}' and order_date = '{entityDate}'" 
-        result = con.execute(sql_cmd)
+        sql_cmd += f"where city = '{entityCity}' and order_date = '{entityDate}'"
+        result = con.execute(text(sql_cmd))
         list1 = result.fetchall()
-        
+
         # 增修記錄
         if len(list1) > 0: # 訂房數加 1
             sql_cmd = f"update hotels set 'room_count' = {list1[-1][-1]+1} "
-            sql_cmd += f"where city = '{entityCity}' and order_date = '{entityDate}'" 
-            result = con.execute(sql_cmd)
-        else: # 新增一筆記錄   
-            sql_cmd = "insert into hotels('city', 'order_date', 'room_count')" 
-            sql_cmd += f" values ('{entityCity}', '{entityDate}', 1)" 
-            result = con.execute(sql_cmd)
+            sql_cmd += f"where city = '{entityCity}' and order_date = '{entityDate}'"
+            result = con.execute(text(sql_cmd))
+        else: # 新增一筆記錄
+            sql_cmd = "insert into hotels('city', 'order_date', 'room_count')"
+            sql_cmd += f" values ('{entityCity}', '{entityDate}', 1)"
+            result = con.execute(text(sql_cmd))
         
         # 回應
         response = f'{entityCity}, {entityDate} OK.'

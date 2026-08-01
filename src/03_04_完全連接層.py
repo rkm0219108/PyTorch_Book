@@ -54,8 +54,6 @@ output.shape
 # In[ ]:
 
 
-
-
 # ## 神經層計算：矩陣內積 (128, 20) @ (20, 30) = (128, 30)
 
 # In[7]:
@@ -78,6 +76,3 @@ output = m(input)
 output.shape
 
 # In[ ]:
-
-
-

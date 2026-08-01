@@ -7,17 +7,15 @@
 
 
 def fibonacci(n):
-    if n == 0 or n ==1:
+    if n == 0 or n == 1:
         return n
     else:
-        return fibonacci(n-1)+fibonacci(n-2)
+        return fibonacci(n - 1) + fibonacci(n - 2)
 
-list1=[]    
+
+list1 = []
 for i in range(2, 20):
     list1.append(fibonacci(i))
 print(list1)
 
 # In[ ]:
-
-
-

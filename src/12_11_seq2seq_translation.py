@@ -8,7 +8,7 @@
 # In[1]:
 
 
-%matplotlib inline
+# get_ipython().run_line_magic('matplotlib', 'inline')
 from __future__ import unicode_literals, print_function, division
 from io import open
 import unicodedata
@@ -36,20 +36,21 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 SOS_token = 0  # 字句的開頭加一標誌
 EOS_token = 1  # 字句的結尾加一標誌
 
+
 # 前置處理函數
 class Lang:
     def __init__(self, name):
         self.name = name
-        self.word2index = {} # 單字轉代碼的字典
+        self.word2index = {}  # 單字轉代碼的字典
         self.word2count = {}
         self.index2word = {0: "SOS", 1: "EOS"}  # 代碼轉單字的字典
         self.n_words = 2  # Count SOS and EOS
 
     def addSentence(self, sentence):
         for word in sentence.split(' '):
-            self.addWord(word) # 分詞
+            self.addWord(word)  # 分詞
 
-    def addWord(self, word): # 建立詞彙表
+    def addWord(self, word):  # 建立詞彙表
         if word not in self.word2index:
             self.word2index[word] = self.n_words
             self.word2count[word] = 1
@@ -58,16 +59,15 @@ class Lang:
         else:
             self.word2count[word] += 1
 
+
 # In[4]:
 
 
 # Unicode 轉 ASCII
 # https://stackoverflow.com/a/518232/2809427
 def unicodeToAscii(s):
-    return ''.join(
-        c for c in unicodedata.normalize('NFD', s)
-        if unicodedata.category(c) != 'Mn'
-    )
+    return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+
 
 # 轉小寫、去除前後的空白、去除標點符號
 def normalizeString(s):
@@ -75,6 +75,7 @@ def normalizeString(s):
     s = re.sub(r"([.!?])", r" \1", s)
     s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
     return s
+
 
 # In[9]:
 
@@ -84,8 +85,7 @@ def readLangs(lang1, lang2, reverse=False):
     print("Reading lines...")
 
     # 讀取檔案、分行
-    lines = open(f'./nlp_data/{lang1}-{lang2}.txt', encoding='utf-8').\
-        read().strip().split('\n')
+    lines = open(f'./nlp_data/{lang1}-{lang2}.txt', encoding='utf-8').read().strip().split('\n')
 
     # 每行分欄
     pairs = [[normalizeString(s) for s in l.split('\t')] for l in lines]
@@ -101,6 +101,7 @@ def readLangs(lang1, lang2, reverse=False):
 
     return input_lang, output_lang, pairs
 
+
 # In[10]:
 
 
@@ -109,23 +110,29 @@ MAX_LENGTH = 10
 
 # 特殊縮寫字對照表
 eng_prefixes = (
-    "i am ", "i m ",
-    "he is", "he s ",
-    "she is", "she s ",
-    "you are", "you re ",
-    "we are", "we re ",
-    "they are", "they re "
+    "i am ",
+    "i m ",
+    "he is",
+    "he s ",
+    "she is",
+    "she s ",
+    "you are",
+    "you re ",
+    "we are",
+    "we re ",
+    "they are",
+    "they re ",
 )
+
 
 # 超過 10 個單字的字句刪除
 def filterPair(p):
-    return len(p[0].split(' ')) < MAX_LENGTH and \
-        len(p[1].split(' ')) < MAX_LENGTH and \
-        p[1].startswith(eng_prefixes)
+    return len(p[0].split(' ')) < MAX_LENGTH and len(p[1].split(' ')) < MAX_LENGTH and p[1].startswith(eng_prefixes)
 
 
 def filterPairs(pairs):
     return [pair for pair in pairs if filterPair(pair)]
+
 
 # In[25]:
 
@@ -144,6 +151,7 @@ def prepareData(lang1, lang2, reverse=False):
     print(input_lang.name, input_lang.n_words)
     print(output_lang.name, output_lang.n_words)
     return input_lang, output_lang, pairs
+
 
 # eng-fra.txt檔案讀取與處理
 input_lang, output_lang, pairs = prepareData('eng', 'fra', True)
@@ -174,6 +182,7 @@ class EncoderRNN(nn.Module):
     def initHidden(self):
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
+
 # ### Decoder
 
 # In[27]:
@@ -199,6 +208,7 @@ class DecoderRNN(nn.Module):
     def initHidden(self):
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
+
 # ### Attention Decoder
 
 # In[28]:
@@ -223,10 +233,8 @@ class AttnDecoderRNN(nn.Module):
         embedded = self.embedding(input).view(1, 1, -1)
         embedded = self.dropout(embedded)
 
-        attn_weights = F.softmax(
-            self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
-        attn_applied = torch.bmm(attn_weights.unsqueeze(0),
-                                 encoder_outputs.unsqueeze(0))
+        attn_weights = F.softmax(self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
+        attn_applied = torch.bmm(attn_weights.unsqueeze(0), encoder_outputs.unsqueeze(0))
 
         output = torch.cat((embedded[0], attn_applied[0]), 1)
         output = self.attn_combine(output).unsqueeze(0)
@@ -240,6 +248,7 @@ class AttnDecoderRNN(nn.Module):
     def initHidden(self):
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
+
 # ## 張量轉換函數
 
 # In[29]:
@@ -248,25 +257,37 @@ class AttnDecoderRNN(nn.Module):
 def indexesFromSentence(lang, sentence):
     return [lang.word2index[word] for word in sentence.split(' ')]
 
+
 def tensorFromSentence(lang, sentence):
     indexes = indexesFromSentence(lang, sentence)
     indexes.append(EOS_token)
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
+
 
 def tensorsFromPair(pair):
     input_tensor = tensorFromSentence(input_lang, pair[0])
     target_tensor = tensorFromSentence(output_lang, pair[1])
     return (input_tensor, target_tensor)
 
+
 # ## 模型訓練函數
 
 # In[30]:
 
 
-teacher_forcing_ratio = 0.5 # 採用 Teacher Forcing 的機率
+teacher_forcing_ratio = 0.5  # 採用 Teacher Forcing 的機率
 
-def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, 
-          decoder_optimizer, criterion, max_length=MAX_LENGTH):
+
+def train(
+    input_tensor,
+    target_tensor,
+    encoder,
+    decoder,
+    encoder_optimizer,
+    decoder_optimizer,
+    criterion,
+    max_length=MAX_LENGTH,
+):
     encoder_hidden = encoder.initHidden()
 
     encoder_optimizer.zero_grad()
@@ -280,8 +301,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer,
     loss = 0
 
     for ei in range(input_length):
-        encoder_output, encoder_hidden = encoder(
-            input_tensor[ei], encoder_hidden)
+        encoder_output, encoder_hidden = encoder(input_tensor[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0, 0]
 
     decoder_input = torch.tensor([[SOS_token]], device=device)
@@ -294,19 +314,17 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer,
     # Teacher Forcing 模式
     if use_teacher_forcing:
         for di in range(target_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+            decoder_output, decoder_hidden, decoder_attention = decoder(decoder_input, decoder_hidden, encoder_outputs)
             loss += criterion(decoder_output, target_tensor[di])
             # 以上一步驟的實際標註(Y)，作為下一步驟的輸入
-            decoder_input = target_tensor[di]  
+            decoder_input = target_tensor[di]
 
-    else: # Free-Running 模式
+    else:  # Free-Running 模式
         for di in range(target_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+            decoder_output, decoder_hidden, decoder_attention = decoder(decoder_input, decoder_hidden, encoder_outputs)
             topv, topi = decoder_output.topk(1)
             # 以上一步驟的隱藏層輸出，作為下一步驟的輸入
-            decoder_input = topi.squeeze().detach()  
+            decoder_input = topi.squeeze().detach()
 
             loss += criterion(decoder_output, target_tensor[di])
             if decoder_input.item() == EOS_token:
@@ -319,6 +337,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer,
 
     return loss.item() / target_length
 
+
 # ## 計算執行時間的函數
 
 # In[31]:
@@ -327,11 +346,13 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer,
 import time
 import math
 
+
 # 換算為分鐘
 def asMinutes(s):
     m = math.floor(s / 60)
     s -= m * 60
     return f'{m}m {s}s'
+
 
 # 計算執行時間
 def timeSince(since, percent):
@@ -341,23 +362,22 @@ def timeSince(since, percent):
     rs = es - s
     return f'{asMinutes(s)} (- {asMinutes(rs)})'
 
+
 # ## 定義訓練週期函數：整合以上函數
 
 # In[32]:
 
 
-def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100
-               , learning_rate=0.01):
+def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # 初始化列印的損失值
-    plot_loss_total = 0   # 初始化繪製的損失值 
+    plot_loss_total = 0  # 初始化繪製的損失值
 
     # 定義優化器、損失函數
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
-    training_pairs = [tensorsFromPair(random.choice(pairs))
-                      for i in range(n_iters)]
+    training_pairs = [tensorsFromPair(random.choice(pairs)) for i in range(n_iters)]
     criterion = nn.NLLLoss()
 
     # 訓練週期
@@ -366,16 +386,14 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100
         input_tensor = training_pair[0]
         target_tensor = training_pair[1]
 
-        loss = train(input_tensor, target_tensor, encoder,
-                     decoder, encoder_optimizer, decoder_optimizer, criterion)
+        loss = train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion)
         print_loss_total += loss
         plot_loss_total += loss
 
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            print(f'{timeSince(start, iter / n_iters)}' + 
-                  f' ({iter} {iter / n_iters * 100}%) {print_loss_avg:.4f}')
+            print(f'{timeSince(start, iter / n_iters)}' + f' ({iter} {iter / n_iters * 100}%) {print_loss_avg:.4f}')
 
         if iter % plot_every == 0:
             plot_loss_avg = plot_loss_total / plot_every
@@ -384,15 +402,18 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100
 
     showPlot(plot_losses)
 
+
 # ## 定義繪圖函數
 
 # In[33]:
 
 
 import matplotlib.pyplot as plt
+
 plt.switch_backend('agg')
 import matplotlib.ticker as ticker
 import numpy as np
+
 
 def showPlot(points):
     plt.figure()
@@ -401,6 +422,7 @@ def showPlot(points):
     loc = ticker.MultipleLocator(base=0.2)
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
+
 
 # ## 定義模型評估函數
 
@@ -416,8 +438,7 @@ def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
         encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
 
         for ei in range(input_length):
-            encoder_output, encoder_hidden = encoder(input_tensor[ei],
-                                                     encoder_hidden)
+            encoder_output, encoder_hidden = encoder(input_tensor[ei], encoder_hidden)
             encoder_outputs[ei] += encoder_output[0, 0]
 
         decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
@@ -428,8 +449,7 @@ def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
         decoder_attentions = torch.zeros(max_length, max_length)
 
         for di in range(max_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+            decoder_output, decoder_hidden, decoder_attention = decoder(decoder_input, decoder_hidden, encoder_outputs)
             decoder_attentions[di] = decoder_attention.data
             topv, topi = decoder_output.data.topk(1)
             if topi.item() == EOS_token:
@@ -440,7 +460,8 @@ def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
 
             decoder_input = topi.squeeze().detach()
 
-        return decoded_words, decoder_attentions[:di + 1]
+        return decoded_words, decoder_attentions[: di + 1]
+
 
 # ## 模型訓練：GTX 1050 Ti 約70分鐘
 
@@ -449,12 +470,11 @@ def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
 
 hidden_size = 256
 encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
-attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, 
-                               dropout_p=0.1).to(device)
+attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, dropout_p=0.1).to(device)
 
 trainIters(encoder1, attn_decoder1, 75000, print_every=5000)
 
-# ## 任選10筆訓練資料評估  
+# ## 任選10筆訓練資料評估
 
 # In[ ]:
 
@@ -468,7 +488,8 @@ def evaluateRandomly(encoder, decoder, n=10):
         output_sentence = ' '.join(output_words)
         print('<', output_sentence)
         print('')
-        
+
+
 evaluateRandomly(encoder1, attn_decoder1)
 
 # ## Attention 視覺化
@@ -476,8 +497,7 @@ evaluateRandomly(encoder1, attn_decoder1)
 # In[ ]:
 
 
-output_words, attentions = evaluate(
-    encoder1, attn_decoder1, "je suis trop froid .")
+output_words, attentions = evaluate(encoder1, attn_decoder1, "je suis trop froid .")
 plt.matshow(attentions.numpy())
 
 # ## Attention 視覺化加強版
@@ -493,8 +513,7 @@ def showAttention(input_sentence, output_words, attentions):
     fig.colorbar(cax)
 
     # Set up axes
-    ax.set_xticklabels([''] + input_sentence.split(' ') +
-                       ['<EOS>'], rotation=90)
+    ax.set_xticklabels([''] + input_sentence.split(' ') + ['<EOS>'], rotation=90)
     ax.set_yticklabels([''] + output_words)
 
     # Show label at every tick
@@ -503,14 +522,15 @@ def showAttention(input_sentence, output_words, attentions):
 
     plt.show()
 
+
 def evaluateAndShowAttention(input_sentence):
-    output_words, attentions = evaluate(
-        encoder1, attn_decoder1, input_sentence)
+    output_words, attentions = evaluate(encoder1, attn_decoder1, input_sentence)
     print('input =', input_sentence)
     print('output =', ' '.join(output_words))
     showAttention(input_sentence, output_words, attentions)
 
-# 測試4句法文    
+
+# 測試4句法文
 evaluateAndShowAttention("elle a cinq ans de moins que moi .")
 evaluateAndShowAttention("elle est trop petit .")
 evaluateAndShowAttention("je ne crains pas de mourir .")

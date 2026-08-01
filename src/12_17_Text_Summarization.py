@@ -59,16 +59,11 @@ model = AutoModelForSeq2SeqLM.from_pretrained("t5-base")
 tokenizer = AutoTokenizer.from_pretrained("t5-base")
 
 # T5 最多限 512 個單字
-inputs = tokenizer("summarize: " + ARTICLE, return_tensors="pt", 
-                   max_length=512, truncation=True)
+inputs = tokenizer("summarize: " + ARTICLE, return_tensors="pt", max_length=512, truncation=True)
 outputs = model.generate(
-    inputs["input_ids"], max_length=150, min_length=40, 
-    length_penalty=2.0, num_beams=4, early_stopping=True
+    inputs["input_ids"], max_length=150, min_length=40, length_penalty=2.0, num_beams=4, early_stopping=True
 )
 
 print(tokenizer.decode(outputs[0]))
 
 # In[ ]:
-
-
-

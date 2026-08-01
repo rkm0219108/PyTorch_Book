@@ -7,7 +7,7 @@
 # In[4]:
 
 
-! pip install datasets 
+# get_ipython().system('pip install datasets')
 
 # ## 參數設定
 
@@ -35,12 +35,13 @@ batch_size = 16
 
 
 import datasets
+import evaluate
 
 actual_task = "mnli" if task == "mnli-mm" else task
 # 載入資料集
 dataset = datasets.load_dataset("glue", actual_task)
 # 載入效能衡量指標
-metric = datasets.load_metric('glue', actual_task)
+metric = evaluate.load('glue', actual_task)
 
 # ### dataset 資料型態為 [`DatasetDict`](https://huggingface.co/docs/datasets/package_reference/main_classes.html#datasetdict)
 
@@ -65,20 +66,22 @@ import random
 import pandas as pd
 from IPython.display import display, HTML
 
+
 # 隨機抽取資料函數
 def show_random_elements(dataset, num_examples=10):
     picks = []
     for _ in range(num_examples):
-        pick = random.randint(0, len(dataset)-1)
+        pick = random.randint(0, len(dataset) - 1)
         while pick in picks:
-            pick = random.randint(0, len(dataset)-1)
+            pick = random.randint(0, len(dataset) - 1)
         picks.append(pick)
-    
+
     df = pd.DataFrame(dataset[picks])
     for column, typ in dataset.features.items():
         if isinstance(typ, datasets.ClassLabel):
             df[column] = df[column].transform(lambda i: typ.names[i])
     display(HTML(df.to_html()))
+
 
 # ## 查看前30筆資料
 
@@ -116,7 +119,7 @@ fake_labels = np.random.randint(0, 2, size=(64,))
 metric.compute(predictions=fake_preds, references=fake_labels)
 
 # Note that `load_metric` has loaded the proper metric associated to your task, which is:
-# 
+#
 # - for CoLA: [Matthews Correlation Coefficient](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient)
 # - for MNLI (matched or mismatched): Accuracy
 # - for MRPC: Accuracy and [F1 score](https://en.wikipedia.org/wiki/F1_score)
@@ -126,7 +129,7 @@ metric.compute(predictions=fake_preds, references=fake_labels)
 # - for SST-2: Accuracy
 # - for STS-B: [Pearson Correlation Coefficient](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient) and [Spearman's_Rank_Correlation_Coefficient](https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient)
 # - for WNLI: Accuracy
-# 
+#
 # so the metric object only computes the one(s) needed for your task.
 
 # ## 分詞
@@ -188,6 +191,7 @@ def preprocess_function(examples):
         return tokenizer(examples[sentence1_key], truncation=True)
     return tokenizer(examples[sentence1_key], examples[sentence2_key], truncation=True)
 
+
 preprocess_function(dataset['train'][:5])
 
 # To apply this function on all the sentences (or pairs of sentences) in our dataset, we just use the `map` method of our `dataset` object we created earlier. This will apply the function on all the elements of all the splits in `dataset`, so our training, validation and testing data will be preprocessed in one single command.
@@ -206,7 +210,7 @@ encoded_dataset = dataset.map(preprocess_function, batched=True)
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
 
 # 載入預先訓練的模型
-num_labels = 3 if task.startswith("mnli") else 1 if task=="stsb" else 2
+num_labels = 3 if task.startswith("mnli") else 1 if task == "stsb" else 2
 model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels)
 
 # ## 定義訓練參數，可參閱 [`TrainingArguments`](https://huggingface.co/transformers/main_classes/trainer.html#transformers.TrainingArguments)
@@ -214,12 +218,11 @@ model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num
 # In[19]:
 
 
-metric_name = "pearson" if task == "stsb" else "matthews_correlation" \
-                        if task == "cola" else "accuracy"
+metric_name = "pearson" if task == "stsb" else "matthews_correlation" if task == "cola" else "accuracy"
 
 args = TrainingArguments(
     "test-glue",
-    evaluation_strategy = "epoch",
+    eval_strategy="epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=batch_size,
     per_device_eval_batch_size=batch_size,
@@ -242,13 +245,15 @@ def compute_metrics(eval_pred):
         predictions = predictions[:, 0]
     return metric.compute(predictions=predictions, references=labels)
 
+
 # ## 定義訓練者(Trainer)物件
 
 # In[21]:
 
 
-validation_key = "validation_mismatched" if task == "mnli-mm" else \
-                 "validation_matched" if task == "mnli" else "validation"
+validation_key = (
+    "validation_mismatched" if task == "mnli-mm" else "validation_matched" if task == "mnli" else "validation"
+)
 
 trainer = Trainer(
     model,
@@ -256,7 +261,7 @@ trainer = Trainer(
     train_dataset=encoded_dataset["train"],
     eval_dataset=encoded_dataset[validation_key],
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics
+    compute_metrics=compute_metrics,
 )
 
 # ## 模型訓練
@@ -288,14 +293,15 @@ trainer.save_model('./cola')
 class SimpleDataset:
     def __init__(self, tokenized_texts):
         self.tokenized_texts = tokenized_texts
-    
+
     def __len__(self):
         return len(self.tokenized_texts["input_ids"])
-    
+
     def __getitem__(self, idx):
         return {k: v[idx] for k, v in self.tokenized_texts.items()}
 
-texts = ["Hello, this one sentence!", "And this sentence goes with it."]    
+
+texts = ["Hello, this one sentence!", "And this sentence goes with it."]
 tokenized_texts = tokenizer(texts, padding=True, truncation=True)
 new_dataset = SimpleDataset(tokenized_texts)
 trainer.predict(new_dataset)
@@ -303,16 +309,16 @@ trainer.predict(new_dataset)
 # In[51]:
 
 
-tokenized_texts = tokenizer(["They drank the pub.", "The professor talked us into a stupor."]
-                            , padding=True, truncation=True)
+tokenized_texts = tokenizer(
+    ["They drank the pub.", "The professor talked us into a stupor."], padding=True, truncation=True
+)
 new_dataset = SimpleDataset(tokenized_texts)
 trainer.predict(new_dataset)
 
 # In[56]:
 
 
-tokenized_texts = tokenizer(["Hello there!", "This is another text"]
-                            , padding=True, truncation=True)
+tokenized_texts = tokenizer(["Hello there!", "This is another text"], padding=True, truncation=True)
 new_dataset = SimpleDataset(tokenized_texts)
 trainer.predict(new_dataset)
 
@@ -325,8 +331,8 @@ trainer.predict(new_dataset)
 # In[ ]:
 
 
-! pip install optuna
-! pip install ray[tune]
+# get_ipython().system('pip install optuna')
+# get_ipython().system('pip install ray[tune]')
 
 # During hyperparameter search, the `Trainer` will run several trainings, so it needs to have the model defined via a function (so it can be reinitialized at each new run) instead of just having it passed. We jsut use the same function as before:
 
@@ -335,6 +341,7 @@ trainer.predict(new_dataset)
 
 def model_init():
     return AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels)
+
 
 # And we can instantiate our `Trainer` like before:
 
@@ -347,12 +354,12 @@ trainer = Trainer(
     train_dataset=encoded_dataset["train"],
     eval_dataset=encoded_dataset[validation_key],
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics
+    compute_metrics=compute_metrics,
 )
 
 # The method we call this time is `hyperparameter_search`. Note that it can take a long time to run on the full dataset for some of the tasks. You can try to find some good hyperparameter on a portion of the training dataset by replacing the `train_dataset` line above by:
 # ```python
-# train_dataset = encoded_dataset["train"].shard(index=1, num_shards=10) 
+# train_dataset = encoded_dataset["train"].shard(index=1, num_shards=10)
 # ```
 # for 1/10th of the dataset. Then you can run a full training on the best hyperparameters picked by the search.
 
@@ -369,7 +376,7 @@ best_run = trainer.hyperparameter_search(n_trials=10, direction="maximize")
 best_run
 
 # You can customize the objective to maximize by passing along a `compute_objective` function to the `hyperparameter_search` method, and you can customize the search space by passing a `hp_space` argument to `hyperparameter_search`. See this [forum post](https://discuss.huggingface.co/t/using-hyperparameter-search-in-trainer/785/10) for some examples.
-# 
+#
 # To reproduce the best training, just set the hyperparameters in your `TrainingArgument` before creating a `Trainer`:
 
 # In[ ]:
@@ -383,6 +390,3 @@ trainer.train()
 # Don't forget to [upload your model](https://huggingface.co/transformers/model_sharing.html) on the [ߤ砍odel Hub](https://huggingface.co/models). You can then use it only to generate results like the one shown in the first picture of this notebook!
 
 # In[ ]:
-
-
-

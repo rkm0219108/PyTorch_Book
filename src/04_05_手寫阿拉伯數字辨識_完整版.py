@@ -21,7 +21,7 @@ from torchvision.datasets import MNIST
 # In[3]:
 
 
-PATH_DATASETS = "" # 預設路徑
+PATH_DATASETS = ""  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 "cuda" if torch.cuda.is_available() else "cpu"
@@ -32,12 +32,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST(PATH_DATASETS, train=True, download=True, 
-                 transform=transforms.ToTensor())
+train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST(PATH_DATASETS, train=False, download=True, 
-                 transform=transforms.ToTensor())
+test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -66,11 +64,11 @@ train_ds.data[0]
 
 # 將非0的數字轉為1，顯示第1張圖片
 data = train_ds.data[0].clone()
-data[data>0]=1
+data[data > 0] = 1
 data = data.numpy()
 
 # 將轉換後二維內容顯示出來，隱約可以看出數字為 5
-text_image=[]
+text_image = []
 for i in range(data.shape[0]):
     text_image.append(''.join(data[i].astype(str)))
 text_image
@@ -80,11 +78,11 @@ text_image
 
 # 將非0的數字轉為1，顯示第2張圖片
 data = train_ds.data[1].clone()
-data[data>0]=1
+data[data > 0] = 1
 data = data.numpy()
 
 # 將轉換後二維內容顯示出來，隱約可以看出數字為 5
-text_image=[]
+text_image = []
 for i in range(data.shape[0]):
     text_image.append(''.join(data[i].astype(str)))
 text_image
@@ -99,13 +97,13 @@ import matplotlib.pyplot as plt
 X = train_ds.data[0]
 
 # 繪製點陣圖，cmap='gray':灰階
-plt.imshow(X.reshape(28,28), cmap='gray')
+plt.imshow(X.reshape(28, 28), cmap='gray')
 
 # 隱藏刻度
-plt.axis('off') 
+plt.axis('off')
 
 # 顯示圖形
-plt.show() 
+plt.show()
 
 # ## 步驟3：特徵工程，此步驟無需進行
 
@@ -125,9 +123,9 @@ plt.show()
 # 建立模型
 model = torch.nn.Sequential(
     torch.nn.Flatten(),
-    torch.nn.Linear(28 * 28, 256), 
+    torch.nn.Linear(28 * 28, 256),
     torch.nn.Dropout(0.2),
-    torch.nn.Linear(256, 10), 
+    torch.nn.Linear(256, 10),
     # 使用nn.CrossEntropyLoss()時，不需要將輸出經過softmax層，否則計算的損失會有誤
     # torch.nn.Softmax(dim=1)
 ).to(device)
@@ -138,7 +136,7 @@ model = torch.nn.Sequential(
 
 
 epochs = 5
-lr=0.1
+lr = 0.1
 
 # 建立 DataLoader
 train_loader = DataLoader(train_ds, batch_size=600)
@@ -150,7 +148,7 @@ optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
 criterion = nn.CrossEntropyLoss()
 
 model.train()
-loss_list = []    
+loss_list = []
 for epoch in range(1, epochs + 1):
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
@@ -167,9 +165,8 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_loader.dataset)
-            percentage = (100. * batch_idx / len(train_loader))
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' +
-                  f'  Loss: {loss.item():.6f}')
+            percentage = 100.0 * batch_idx / len(train_loader)
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
 
 # ## CrossEntropyLoss 可接納 output, target 維度不同，[600, 10]及[600]
 
@@ -201,7 +198,7 @@ for data, target in test_loader:
     test_loss += criterion(output, target).item()
 
     # 預測
-    pred = output.argmax(dim=1, keepdim=True)  
+    pred = output.argmax(dim=1, keepdim=True)
 
     # 正確筆數
     correct += pred.eq(target.view_as(pred)).sum().item()
@@ -211,24 +208,22 @@ test_loss /= len(test_loader.dataset)
 # 顯示測試結果
 batch = batch_idx * len(data)
 data_count = len(test_loader.dataset)
-percentage = 100. * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + 
-      f' ({percentage:.0f}%)\n')
+percentage = 100.0 * correct / data_count
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
 
 # ## 使用 torchmetrics
 
 # In[ ]:
 
 
-!pip install torchmetrics
+# !pip install torchmetrics
 
 # In[ ]:
 
 
 import torchmetrics
 
-torchmetrics.functional.accuracy(pred.reshape(-1), test_ds.targets.to(device)
-                                 , num_classes=10)
+torchmetrics.functional.accuracy(pred.reshape(-1), test_ds.targets.to(device), task="multiclass", num_classes=10)
 
 # ## 實際比對測試資料的前20筆
 
@@ -254,10 +249,10 @@ print('prediction: ', ' '.join(predictions[0:20]))
 # 顯示第 9 筆的機率
 import numpy as np
 
-i=8
+i = 8
 data = test_ds[i][0]
 data = data.reshape(1, *data.shape).to(device)
-#print(data.shape)
+# print(data.shape)
 predictions = torch.softmax(model(data), dim=1)
 print(f'0~9預測機率: {np.around(predictions.cpu().detach().numpy(), 2)}')
 print(f'0~9預測機率: {np.argmax(predictions.cpu().detach().numpy(), axis=-1)}')
@@ -266,10 +261,10 @@ print(f'0~9預測機率: {np.argmax(predictions.cpu().detach().numpy(), axis=-1)
 
 
 # 顯示第 9 筆圖像
-X2 = test_ds[i][0] 
-plt.imshow(X2.reshape(28,28), cmap='gray')
+X2 = test_ds[i][0]
+plt.imshow(X2.reshape(28, 28), cmap='gray')
 plt.axis('off')
-plt.show() 
+plt.show()
 
 # ## 步驟8：評估，暫不進行
 
@@ -317,11 +312,11 @@ for i in range(10):
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
-    image_resized = resize(image1, (28, 28), anti_aliasing=True)    
-    X1 = image_resized.reshape(1,28, 28) 
+    image_resized = resize(image1, (28, 28), anti_aliasing=True)
+    X1 = image_resized.reshape(1, 28, 28)
 
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
-    X1 = torch.FloatTensor(1.0-X1).to(device)
+    X1 = torch.FloatTensor(1.0 - X1).to(device)
 
     # 預測
     predictions = torch.softmax(model(X1), dim=1)
@@ -345,17 +340,15 @@ for name, module in model.named_children():
 # In[25]:
 
 
-!pip install torchinfo 
+# !pip install torchinfo
 
 # In[24]:
 
 
 from torchinfo import summary
-summary(model, (60000, 28, 28)) # input dimension size
+
+summary(model, (60000, 28, 28))  # input dimension size
 
 # ## PyTorch 無法繪製模型
 
 # In[ ]:
-
-
-

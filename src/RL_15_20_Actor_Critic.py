@@ -5,6 +5,7 @@ Date created: 2020/05/13
 Last modified: 2020/05/13
 Description: Implement Actor Critic Method in CartPole environment.
 """
+
 """
 ## Introduction
 
@@ -38,7 +39,7 @@ remains upright. The agent, therefore, must learn to keep the pole from falling 
 ## Setup
 """
 
-import gym
+import gymnasium as gym
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -49,7 +50,7 @@ seed = 42
 gamma = 0.99  # Discount factor for past rewards
 max_steps_per_episode = 10000
 env = gym.make("CartPole-v0")  # Create the environment
-env.seed(seed)
+env.reset(seed=seed)  # env.seed() 已移除，改於 reset() 傳入 seed
 eps = np.finfo(np.float32).eps.item()  # Smallest number such that 1.0 + eps != 1.0
 
 """
@@ -89,7 +90,7 @@ running_reward = 0
 episode_count = 0
 
 while True:  # Run until solved
-    state = env.reset()
+    state, _ = env.reset()
     episode_reward = 0
     with tf.GradientTape() as tape:
         for timestep in range(1, max_steps_per_episode):
@@ -109,7 +110,8 @@ while True:  # Run until solved
             action_probs_history.append(tf.math.log(action_probs[0, action]))
 
             # Apply the sampled action in our environment
-            state, reward, done, _ = env.step(action)
+            state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
             rewards_history.append(reward)
             episode_reward += reward
 
@@ -149,9 +151,7 @@ while True:  # Run until solved
 
             # The critic must be updated so that it predicts a better estimate of
             # the future rewards.
-            critic_losses.append(
-                huber_loss(tf.expand_dims(value, 0), tf.expand_dims(ret, 0))
-            )
+            critic_losses.append(huber_loss(tf.expand_dims(value, 0), tf.expand_dims(ret, 0)))
 
         # Backpropagation
         loss_value = sum(actor_losses) + sum(critic_losses)

@@ -8,7 +8,7 @@
 
 
 # 載入套件
-import numpy as np 
+import numpy as np
 import torch
 
 # ## 定義訓練函數
@@ -17,37 +17,38 @@ import torch
 
 
 def train(X, y, epochs=100, lr=0.0001):
-    loss_list, w_list, b_list=[], [], []
-    
-    # w、b 初始值均設為常態分配之隨機亂數 
+    loss_list, w_list, b_list = [], [], []
+
+    # w、b 初始值均設為常態分配之隨機亂數
     w = torch.randn(1, requires_grad=True, dtype=torch.float)
-    b = torch.randn(1, requires_grad=True, dtype=torch.float)    
-    for epoch in range(epochs):   # 執行訓練週期       
-        y_pred = w * X + b        # 預測值
-        
+    b = torch.randn(1, requires_grad=True, dtype=torch.float)
+    for epoch in range(epochs):  # 執行訓練週期
+        y_pred = w * X + b  # 預測值
+
         # 計算損失函數值
-        MSE = torch.square(y - y_pred).mean()        
-        MSE.backward()      
-        
+        MSE = torch.square(y - y_pred).mean()
+        MSE.backward()
+
         # 設定不參與梯度下降，w、b才能運算
         with torch.no_grad():
             # 新權重 = 原權重 — 學習率(learning_rate) * 梯度(gradient)
             w -= lr * w.grad
-            b -= lr * b.grad 
-        
+            b -= lr * b.grad
+
         # 記錄訓練結果
-        if (epoch+1) % 1000 == 0 or epochs < 1000:
+        if (epoch + 1) % 1000 == 0 or epochs < 1000:
             # detach：與運算圖分離，numpy()：轉成陣列
             # w.detach().numpy()
             w_list.append(w.item())  # w.item()：轉成常數
             b_list.append(b.item())
             loss_list.append(MSE.item())
-        
+
         # 梯度重置
         w.grad.zero_()
         b.grad.zero_()
-        
+
     return w_list, b_list, loss_list
+
 
 # ## 產生隨機資料
 
@@ -56,12 +57,12 @@ def train(X, y, epochs=100, lr=0.0001):
 
 # 產生線性隨機資料100筆，介於 0-50
 n = 100
-X = np.linspace(0, 50, n) 
-y = np.linspace(0, 50, n) 
-  
+X = np.linspace(0, 50, n)
+y = np.linspace(0, 50, n)
+
 # 資料加一點雜訊(noise)
-X += np.random.uniform(-10, 10, n) 
-y += np.random.uniform(-10, 10, n) 
+X += np.random.uniform(-10, 10, n)
+y += np.random.uniform(-10, 10, n)
 
 # ## 執行訓練
 
@@ -111,7 +112,7 @@ lr.coef_[0], lr.intercept_
 # In[96]:
 
 
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 plt.scatter(X, y, label='data')
 plt.plot(X, w_list[-1] * X + b_list[-1], 'r-', label='predicted')
@@ -121,7 +122,7 @@ plt.legend()
 
 
 # NumPy 求得的迴歸線
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 plt.scatter(X, y, label='data')
 plt.plot(X, coef[0] * X + coef[1], 'r-', label='predicted')
@@ -144,6 +145,3 @@ loss_list
 w_list
 
 # In[ ]:
-
-
-

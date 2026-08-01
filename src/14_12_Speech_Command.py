@@ -28,6 +28,7 @@ from IPython.core.display import display
 
 # 不顯示警告訊息
 import warnings
+
 warnings.filterwarnings('ignore')
 
 # ## 下載 Speech Commands 資料集，並建立 Dataset
@@ -49,7 +50,7 @@ dataset[0]
 
 # 任選一檔案測試，發音為 happy
 train_audio_path = './audio/SpeechCommands/speech_commands_v0.02/'
-wav_file = train_audio_path+'happy/0ab3b47d_nohash_0.wav'
+wav_file = train_audio_path + 'happy/0ab3b47d_nohash_0.wav'
 
 # 播放語音
 Audio(wav_file, autoplay=False)
@@ -75,14 +76,14 @@ sample_rate
 
 
 # 任選一檔案測試，發音為 happy
-wav_file = train_audio_path+'happy/0b09edd3_nohash_0.wav'
+wav_file = train_audio_path + 'happy/0b09edd3_nohash_0.wav'
 
 # 播放語音
 display(Audio(wav_file, autoplay=False))
 
 # 繪製波形
 waveform, sample_rate = torchaudio.load(wav_file)
-audio_util.plot_waveform(waveform, sample_rate) 
+audio_util.plot_waveform(waveform, sample_rate)
 
 # In[10]:
 
@@ -96,9 +97,11 @@ Audio(waveform, rate=sample_rate)
 
 # 取得音檔的屬性
 info = torchaudio.info(wav_file)
-print(f'取樣率={info.sample_rate}, 幀數={info.num_frames}, ' +
-      f'聲道={info.num_channels}, 精度={info.bits_per_sample}, ' +
-      f'檔案秒數={info.num_frames / info.sample_rate:.2f}')
+print(
+    f'取樣率={info.sample_rate}, 幀數={info.num_frames}, '
+    + f'聲道={info.num_channels}, 精度={info.bits_per_sample}, '
+    + f'檔案秒數={info.num_frames / info.sample_rate:.2f}'
+)
 
 # ## 重抽樣
 
@@ -110,8 +113,7 @@ waveform, sample_rate = torchaudio.load(wav_file)
 
 # 重抽樣率，每秒取 8000 個樣本
 resample_rate = 8000
-resampled_waveform = torchaudio.functional.resample(
-                        waveform, sample_rate, resample_rate)
+resampled_waveform = torchaudio.functional.resample(waveform, sample_rate, resample_rate)
 print(f'幀數={resampled_waveform.shape[1]}')
 
 # In[13]:
@@ -125,7 +127,7 @@ type(waveform)
 
 
 # label類別
-labels=os.listdir(train_audio_path)
+labels = os.listdir(train_audio_path)
 labels
 
 # ## 各類別的檔案數
@@ -133,17 +135,16 @@ labels
 # In[15]:
 
 
-no_of_recordings=[]
+no_of_recordings = []
 for label in labels:
-    waves = [f for f in os.listdir(train_audio_path + '/'+ label) 
-             if f.endswith('.wav')]
+    waves = [f for f in os.listdir(train_audio_path + '/' + label) if f.endswith('.wav')]
     no_of_recordings.append(len(waves))
-    
+
 # 繪圖
-plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'] 
+plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']
 plt.rcParams['axes.unicode_minus'] = False
 
-plt.figure(figsize=(10,6))
+plt.figure(figsize=(10, 6))
 index = np.arange(len(labels))
 plt.bar(index, no_of_recordings)
 plt.xlabel('指令', fontsize=12)
@@ -159,7 +160,8 @@ plt.show()
 
 
 import seaborn as sns
-length_list=[]
+
+length_list = []
 for x in dataset:
     waveform, sample_rate, label, speaker_id, utterance_number = x
     length_list.append(waveform.shape[1])
@@ -188,34 +190,35 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # In[19]:
 
 
-TOTAL_FRAME_COUNT = 16000  # 統一幀數為 16000 
+TOTAL_FRAME_COUNT = 16000  # 統一幀數為 16000
 n_mfcc = 40  # 萃取 MFCC 個數
+
 
 class SPEECH_DS(Dataset):
     def __init__(self, dataset1):
         self.dataset1 = dataset1
-        
+
     def __len__(self):
-          return len(self.dataset1)  
+        return len(self.dataset1)
 
     def __getitem__(self, n):
-        waveform , sample_rate, label, _, _ = self.dataset1[n]
-        if waveform.shape[1] < TOTAL_FRAME_COUNT : # 長度不足，右邊補 0 
-            waveform = F.pad(waveform,
-                     (0, TOTAL_FRAME_COUNT-waveform.shape[1]),'constant')
-        elif waveform.shape[1] > TOTAL_FRAME_COUNT : # 長度過長則截斷
+        waveform, sample_rate, label, _, _ = self.dataset1[n]
+        if waveform.shape[1] < TOTAL_FRAME_COUNT:  # 長度不足，右邊補 0
+            waveform = F.pad(waveform, (0, TOTAL_FRAME_COUNT - waveform.shape[1]), 'constant')
+        elif waveform.shape[1] > TOTAL_FRAME_COUNT:  # 長度過長則截斷
             waveform = waveform[:, :TOTAL_FRAME_COUNT]
         if waveform.shape[1] != TOTAL_FRAME_COUNT:  # 確認幀數為 16000
             print(waveform.shape[1])
-        
+
         mfcc_transform = T.MFCC(
             sample_rate=sample_rate,
-            n_mfcc=n_mfcc,   
+            n_mfcc=n_mfcc,
         )
         mfcc = mfcc_transform(waveform)
         # print(mfcc)
         return mfcc, labels.index(label)
-    
+
+
 dataset_new = SPEECH_DS(dataset)
 
 # In[20]:
@@ -247,7 +250,7 @@ len(train_ds), len(test_ds)
 
 
 train_loader = DataLoader(train_ds, BATCH_SIZE, shuffle=False)
-test_loader = DataLoader(test_ds, BATCH_SIZE*2, shuffle=False)
+test_loader = DataLoader(test_ds, BATCH_SIZE * 2, shuffle=False)
 
 # ## 步驟5：建立模型結構
 
@@ -256,6 +259,8 @@ test_loader = DataLoader(test_ds, BATCH_SIZE*2, shuffle=False)
 
 # 建立模型
 Linear_Input = 6400
+
+
 class ConvNet(nn.Module):
     def __init__(self, num_classes=3):
         super(ConvNet, self).__init__()
@@ -264,14 +269,16 @@ class ConvNet(nn.Module):
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.layer2 = nn.Sequential(
             nn.Conv2d(16, 32, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.fc = nn.Linear(Linear_Input, num_classes)
-        
+
     def forward(self, x):
         out = self.layer1(x)
         out = self.layer2(out)
@@ -279,6 +286,7 @@ class ConvNet(nn.Module):
         out = self.fc(out)
         out = F.log_softmax(out, dim=1)
         return out
+
 
 model = ConvNet(num_classes=3).to(device)
 
@@ -300,7 +308,7 @@ def score_model():
             output = model(data)
 
             # sum up batch loss
-            test_loss += F.nll_loss(output, target).item()            
+            test_loss += F.nll_loss(output, target).item()
 
             # 計算正確數
             _, predicted = torch.max(output.data, 1)
@@ -309,14 +317,14 @@ def score_model():
             target_list.extend(target.cpu().numpy())
 
     # 平均損失
-    test_loss /= len(test_loader.dataset) 
+    test_loss /= len(test_loader.dataset)
     # 顯示測試結果
     batch = batch_idx * len(data)
     data_count = len(test_loader.dataset)
-    percentage = 100. * correct / data_count 
-    print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + 
-          f' ({percentage:.2f}%)\n')
+    percentage = 100.0 * correct / data_count
+    print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.2f}%)\n')
     return prediction_list, target_list
+
 
 # In[26]:
 
@@ -326,10 +334,10 @@ epochs = 10
 # 設定優化器(optimizer)
 optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
 # 每 20 執行週期，學習率降低 10%
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)  
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
 
 model.train()
-loss_list = []    
+loss_list = []
 for epoch in range(1, epochs + 1):
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
@@ -341,20 +349,19 @@ for epoch in range(1, epochs + 1):
         loss.backward()
         optimizer.step()
 
-        if (batch_idx+1) % 10 == 0:
+        if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
-            batch = (batch_idx+1) * len(data)
+            batch = (batch_idx + 1) * len(data)
             data_count = len(train_loader.dataset)
-            percentage = (100. * (batch_idx+1) / len(train_loader))
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' +
-                  f'  Loss: {loss.item():.6f}')
+            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
     score_model()
     scheduler.step()
 
 # In[27]:
 
 
-score_model();
+score_model()
 
 # ## 對訓練過程的損失繪圖
 
@@ -382,47 +389,47 @@ model = torch.load('Speech_Command.pth')
 
 # 預測函數
 def predict(wav_file):
-    waveform , sample_rate = torchaudio.load(wav_file)
-    
-    if waveform.shape[1] < TOTAL_FRAME_COUNT: # 長度不足，右邊補 0
-        waveform = F.pad(waveform,(0, 
-                   TOTAL_FRAME_COUNT-waveform.shape[1]),'constant')
-    elif waveform.shape[1] > TOTAL_FRAME_COUNT: # 長度過長則截斷
+    waveform, sample_rate = torchaudio.load(wav_file)
+
+    if waveform.shape[1] < TOTAL_FRAME_COUNT:  # 長度不足，右邊補 0
+        waveform = F.pad(waveform, (0, TOTAL_FRAME_COUNT - waveform.shape[1]), 'constant')
+    elif waveform.shape[1] > TOTAL_FRAME_COUNT:  # 長度過長則截斷
         waveform = waveform[:, :TOTAL_FRAME_COUNT]
     if waveform.shape[1] != TOTAL_FRAME_COUNT:
         print(waveform.shape[1])
 
     mfcc_transform = T.MFCC(
         sample_rate=sample_rate,
-        n_mfcc=n_mfcc,   # MFCC 個數
+        n_mfcc=n_mfcc,  # MFCC 個數
     )
     mfcc = mfcc_transform(waveform)
-    mfcc = mfcc.reshape(1,*mfcc.shape)
+    mfcc = mfcc.reshape(1, *mfcc.shape)
     # print(mfcc)
-    
-    #print(X_pred.shape, samples.shape)
+
+    # print(X_pred.shape, samples.shape)
     # 預測
     output = model(mfcc.to(device))
     _, predicted = torch.max(output.data, 1)
     return predicted.cpu().item()
 
+
 # In[31]:
 
 
 # 任選一檔案測試，該檔案發音為 bed
-predict(train_audio_path+'bed/0d2bcf9d_nohash_0.wav')
+predict(train_audio_path + 'bed/0d2bcf9d_nohash_0.wav')
 
 # In[32]:
 
 
 # 任選一檔案測試，該檔案發音為 cat
-predict(train_audio_path+'cat/0ac15fe9_nohash_0.wav')
+predict(train_audio_path + 'cat/0ac15fe9_nohash_0.wav')
 
 # In[33]:
 
 
 # 任選一檔案測試，該檔案發音為 happy
-predict(train_audio_path+'happy/0ab3b47d_nohash_0.wav')
+predict(train_audio_path + 'happy/0ab3b47d_nohash_0.wav')
 
 # ## 自行使用 14_10_record.py 錄音，指令：
 # #### python 14_13_record.py audio/happy.wav
@@ -446,6 +453,3 @@ predict('./audio/cat.wav')
 predict('./audio/happy.wav')
 
 # In[ ]:
-
-
-

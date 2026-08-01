@@ -21,26 +21,20 @@ from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 from torchvision.datasets import MNIST
 from torchvision import transforms
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 from torchmetrics import Accuracy
+
 
 # 建立模型
 class LitAutoEncoder(pl.LightningModule):
     def __init__(self):
         super().__init__()
-        
-        self.encoder = nn.Sequential(
-        nn.Linear(28 * 28, 64),
-        nn.ReLU(),
-        nn.Linear(64, 10))
-        
-        self.decoder = nn.Sequential(
-        nn.Linear(10, 64),
-        nn.ReLU(),
-        nn.Linear(64, 28 * 28))
-        
-        
-        self.accuracy = Accuracy()
+
+        self.encoder = nn.Sequential(nn.Linear(28 * 28, 64), nn.ReLU(), nn.Linear(64, 10))
+
+        self.decoder = nn.Sequential(nn.Linear(10, 64), nn.ReLU(), nn.Linear(64, 28 * 28))
+
+        self.accuracy = Accuracy(task="multiclass", num_classes=10)
 
     def forward(self, x):
         embedding = self.encoder(x)
@@ -53,7 +47,7 @@ class LitAutoEncoder(pl.LightningModule):
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         x = x.view(x.size(0), -1)
-        z = self.encoder(x)    
+        z = self.encoder(x)
         x_hat = self.decoder(z)
         loss = F.mse_loss(x_hat, x)
         self.log('train_loss', loss)
@@ -63,14 +57,15 @@ class LitAutoEncoder(pl.LightningModule):
         x, y = val_batch
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
-        
+
         x_hat = self.decoder(z)
         loss = F.mse_loss(x_hat, x)
         self.log('val_loss', loss)
 
     def test_step(self, batch, batch_idx):
         self.validation_step(batch, batch_idx)
-        
+
+
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
 dataset = MNIST('', train=True, download=True, transform=transforms.ToTensor())
 test_data = MNIST('', train=False, download=True, transform=transforms.ToTensor())
@@ -86,13 +81,10 @@ test_loader = DataLoader(test_data, batch_size=1024, shuffle=False)
 model = LitAutoEncoder()
 
 # 模型訓練
-trainer = pl.Trainer(gpus=0, max_epochs=2)
+trainer = pl.Trainer(accelerator="cpu", max_epochs=2)
 trainer.fit(model, train_loader, val_loader)
-    
+
 # 模型評估
 trainer.test(model, test_loader)
 
 # In[ ]:
-
-
-

@@ -3,7 +3,7 @@
 
 # # 實作情緒分析(Sentiment Analysis)
 
-# ## 載入IMDB資料集 
+# ## 載入IMDB資料集
 
 # In[3]:
 
@@ -45,10 +45,12 @@ from torchtext.vocab import build_vocab_from_iterator
 # 分詞
 tokenizer = get_tokenizer('basic_english')
 
+
 # 建立 Generator 函數
 def yield_tokens(data_iter):
     for _, text in data_iter:
         yield tokenizer(text)
+
 
 # 由 train_iter 建立詞彙字典
 vocab = build_vocab_from_iterator(yield_tokens(train_iter), specials=["<unk>"])
@@ -67,9 +69,9 @@ vocab(['here', 'is', 'an', 'example'])
 # In[9]:
 
 
-EPOCHS = 10 # 訓練週期數
+EPOCHS = 10  # 訓練週期數
 LR = 5  # 學習率
-BATCH_SIZE = 64 # 訓練批量
+BATCH_SIZE = 64  # 訓練批量
 # 取得標註個數
 num_class = len(set([label for (label, text) in imdb]))
 vocab_size = len(vocab)
@@ -86,8 +88,8 @@ num_class
 # In[11]:
 
 
-text_pipeline = lambda x: vocab(tokenizer(x)) # 分詞、取得單字的索引值
-label_pipeline = lambda x: 0 if x == 'neg' else 1 # 換成索引值
+text_pipeline = lambda x: vocab(tokenizer(x))  # 分詞、取得單字的索引值
+label_pipeline = lambda x: 0 if x == 'neg' else 1  # 換成索引值
 
 # In[12]:
 
@@ -102,6 +104,7 @@ label_pipeline('pos')
 
 
 from torch import nn
+
 
 class TextClassificationModel(nn.Module):
     def __init__(self, vocab_size, embed_dim, num_class):
@@ -122,6 +125,7 @@ class TextClassificationModel(nn.Module):
         rnn_out, h_out = self.rnn(embedded)
         return self.fc(rnn_out)
 
+
 model = TextClassificationModel(vocab_size, emsize, num_class).to(device)
 
 # ## 定義訓練及評估函數
@@ -130,6 +134,7 @@ model = TextClassificationModel(vocab_size, emsize, num_class).to(device)
 
 
 import time
+
 
 # 訓練函數
 def train(dataloader):
@@ -149,11 +154,13 @@ def train(dataloader):
         total_count += label.size(0)
         if idx % log_interval == 0 and idx > 0:
             elapsed = time.time() - start_time
-            print('| epoch {:3d} | {:5d}/{:5d} batches '
-                  '| accuracy {:8.3f}'.format(epoch, idx, len(dataloader),
-                                              total_acc/total_count))
+            print(
+                '| epoch {:3d} | {:5d}/{:5d} batches '
+                '| accuracy {:8.3f}'.format(epoch, idx, len(dataloader), total_acc / total_count)
+            )
             total_acc, total_count = 0, 0
             start_time = time.time()
+
 
 # 評估函數
 def evaluate(dataloader):
@@ -166,7 +173,8 @@ def evaluate(dataloader):
             loss = criterion(predicted_label, label)
             total_acc += (predicted_label.argmax(1) == label).sum().item()
             total_count += label.size(0)
-    return total_acc/total_count
+    return total_acc / total_count
+
 
 # ## 建立DataLoader，逐批訓練
 
@@ -177,18 +185,20 @@ from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
 from torchtext.data.functional import to_map_style_dataset
 
+
 # 批次處理
 def collate_batch(batch):
     label_list, text_list, offsets = [], [], [0]
-    for (_label, _text) in batch:
+    for _label, _text in batch:
         label_list.append(label_pipeline(_label))
         processed_text = torch.tensor(text_pipeline(_text), dtype=torch.int64)
         text_list.append(processed_text)
-        offsets.append(processed_text.size(0)) # 設定每筆資料的起始位置 
+        offsets.append(processed_text.size(0))  # 設定每筆資料的起始位置
     label_list = torch.tensor(label_list, dtype=torch.int64)
     offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)  # 每筆資料的起始位置累加
     text_list = torch.cat(text_list)
     return label_list.to(device), text_list.to(device), offsets.to(device)
+
 
 train_iter, test_iter = IMDB()
 # 轉換為 DataSet
@@ -196,16 +206,12 @@ train_dataset = to_map_style_dataset(train_iter)
 test_dataset = to_map_style_dataset(test_iter)
 # 資料切割，95% 作為訓練資料
 num_train = int(len(train_dataset) * 0.95)
-split_train_, split_valid_ = \
-    random_split(train_dataset, [num_train, len(train_dataset) - num_train])
+split_train_, split_valid_ = random_split(train_dataset, [num_train, len(train_dataset) - num_train])
 
 # 建立DataLoader
-train_dataloader = DataLoader(split_train_, batch_size=BATCH_SIZE,
-                              shuffle=True, collate_fn=collate_batch)
-valid_dataloader = DataLoader(split_valid_, batch_size=BATCH_SIZE,
-                              shuffle=True, collate_fn=collate_batch)
-test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE,
-                             shuffle=True, collate_fn=collate_batch)
+train_dataloader = DataLoader(split_train_, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_batch)
+valid_dataloader = DataLoader(split_valid_, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_batch)
+test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_batch)
 
 # ## 模型訓練
 
@@ -226,10 +232,10 @@ for epoch in range(1, EPOCHS + 1):
     else:
         total_accu = accu_val
     print('-' * 59)
-    print('| end of epoch {:3d} | time: {:5.2f}s | '
-          'valid accuracy {:8.3f} '.format(epoch,
-                                           time.time() - epoch_start_time,
-                                           accu_val))
+    print(
+        '| end of epoch {:3d} | time: {:5.2f}s | '
+        'valid accuracy {:8.3f} '.format(epoch, time.time() - epoch_start_time, accu_val)
+    )
     print('-' * 59)
 
 # ## 模型評估
@@ -245,12 +251,15 @@ print(f'測試資料準確度: {evaluate(test_dataloader):.3f}')
 
 
 # 預測
-label = {0:'負面', 1:'正面'}
+label = {0: '負面', 1: '正面'}
+
+
 def predict(text, text_pipeline):
     with torch.no_grad():
         text = torch.tensor(text_pipeline(text)).to(device)
-        output = model(text, torch.tensor([0])).to(device)
+        output = model(text, torch.tensor([0]).to(device))
         return output.argmax(1).item()
+
 
 # 測試資料
 my_test = open('./nlp_data/imdb_1.txt', encoding='utf8').read()
@@ -260,7 +269,7 @@ print(label[predict(data[1], text_pipeline)])
 
 
 imdb_iterator = iter(IMDB(split='train'))
-label_rev = {'neg':0, 'pos':1}
+label_rev = {'neg': 0, 'pos': 1}
 acc = 0
 for i in range(20000):
     data = next(imdb_iterator)
@@ -268,6 +277,3 @@ for i in range(20000):
 print(acc)
 
 # In[ ]:
-
-
-
