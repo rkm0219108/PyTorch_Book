@@ -8,6 +8,8 @@
 # In[25]:
 
 
+from typing import Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -62,7 +64,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 # 函數：以前期資料為 X，當前期資料為 Y
-def create_dataset(data1, look_back):
+def create_dataset(data1: np.ndarray, look_back: int) -> Tuple[torch.Tensor, torch.Tensor]:
     x, y = [], []
     for i in range(len(data1) - look_back - 1):
         _x = data1[i : (i + look_back)]
@@ -108,7 +110,7 @@ torch.cat((trainX.reshape(trainX.shape[0], trainX.shape[1]), trainY), axis=1)
 
 
 class TimeSeriesModel(nn.Module):
-    def __init__(self, look_back, hidden_size=4, num_layers=1):
+    def __init__(self, look_back: int, hidden_size: int = 4, num_layers: int = 1) -> None:
         super().__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -116,12 +118,12 @@ class TimeSeriesModel(nn.Module):
         self.fc = nn.Linear(self.hidden_size, 1)
         self.init_weights()
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         initrange = 0.5
         self.fc.weight.data.uniform_(-initrange, initrange)
         self.fc.bias.data.zero_()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # print(x.shape)
         # rnn_out, h_out = self.rnn(x)
         h_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
@@ -147,7 +149,7 @@ num_epochs = 2000
 learning_rate = 0.01
 
 
-def train(trainX, trainY):
+def train(trainX: torch.Tensor, trainY: torch.Tensor) -> None:
     criterion = torch.nn.MSELoss()  # MSE
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 

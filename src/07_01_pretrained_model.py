@@ -12,6 +12,7 @@ import torch
 from torchvision import models
 from torchvision.models import VGG16_Weights, ResNet50_Weights
 from torch import nn
+from torch.nn import functional as F
 import numpy as np
 from torchsummary import summary
 
@@ -50,7 +51,7 @@ model.modules
 # In[54]:
 
 
-torch.nn.Sequential(*list(model.children())[:])
+nn.Sequential(*list(model.children())[:])
 
 # In[55]:
 
@@ -110,7 +111,7 @@ with torch.no_grad():
     output = model(input_batch)
 
 # 轉成機率
-probabilities = torch.nn.functional.softmax(output[0], dim=0)
+probabilities = F.softmax(output[0], dim=0)
 print(probabilities)
 
 # In[62]:
@@ -150,7 +151,7 @@ with torch.no_grad():
     output = model(input_batch)
 
 # 轉成機率
-probabilities = torch.nn.functional.softmax(output[0], dim=0)
+probabilities = F.softmax(output[0], dim=0)
 max_item = torch.argmax(probabilities).item()
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
@@ -189,7 +190,7 @@ with torch.no_grad():
     output = model(input_batch)
 
 # 轉成機率
-probabilities = torch.nn.functional.softmax(output[0], dim=0)
+probabilities = F.softmax(output[0], dim=0)
 max_item = torch.argmax(probabilities).item()
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
@@ -221,7 +222,7 @@ with torch.no_grad():
     output = model(input_batch)
 
 # 轉成機率
-probabilities = torch.nn.functional.softmax(output[0], dim=0)
+probabilities = F.softmax(output[0], dim=0)
 max_item = torch.argmax(probabilities).item()
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
@@ -272,7 +273,7 @@ with torch.no_grad():
     output = model(input_batch)
 
 # 轉成機率
-probabilities = torch.nn.functional.softmax(output[0], dim=0)
+probabilities = F.softmax(output[0], dim=0)
 max_item = torch.argmax(probabilities).item()
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 

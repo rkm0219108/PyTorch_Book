@@ -19,6 +19,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 import urllib.request
+from typing import List
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk import word_tokenize
@@ -41,7 +42,7 @@ EMBEDDING_DIM = 10  # 嵌入層輸出維度
 
 
 # 以值(value)找鍵值(key)
-def get_key(word_id):
+def get_key(word_id: int) -> str:
     for key, val in word_to_ix.items():
         if val == word_id:
             return key
@@ -49,7 +50,7 @@ def get_key(word_id):
 
 
 # 分詞及前置處理
-def read_data(file_path, remove_stopwords=False):
+def read_data(file_path: str, remove_stopwords: bool = False) -> List[str]:
     tokenizer = RegexpTokenizer(r'\w+')
     if file_path.lower().startswith('http'):
         data = urllib.request.urlopen(file_path)
@@ -106,13 +107,13 @@ word_to_ix = {word: i for i, word in enumerate(vocab)}
 
 
 class CBOWModeler(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, context_size):
+    def __init__(self, vocab_size: int, embedding_dim: int, context_size: int) -> None:
         super(CBOWModeler, self).__init__()
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.linear1 = nn.Linear(context_size * embedding_dim, 128)
         self.linear2 = nn.Linear(128, vocab_size)
 
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         # embeds -> linear -> relu -> linear -> log_softmax
         embeds = self.embeddings(inputs).view((1, -1))
         out1 = F.relu(self.linear1(embeds))
@@ -120,7 +121,7 @@ class CBOWModeler(nn.Module):
         log_probs = F.log_softmax(out2, dim=1)
         return log_probs
 
-    def predict(self, input):
+    def predict(self, input: List[str]) -> None:
         # 以上下文預測
         context_idxs = torch.LongTensor([word_to_ix[w] for w in input])
         res = self.forward(context_idxs)
@@ -185,14 +186,14 @@ print(ngrams[0], ngrams[1])
 
 
 class SkipgramModeler(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, context_size):
+    def __init__(self, vocab_size: int, embedding_dim: int, context_size: int) -> None:
         super(SkipgramModeler, self).__init__()
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.linear1 = nn.Linear(embedding_dim, 128)
         self.linear2 = nn.Linear(128, context_size * vocab_size)
         # self.parameters['context_size'] = context_size
 
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         # embeds -> linear -> relu -> linear -> log_softmax
         embeds = self.embeddings(inputs).view((1, -1))
         out1 = F.relu(self.linear1(embeds))
@@ -200,7 +201,7 @@ class SkipgramModeler(nn.Module):
         log_probs = F.log_softmax(out2, dim=1).view(CONTEXT_SIZE, -1)
         return log_probs
 
-    def predict(self, input):
+    def predict(self, input: str) -> None:
         context_idxs = torch.LongTensor([word_to_ix[input]])
         res = self.forward(context_idxs)
         res_arg = torch.argmax(res)

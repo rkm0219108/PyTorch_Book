@@ -56,15 +56,6 @@ results.show()
 # In[11]:
 
 
-from IPython.display import Image
-
-Image('./runs/detect/exp/zidane.jpg')
-
-# ## 顯示定界框及預測機率
-
-# In[10]:
-
-
 results.xyxy[0]
 
 # ## 以表格顯示定界框、預測機率及類別

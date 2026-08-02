@@ -136,7 +136,7 @@ state_to_location
 # In[9]:
 
 
-def route(starting_location, ending_location):
+def route(starting_location: str, ending_location: str) -> list[str]:
     # starting_location, ending_location：起點、終點
     # 位置轉換為代碼
     ending_state = location_to_state[ending_location]
@@ -192,7 +192,7 @@ route('A', 'K')
 
 
 # 3 個點的路由
-def best_route(starting_location, intermediary_location, ending_location):
+def best_route(starting_location: str, intermediary_location: str, ending_location: str) -> list[str]:
     # 3 個點的路由 = 2 個點的路由 + 2 個點的路由
     return route(starting_location, intermediary_location) + route(intermediary_location, ending_location)[1:]
 

@@ -6,6 +6,7 @@ from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
 from spp_layer import spatial_pyramid_pool
+from typing import Any, List
 
 
 class SPP_NET(nn.Module):
@@ -13,7 +14,7 @@ class SPP_NET(nn.Module):
     A CNN model which adds spp layer so that we can input multi-size tensor
     '''
 
-    def __init__(self, opt, input_nc, ndf=64, gpu_ids=[]):
+    def __init__(self, opt: Any, input_nc: int, ndf: int = 64, gpu_ids: List[int] = []) -> None:
         super(SPP_NET, self).__init__()
         self.gpu_ids = gpu_ids
         self.output_num = [4, 2, 1]
@@ -34,7 +35,7 @@ class SPP_NET(nn.Module):
         self.fc1 = nn.Linear(10752, 4096)
         self.fc2 = nn.Linear(4096, 1000)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv1(x)
         x = self.LReLU1(x)
 

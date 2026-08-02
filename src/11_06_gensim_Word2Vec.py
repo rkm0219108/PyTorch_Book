@@ -9,6 +9,7 @@
 # 載入相關套件
 import gzip
 import gensim
+from typing import Iterator, List, Set
 
 # ## Gensim簡單測試
 
@@ -61,7 +62,7 @@ with gzip.open(data_file, 'rb') as f:
 
 
 # 讀取 OpinRank 語料庫，並作前置處理
-def read_input(input_file):
+def read_input(input_file: str) -> Iterator[List[str]]:
     with gzip.open(input_file, 'rb') as f:
         for i, line in enumerate(f):
             # 前置處理
@@ -245,7 +246,7 @@ stopword_list = set(nltk.corpus.stopwords.words('english') + list(string.punctua
 
 
 # 分詞函數
-def tokenize(text, stopwords, max_len=MAX_WORDS_A_LINE):
+def tokenize(text: str, stopwords: Set[str], max_len: int = MAX_WORDS_A_LINE) -> List[str]:
     return [token for token in gensim.utils.simple_preprocess(text, max_len=max_len) if token not in stopwords]
 
 

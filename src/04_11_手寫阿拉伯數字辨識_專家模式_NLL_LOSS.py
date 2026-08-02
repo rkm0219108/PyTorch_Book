@@ -59,14 +59,14 @@ print(train_ds.data.shape, test_ds.data.shape)
 
 # 建立模型
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.fc1 = torch.nn.Linear(28 * 28, 256)  # 完全連接層
+        self.fc1 = nn.Linear(28 * 28, 256)  # 完全連接層
         self.dropout1 = nn.Dropout(0.2)
-        self.fc2 = torch.nn.Linear(256, 10)  # 完全連接層
+        self.fc2 = nn.Linear(256, 10)  # 完全連接層
         self.dropout2 = nn.Dropout(0.2)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # 完全連接層 + dropout + 完全連接層 + dropout + log_softmax
         x = torch.flatten(x, 1)
         x = self.fc1(x)

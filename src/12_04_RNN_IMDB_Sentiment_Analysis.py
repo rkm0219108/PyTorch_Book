@@ -10,6 +10,7 @@
 
 import torch
 from torchtext.datasets import IMDB
+from typing import Any, Callable, Iterable, Iterator, List, Tuple
 
 imdb = IMDB(split='train')
 
@@ -47,7 +48,7 @@ tokenizer = get_tokenizer('basic_english')
 
 
 # 建立 Generator 函數
-def yield_tokens(data_iter):
+def yield_tokens(data_iter: Iterable[Tuple[Any, str]]) -> Iterator[List[str]]:
     for _, text in data_iter:
         yield tokenizer(text)
 
@@ -107,20 +108,20 @@ from torch import nn
 
 
 class TextClassificationModel(nn.Module):
-    def __init__(self, vocab_size, embed_dim, num_class):
+    def __init__(self, vocab_size: int, embed_dim: int, num_class: int) -> None:
         super().__init__()
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim, sparse=True)
         self.rnn = nn.RNN(embed_dim, hidden_dim)
         self.fc = nn.Linear(hidden_dim, num_class)
         self.init_weights()
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         initrange = 0.5
         self.embedding.weight.data.uniform_(-initrange, initrange)
         self.fc.weight.data.uniform_(-initrange, initrange)
         self.fc.bias.data.zero_()
 
-    def forward(self, text, offsets):
+    def forward(self, text: torch.Tensor, offsets: torch.Tensor) -> torch.Tensor:
         embedded = self.embedding(text, offsets)
         rnn_out, h_out = self.rnn(embedded)
         return self.fc(rnn_out)
@@ -137,7 +138,7 @@ import time
 
 
 # 訓練函數
-def train(dataloader):
+def train(dataloader: "DataLoader") -> None:
     model.train()
     total_acc, total_count = 0, 0
     log_interval = 500
@@ -148,7 +149,7 @@ def train(dataloader):
         predicted_label = model(text, offsets)
         loss = criterion(predicted_label, label)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.1)
+        nn.utils.clip_grad_norm_(model.parameters(), 0.1)
         optimizer.step()
         total_acc += (predicted_label.argmax(1) == label).sum().item()
         total_count += label.size(0)
@@ -163,7 +164,7 @@ def train(dataloader):
 
 
 # 評估函數
-def evaluate(dataloader):
+def evaluate(dataloader: "DataLoader") -> float:
     model.eval()
     total_acc, total_count = 0, 0
 
@@ -187,7 +188,7 @@ from torchtext.data.functional import to_map_style_dataset
 
 
 # 批次處理
-def collate_batch(batch):
+def collate_batch(batch: List[Tuple[Any, str]]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     label_list, text_list, offsets = [], [], [0]
     for _label, _text in batch:
         label_list.append(label_pipeline(_label))
@@ -218,7 +219,7 @@ test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True, 
 # In[34]:
 
 
-criterion = torch.nn.CrossEntropyLoss()
+criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=LR)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.1)
 
@@ -254,7 +255,7 @@ print(f'測試資料準確度: {evaluate(test_dataloader):.3f}')
 label = {0: '負面', 1: '正面'}
 
 
-def predict(text, text_pipeline):
+def predict(text: str, text_pipeline: Callable[[str], List[int]]) -> int:
     with torch.no_grad():
         text = torch.tensor(text_pipeline(text)).to(device)
         output = model(text, torch.tensor([0]).to(device))

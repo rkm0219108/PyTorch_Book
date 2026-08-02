@@ -14,6 +14,8 @@ Image('./images/grid_world.png')
 
 
 # 載入相關套件
+from typing import List, Tuple, Union
+
 import numpy as np
 import random
 
@@ -30,7 +32,9 @@ actions = [[-1, 0], [1, 0], [0, 1], [0, -1]]  # 行動空間
 
 
 # 行動及獎勵
-def actionValue(initialPosition, action):
+def actionValue(
+    initialPosition: List[int], action: List[int]
+) -> Tuple[Union[List[int], np.ndarray], int]:
     if initialPosition in terminationStates:  # 到達終點
         finalPosition = initialPosition  # 不移動，留在原來位置
         reward = 0  # 獎勵為 0
@@ -54,7 +58,7 @@ def actionValue(initialPosition, action):
 # numIterations：訓練週期
 # gamma：折扣因子
 # valueMap：狀態值函數初始值
-def policy_evaluation(numIterations, gamma, valueMap):
+def policy_evaluation(numIterations: int, gamma: float, valueMap: np.ndarray) -> None:
     valueMap1 = np.copy(valueMap)
     for i in range(numIterations):
         for state in states:  # 更新每一週期的狀態值函數

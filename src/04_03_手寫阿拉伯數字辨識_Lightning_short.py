@@ -14,6 +14,7 @@
 
 # 載入套件
 import torch
+from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from lightning.pytorch import LightningModule, Trainer
@@ -37,20 +38,20 @@ BATCH_SIZE = 256 if AVAIL_GPUS else 64  # 批量
 
 # 建立模型
 class MNISTModel(LightningModule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.l1 = torch.nn.Linear(28 * 28, 10)  # 完全連接層
+        self.l1 = nn.Linear(28 * 28, 10)  # 完全連接層
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # relu activation function + 完全連接層
         return torch.relu(self.l1(x.view(x.size(0), -1)))
 
-    def training_step(self, batch, batch_nb):
+    def training_step(self, batch: tuple[torch.Tensor, torch.Tensor], batch_nb: int) -> torch.Tensor:
         x, y = batch
         loss = F.cross_entropy(self(x), y)  # 交叉熵
         return loss
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> torch.optim.Optimizer:
         return torch.optim.Adam(self.parameters(), lr=0.02)  # Adam 優化器
 
 

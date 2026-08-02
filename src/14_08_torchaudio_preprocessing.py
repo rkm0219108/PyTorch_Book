@@ -53,7 +53,7 @@ IPython.display.Audio(wav_file, autoplay=False)
 
 
 # 取得一段語音的描述統計量
-def print_stats(waveform, sample_rate=None):
+def print_stats(waveform: torch.Tensor, sample_rate: int | None = None) -> None:
     if sample_rate:
         print("Sample Rate:", sample_rate)
     print("維度:", tuple(waveform.shape))
@@ -68,7 +68,13 @@ def print_stats(waveform, sample_rate=None):
 
 
 # 繪製語音的波形
-def plot_waveform(waveform, sample_rate, title="Waveform", xlim=None, ylim=None):
+def plot_waveform(
+    waveform: torch.Tensor,
+    sample_rate: int,
+    title: str = "Waveform",
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+) -> None:
     waveform = waveform.numpy()
 
     num_channels, num_frames = waveform.shape
@@ -91,7 +97,12 @@ def plot_waveform(waveform, sample_rate, title="Waveform", xlim=None, ylim=None)
 
 
 # 繪製語音的頻譜
-def plot_specgram(waveform, sample_rate, title="Spectrogram", xlim=None):
+def plot_specgram(
+    waveform: torch.Tensor,
+    sample_rate: int,
+    title: str = "Spectrogram",
+    xlim: tuple[float, float] | None = None,
+) -> None:
     waveform = waveform.numpy()
 
     num_channels, num_frames = waveform.shape
@@ -111,7 +122,7 @@ def plot_specgram(waveform, sample_rate, title="Spectrogram", xlim=None):
 
 
 # 播放語音
-def play_audio(waveform, sample_rate):
+def play_audio(waveform: torch.Tensor, sample_rate: int) -> None:
     waveform = waveform.numpy()
 
     num_channels, num_frames = waveform.shape
@@ -124,7 +135,7 @@ def play_audio(waveform, sample_rate):
 
 
 # 取得檔案資訊
-def inspect_file(path):
+def inspect_file(path: str) -> None:
     print("-" * 10)
     print("Source:", path)
     print("-" * 10)
@@ -253,7 +264,13 @@ waveform, sample_rate = torchaudio.load(wav_file)
 # In[17]:
 
 
-def plot_spectrogram(spec, title=None, ylabel='freq_bin', aspect='auto', xmax=None):
+def plot_spectrogram(
+    spec: torch.Tensor,
+    title: str | None = None,
+    ylabel: str = 'freq_bin',
+    aspect: str = 'auto',
+    xmax: int | None = None,
+) -> None:
     fig, axs = plt.subplots(1, 1)
     axs.set_title(title or 'Spectrogram (db)')
     axs.set_ylabel(ylabel)
@@ -311,7 +328,7 @@ plot_waveform(waveform, sample_rate, title="Reconstructed")
 
 
 # FBank 繪圖
-def plot_mel_fbank(fbank, title=None):
+def plot_mel_fbank(fbank: torch.Tensor, title: str | None = None) -> None:
     fig, axs = plt.subplots(1, 1)
     axs.set_title(title or 'Filter bank')
     axs.imshow(fbank, aspect='auto')
@@ -391,7 +408,7 @@ plot_spectrogram(mfcc[0])
 # In[26]:
 
 
-def plot_pitch(waveform, sample_rate, pitch):
+def plot_pitch(waveform: torch.Tensor, sample_rate: int, pitch: torch.Tensor) -> None:
     figure, axis = plt.subplots(1, 1)
     axis.set_title("Pitch Feature")
     axis.grid(True)

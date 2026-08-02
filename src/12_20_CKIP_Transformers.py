@@ -11,6 +11,7 @@
 from ckip_transformers import __version__
 from ckip_transformers.nlp import CkipWordSegmenter, CkipPosTagger, CkipNerChunker
 import torch
+from typing import List
 
 # ## 載入模型
 
@@ -48,7 +49,7 @@ ner = ner_driver(text)
 
 
 # 顯示分詞、詞性標記結果
-def pack_ws_pos_sentece(sentence_ws, sentence_pos):
+def pack_ws_pos_sentece(sentence_ws: List[str], sentence_pos: List[str]) -> str:
     res = []
     for word_ws, word_pos in zip(sentence_ws, sentence_pos):
         res.append(f"{word_ws}({word_pos})")

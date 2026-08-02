@@ -15,16 +15,19 @@
 
 
 # 載入套件
+from typing import Iterator, Tuple
+
 import cv2
 import time
 import imutils
+import numpy as np
 
 # In[2]:
 
 
 # 影像金字塔操作
 # image：原圖，scale：每次縮小倍數，minSize：最小尺寸
-def pyramid(image, scale=1.5, minSize=(30, 30)):
+def pyramid(image: np.ndarray, scale: float = 1.5, minSize: Tuple[int, int] = (30, 30)) -> Iterator[np.ndarray]:
     # 第一次傳回原圖
     yield image
 
@@ -44,7 +47,9 @@ def pyramid(image, scale=1.5, minSize=(30, 30)):
 
 
 # 滑動視窗
-def sliding_window(image, stepSize, windowSize):
+def sliding_window(
+    image: np.ndarray, stepSize: int, windowSize: Tuple[int, int]
+) -> Iterator[Tuple[int, int, np.ndarray]]:
     for y in range(0, image.shape[0], stepSize):  # 向下滑動 stepSize 格
         for x in range(0, image.shape[1], stepSize):  # 向右滑動 stepSize 格
             # 傳回裁剪後的視窗

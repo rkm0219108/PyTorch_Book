@@ -8,6 +8,8 @@
 
 # Scikit-Image 的範例
 # 載入套件
+from typing import Iterator
+
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.feature import hog
@@ -78,7 +80,9 @@ from sklearn.feature_extraction.image import PatchExtractor
 
 
 # 轉換為不同的尺寸
-def extract_patches(img, N, scale=1.0, patch_size=positive_patches[0].shape):
+def extract_patches(
+    img: np.ndarray, N: int, scale: float = 1.0, patch_size: tuple[int, ...] = positive_patches[0].shape
+) -> np.ndarray:
     extracted_patch_size = tuple((scale * np.array(patch_size)).astype(int))
     # PatchExtractor：產生不同尺寸的圖像
     extractor = PatchExtractor(patch_size=extracted_patch_size, max_patches=N, random_state=0)
@@ -154,7 +158,13 @@ plt.axis('off')
 
 
 # 滑動視窗函數
-def sliding_window(img, patch_size=positive_patches[0].shape, istep=2, jstep=2, scale=1.0):
+def sliding_window(
+    img: np.ndarray,
+    patch_size: tuple[int, ...] = positive_patches[0].shape,
+    istep: int = 2,
+    jstep: int = 2,
+    scale: float = 1.0,
+) -> Iterator[tuple[tuple[int, int], np.ndarray]]:
     Ni, Nj = (int(scale * s) for s in patch_size)
     for i in range(0, img.shape[0] - Ni, istep):
         for j in range(0, img.shape[1] - Ni, jstep):
@@ -210,7 +220,7 @@ candidate_patches.shape
 
 # Non-Maximum Suppression演算法 by Felzenszwalb et al.
 # boxes：所有候選的視窗，overlapThresh：視窗重疊的比例門檻
-def non_max_suppression_slow(boxes, overlapThresh=0.5):
+def non_max_suppression_slow(boxes: np.ndarray, overlapThresh: float = 0.5) -> np.ndarray | list:
     if len(boxes) == 0:
         return []
 

@@ -25,7 +25,7 @@ t = np.linspace(0, audio_length, sample_rate * audio_length)
 y = np.sin(2 * np.pi * frequency * t)
 plt.plot(t, y, 'g')
 
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']
+plt.rcParams['font.family'] = ['Microsoft JhengHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 plt.axhline(0, color='blue')

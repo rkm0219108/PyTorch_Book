@@ -13,6 +13,8 @@
 # In[ ]:
 
 
+from typing import Any
+
 import gymnasium as gym
 import torch
 import torch.nn as nn
@@ -62,17 +64,17 @@ Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'
 # 定義 Experience Replay Memory 機制
 class ReplayMemory(object):
 
-    def __init__(self, capacity):
+    def __init__(self, capacity: int) -> None:
         self.memory = deque([], maxlen=capacity)
 
-    def push(self, *args):
+    def push(self, *args: Any) -> None:
         """Save a transition"""
         self.memory.append(Transition(*args))
 
-    def sample(self, batch_size):
+    def sample(self, batch_size: int) -> list[Transition]:
         return random.sample(self.memory, batch_size)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.memory)
 
 
@@ -97,7 +99,7 @@ class ReplayMemory(object):
 
 
 class DQN(nn.Module):
-    def __init__(self, h, w, outputs):
+    def __init__(self, h: int, w: int, outputs: int) -> None:
         super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
         self.bn1 = nn.BatchNorm2d(16)
@@ -107,7 +109,7 @@ class DQN(nn.Module):
         self.bn3 = nn.BatchNorm2d(32)
 
         # 計算 Linear 神經層輸入個數
-        def conv2d_size_out(size, kernel_size=5, stride=2):
+        def conv2d_size_out(size: int, kernel_size: int = 5, stride: int = 2) -> int:
             return (size - (kernel_size - 1) - 1) // stride + 1
 
         convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
@@ -115,7 +117,7 @@ class DQN(nn.Module):
         linear_input_size = convw * convh * 32
         self.head = nn.Linear(linear_input_size, outputs)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x.to(device)
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
@@ -133,14 +135,14 @@ resize = T.Compose([T.ToPILImage(), T.Resize(40, interpolation=T.InterpolationMo
 
 
 # 取得台車在螢幕的位置
-def get_cart_location(screen_width):
+def get_cart_location(screen_width: int) -> int:
     world_width = env.x_threshold * 2
     scale = screen_width / world_width
     return int(env.state[0] * scale + screen_width / 2.0)
 
 
 # 取得螢幕所有像素，並轉換為張量
-def get_screen():
+def get_screen() -> torch.Tensor:
     # 將螢幕像素格式轉為三維張量：顏色、高度、寬度(CHW).
     screen = env.render().transpose((2, 0, 1))
 
@@ -214,7 +216,7 @@ episode_durations = []  # 每回合的遊戲時間
 
 
 # 行動選擇
-def select_action(state):
+def select_action(state: torch.Tensor) -> torch.Tensor:
     global steps_done
     sample = random.random()
     eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1.0 * steps_done / EPS_DECAY)
@@ -229,7 +231,7 @@ def select_action(state):
 
 
 # 繪製遊戲時間的線圖
-def plot_durations():
+def plot_durations() -> None:
     plt.figure(2)
     plt.clf()
     durations_t = torch.tensor(episode_durations, dtype=torch.float)
@@ -253,7 +255,7 @@ def plot_durations():
 # In[11]:
 
 
-def optimize_model():
+def optimize_model() -> None:
     if len(memory) < BATCH_SIZE:  # 累積夠資料才訓練
         return
     transitions = memory.sample(BATCH_SIZE)  # 隨機抽樣

@@ -28,13 +28,15 @@ demo()
 
 
 # 載入相關套件
+from typing import Any
+
 from chatbot import Chat, register_call
 import wikipedia
 
 
 # 註冊可接收的關鍵字及負責回應的模組
 @register_call("whoIs")
-def who_is(session, query):
+def who_is(session: Any, query: str) -> str:
     try:
         # 回應
         return wikipedia.summary(query)
@@ -75,7 +77,7 @@ Chat("chatbot_data/Example.template").converse(first_question)
 
 # 記憶(memory)模組定義
 @register_call("increment_count")
-def memory_get_set_example(session, query):
+def memory_get_set_example(session: Any, query: str) -> str:
     # 一律轉成小寫
     name = query.strip().lower()
     # 取得記憶的次數

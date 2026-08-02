@@ -73,7 +73,7 @@ plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=
 # In[26]:
 
 
-def weights_init(m):
+def weights_init(m: nn.Module) -> None:
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
         m.weight.data.normal_(0.0, 0.02)  # 卷積層權重初始值
@@ -88,7 +88,7 @@ def weights_init(m):
 
 
 class Generator(nn.Module):
-    def __init__(self, nc=3, nz=100, ngf=ngf):
+    def __init__(self, nc: int = 3, nz: int = 100, ngf: int = ngf) -> None:
         super(Generator, self).__init__()
         self.main = nn.Sequential(
             # input is Z, going into a convolution
@@ -112,7 +112,7 @@ class Generator(nn.Module):
             nn.Tanh(),
         )
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
         output = self.main(input)
         return output
 
@@ -126,7 +126,7 @@ netG.apply(weights_init)
 
 
 class Discriminator(nn.Module):
-    def __init__(self, nc=3, ndf=ndf):
+    def __init__(self, nc: int = 3, ndf: int = ndf) -> None:
         super(Discriminator, self).__init__()
         self.main = nn.Sequential(
             # input is (nc) x 64 x 64
@@ -149,7 +149,7 @@ class Discriminator(nn.Module):
             nn.Sigmoid(),
         )
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
         output = self.main(input)
         return output.view(-1, 1).squeeze(1)
 

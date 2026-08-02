@@ -27,7 +27,7 @@ from torchmetrics import Accuracy
 
 # 建立模型
 class LitAutoEncoder(pl.LightningModule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.encoder = nn.Sequential(nn.Linear(28 * 28, 64), nn.ReLU(), nn.Linear(64, 10))
@@ -36,15 +36,15 @@ class LitAutoEncoder(pl.LightningModule):
 
         self.accuracy = Accuracy(task="multiclass", num_classes=10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         embedding = self.encoder(x)
         return embedding
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
 
-    def training_step(self, train_batch, batch_idx):
+    def training_step(self, train_batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
         x, y = train_batch
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
@@ -53,7 +53,7 @@ class LitAutoEncoder(pl.LightningModule):
         self.log('train_loss', loss)
         return loss
 
-    def validation_step(self, val_batch, batch_idx):
+    def validation_step(self, val_batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         x, y = val_batch
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
@@ -62,7 +62,7 @@ class LitAutoEncoder(pl.LightningModule):
         loss = F.mse_loss(x_hat, x)
         self.log('val_loss', loss)
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         self.validation_step(batch, batch_idx)
 
 

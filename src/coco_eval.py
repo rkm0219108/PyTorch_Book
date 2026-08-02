@@ -1,6 +1,7 @@
 import copy
 import io
 from contextlib import redirect_stdout
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import pycocotools.mask as mask_util
@@ -11,7 +12,7 @@ from pycocotools.cocoeval import COCOeval
 
 
 class CocoEvaluator:
-    def __init__(self, coco_gt, iou_types):
+    def __init__(self, coco_gt: COCO, iou_types: Union[List[str], Tuple[str, ...]]) -> None:
         assert isinstance(iou_types, (list, tuple))
         coco_gt = copy.deepcopy(coco_gt)
         self.coco_gt = coco_gt
@@ -24,7 +25,7 @@ class CocoEvaluator:
         self.img_ids = []
         self.eval_imgs = {k: [] for k in iou_types}
 
-    def update(self, predictions):
+    def update(self, predictions: Dict[int, Dict[str, Any]]) -> None:
         img_ids = list(np.unique(list(predictions.keys())))
         self.img_ids.extend(img_ids)
 
@@ -40,21 +41,21 @@ class CocoEvaluator:
 
             self.eval_imgs[iou_type].append(eval_imgs)
 
-    def synchronize_between_processes(self):
+    def synchronize_between_processes(self) -> None:
         for iou_type in self.iou_types:
             self.eval_imgs[iou_type] = np.concatenate(self.eval_imgs[iou_type], 2)
             create_common_coco_eval(self.coco_eval[iou_type], self.img_ids, self.eval_imgs[iou_type])
 
-    def accumulate(self):
+    def accumulate(self) -> None:
         for coco_eval in self.coco_eval.values():
             coco_eval.accumulate()
 
-    def summarize(self):
+    def summarize(self) -> None:
         for iou_type, coco_eval in self.coco_eval.items():
             print(f"IoU metric: {iou_type}")
             coco_eval.summarize()
 
-    def prepare(self, predictions, iou_type):
+    def prepare(self, predictions: Dict[int, Dict[str, Any]], iou_type: str) -> List[Dict[str, Any]]:
         if iou_type == "bbox":
             return self.prepare_for_coco_detection(predictions)
         if iou_type == "segm":
@@ -63,7 +64,7 @@ class CocoEvaluator:
             return self.prepare_for_coco_keypoint(predictions)
         raise ValueError(f"Unknown iou type {iou_type}")
 
-    def prepare_for_coco_detection(self, predictions):
+    def prepare_for_coco_detection(self, predictions: Dict[int, Dict[str, Any]]) -> List[Dict[str, Any]]:
         coco_results = []
         for original_id, prediction in predictions.items():
             if len(prediction) == 0:
@@ -87,7 +88,7 @@ class CocoEvaluator:
             )
         return coco_results
 
-    def prepare_for_coco_segmentation(self, predictions):
+    def prepare_for_coco_segmentation(self, predictions: Dict[int, Dict[str, Any]]) -> List[Dict[str, Any]]:
         coco_results = []
         for original_id, prediction in predictions.items():
             if len(prediction) == 0:
@@ -121,7 +122,7 @@ class CocoEvaluator:
             )
         return coco_results
 
-    def prepare_for_coco_keypoint(self, predictions):
+    def prepare_for_coco_keypoint(self, predictions: Dict[int, Dict[str, Any]]) -> List[Dict[str, Any]]:
         coco_results = []
         for original_id, prediction in predictions.items():
             if len(prediction) == 0:
@@ -148,12 +149,12 @@ class CocoEvaluator:
         return coco_results
 
 
-def convert_to_xywh(boxes):
+def convert_to_xywh(boxes: torch.Tensor) -> torch.Tensor:
     xmin, ymin, xmax, ymax = boxes.unbind(1)
     return torch.stack((xmin, ymin, xmax - xmin, ymax - ymin), dim=1)
 
 
-def merge(img_ids, eval_imgs):
+def merge(img_ids: List[int], eval_imgs: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     all_img_ids = utils.all_gather(img_ids)
     all_eval_imgs = utils.all_gather(eval_imgs)
 
@@ -175,7 +176,7 @@ def merge(img_ids, eval_imgs):
     return merged_img_ids, merged_eval_imgs
 
 
-def create_common_coco_eval(coco_eval, img_ids, eval_imgs):
+def create_common_coco_eval(coco_eval: COCOeval, img_ids: List[int], eval_imgs: np.ndarray) -> None:
     img_ids, eval_imgs = merge(img_ids, eval_imgs)
     img_ids = list(img_ids)
     eval_imgs = list(eval_imgs.flatten())
@@ -185,7 +186,7 @@ def create_common_coco_eval(coco_eval, img_ids, eval_imgs):
     coco_eval._paramsEval = copy.deepcopy(coco_eval.params)
 
 
-def evaluate(imgs):
+def evaluate(imgs: COCOeval) -> Tuple[List[int], np.ndarray]:
     with redirect_stdout(io.StringIO()):
         imgs.evaluate()
     return imgs.params.imgIds, np.asarray(imgs.evalImgs).reshape(-1, len(imgs.params.areaRng), len(imgs.params.imgIds))

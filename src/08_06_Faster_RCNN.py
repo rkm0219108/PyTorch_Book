@@ -18,6 +18,7 @@ import torch
 import numpy as np
 import cv2
 import os
+from typing import List, Tuple
 
 # ## 檢查 GPU
 
@@ -146,7 +147,7 @@ len(COCO_INSTANCE_CATEGORY_NAMES)
 # In[6]:
 
 
-def get_prediction(img_path, threshold):
+def get_prediction(img_path: str, threshold: float) -> Tuple[List[List[Tuple[int, int]]], List[str]]:
     # 讀取圖檔
     img = Image.open(img_path)
     # 預測
@@ -170,7 +171,9 @@ def get_prediction(img_path, threshold):
 # In[8]:
 
 
-def object_detection_api(img_path, threshold=0.5, rect_th=3, text_size=2, text_th=2):
+def object_detection_api(
+    img_path: str, threshold: float = 0.5, rect_th: int = 3, text_size: int = 2, text_th: int = 2
+) -> None:
     # 預測
     boxes, pred_cls = get_prediction(img_path, threshold)
 

@@ -16,6 +16,7 @@ import sys
 from collections import defaultdict
 from lib.envs.cliff_walking import CliffWalkingEnv
 from lib import plotting
+from typing import Any, Callable, DefaultDict, Tuple
 
 matplotlib.style.use('ggplot')  # 設定繪圖的風格
 
@@ -54,8 +55,10 @@ env.render()  # 更新畫面
 
 
 # 定義 ε-greedy策略
-def make_epsilon_greedy_policy(Q, epsilon, nA):
-    def policy_fn(observation):
+def make_epsilon_greedy_policy(
+    Q: DefaultDict[Any, np.ndarray], epsilon: float, nA: int
+) -> Callable[[Any], np.ndarray]:
+    def policy_fn(observation: Any) -> np.ndarray:
         # 每個行動的機率初始化，均為 ε / n
         A = np.ones(nA, dtype=float) * epsilon / nA
         best_action = np.argmax(Q[observation])
@@ -70,7 +73,13 @@ def make_epsilon_greedy_policy(Q, epsilon, nA):
 
 
 # 定義 SARSA 策略
-def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
+def sarsa(
+    env: CliffWalkingEnv,
+    num_episodes: int,
+    discount_factor: float = 1.0,
+    alpha: float = 0.5,
+    epsilon: float = 0.1,
+) -> Tuple[DefaultDict[Any, np.ndarray], plotting.EpisodeStats]:
     # 行動值函數初始化
     Q = defaultdict(lambda: np.zeros(env.action_space.n))
     # 記錄 所有回合的長度及獎勵

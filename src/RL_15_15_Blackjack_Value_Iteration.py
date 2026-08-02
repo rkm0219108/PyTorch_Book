@@ -7,6 +7,7 @@
 
 
 # 載入相關套件
+from typing import Callable
 import numpy as np
 from lib.envs.blackjack import BlackjackEnv
 from lib import plotting
@@ -26,8 +27,10 @@ env = BlackjackEnv()
 
 
 # ε-greedy策略
-def make_epsilon_greedy_policy(Q, epsilon, nA):
-    def policy_fn(observation):
+def make_epsilon_greedy_policy(
+    Q: dict[tuple[int, int, bool], np.ndarray], epsilon: float, nA: int
+) -> Callable[[tuple[int, int, bool]], np.ndarray]:
+    def policy_fn(observation: tuple[int, int, bool]) -> np.ndarray:
         # 每個行動的機率初始化，均為 ε / n
         A = np.ones(nA, dtype=float) * epsilon / nA
         best_action = np.argmax(Q[observation])
@@ -42,7 +45,9 @@ def make_epsilon_greedy_policy(Q, epsilon, nA):
 
 
 # 值循環函數
-def value_iteration(env, num_episodes, discount_factor=1.0, epsilon=0.1):
+def value_iteration(
+    env: BlackjackEnv, num_episodes: int, discount_factor: float = 1.0, epsilon: float = 0.1
+) -> tuple[dict[tuple[int, int, bool], np.ndarray], Callable[[tuple[int, int, bool]], np.ndarray]]:
     returns_sum = defaultdict(float)  # 記錄每一個狀態的報酬
     returns_count = defaultdict(float)  # 記錄每一個狀態的訪問個數
     Q = defaultdict(lambda: np.zeros(env.action_space.n))  # 行動值函數

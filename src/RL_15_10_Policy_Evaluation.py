@@ -6,13 +6,6 @@
 # In[18]:
 
 
-from IPython.display import Image
-
-Image('./images/grid_world.png')
-
-# In[61]:
-
-
 # 載入相關套件
 import gymnasium as gym
 import numpy as np
@@ -45,7 +38,7 @@ env.P
 # In[78]:
 
 
-def policy_eval(policy, env, epoch=1, discount_factor=1.0):
+def policy_eval(policy: np.ndarray, env: GridworldEnv, epoch: int = 1, discount_factor: float = 1.0) -> np.ndarray:
     # 狀態值函數初始化
     V = np.zeros(env.nS)
     V1 = np.copy(V)
@@ -102,7 +95,9 @@ print(v.reshape(env.shape))
 
 
 # 策略評估函數
-def policy_eval(policy, env, discount_factor=1.0, theta=0.00001):
+def policy_eval(
+    policy: np.ndarray, env: GridworldEnv, discount_factor: float = 1.0, theta: float = 0.00001
+) -> np.ndarray:
     # 狀態值函數初始化
     V = np.zeros(env.nS)
     V1 = np.copy(V)

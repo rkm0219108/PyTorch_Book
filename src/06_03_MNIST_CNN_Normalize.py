@@ -71,34 +71,34 @@ import math
 #     return math.floor((W - F) / S) + 1
 
 
-def Conv_Width(W, F, P, S):
+def Conv_Width(W: int, F: int, P: int, S: int) -> int:
     return math.floor(((W - F + 2 * P) / S) + 1)
 
 
-def Conv_Output_Volume(W, F, P, S, out):
+def Conv_Output_Volume(W: int, F: int, P: int, S: int, out: int) -> int:
     return Conv_Width(W, F, P, S) ** 2 * out
 
 
 # C: no of channels
-def Conv_Parameter_Count(F, C, out):
+def Conv_Parameter_Count(F: int, C: int, out: int) -> int:
     return F**2 * C * out
 
 
-def Pool_Width(W, F, P, S):
+def Pool_Width(W: int, F: int, P: int, S: int) -> int:
     return Conv_Width(W, F, P, S)
 
 
 # filter_count: no of filter in last conv
 # stride count default value = Filter width
-def Pool_Output_Volume(W, F, P, S, filter_count):
+def Pool_Output_Volume(W: int, F: int, P: int, S: int, filter_count: int) -> int:
     return Conv_Output_Volume(W, F, P, S, filter_count)
 
 
-def Pool_Parameter_Count(W, F, S):
+def Pool_Parameter_Count(W: int, F: int, S: int) -> int:
     return 0
 
 
-def Conv_Pool_Width(W, F, P, S, F2, P2, S2, n):
+def Conv_Pool_Width(W: int, F: int, P: int, S: int, F2: int, P2: int, S2: int, n: int) -> int:
     for i in range(n):
         W = Pool_Width(Conv_Width(W, F, P, S), F2, P2, S2)
     return W
@@ -119,7 +119,7 @@ l2_Width, p1_out
 
 # Conv2d 參數： in-channel, out-channel, kernel size, Stride, Padding
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
         self.conv2 = nn.Conv2d(32, 64, 3, 1)
@@ -128,7 +128,7 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(9216, 128)
         self.fc2 = nn.Linear(128, 10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv1(x)
         x = F.relu(x)
         x = self.conv2(x)
@@ -147,7 +147,13 @@ class Net(nn.Module):
 # In[8]:
 
 
-def train(model, device, train_loader, optimizer, epoch):
+def train(
+    model: nn.Module,
+    device: torch.device,
+    train_loader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    epoch: int,
+) -> list[float]:
     model.train()
     loss_list = []
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -171,7 +177,7 @@ def train(model, device, train_loader, optimizer, epoch):
 # In[9]:
 
 
-def test(model, device, test_loader):
+def test(model: nn.Module, device: torch.device, test_loader: DataLoader) -> None:
     model.eval()
     test_loss = 0
     correct = 0

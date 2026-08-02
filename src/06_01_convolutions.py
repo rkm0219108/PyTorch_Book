@@ -54,7 +54,7 @@ convolve2d(source_map, filter1, mode='valid')
 from skimage.exposure import rescale_intensity
 
 
-def convolve(image, kernel):
+def convolve(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
     # 取得圖像與濾波器的寬高
     iH, iW = image.shape[:2]
     kH, kW = kernel.shape[:2]

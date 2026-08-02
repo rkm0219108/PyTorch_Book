@@ -10,6 +10,7 @@
 
 # 載入相關套件
 import spacy
+from spacy.tokens import Doc
 import json
 import random
 import pandas as pd
@@ -62,7 +63,7 @@ from spacy.lang.en.stop_words import STOP_WORDS
 
 
 # 去除停用詞函數
-def remove_stopwords(text1):
+def remove_stopwords(text1: str) -> Doc:
     filtered_sentence = []
     doc = nlp(text1)
     for word in doc:
@@ -72,7 +73,7 @@ def remove_stopwords(text1):
 
 
 # 結束用語
-def say_goodbye():
+def say_goodbye() -> str:
     tag = 1  # goodbye 項次
     response_filter = responses_df[responses_df['no'] == tag][['response']]
     selected_response = response_filter.sample().iloc[0, 0]
@@ -80,7 +81,7 @@ def say_goodbye():
 
 
 # 結束用語
-def say_not_understand():
+def say_not_understand() -> str:
     tag = 3  # 不理解的項次
     response_filter = responses_df[responses_df['no'] == tag][['response']]
     selected_response = response_filter.sample().iloc[0, 0]

@@ -47,7 +47,7 @@ f.close()
 import pyaudio
 
 
-def PlayAudio(filename, seconds=-1):
+def PlayAudio(filename: str, seconds: int = -1) -> None:
     # 定義串流區塊大小(stream chunk)
     chunk = 1024
 
@@ -117,7 +117,7 @@ import matplotlib.pyplot as plt
 
 
 # 單聲道繪製波形
-def DrawWavFile_mono(filename):
+def DrawWavFile_mono(filename: str) -> None:
     # 開啟音檔
     f = wave.open(filename, "r")
 
@@ -161,7 +161,7 @@ f.close()
 
 
 # 多聲道繪製波形
-def DrawWavFile_stereo(filename):
+def DrawWavFile_stereo(filename: str) -> None:
     # 開啟音檔
     with wave.open(filename, 'r') as wav_file:
         # 字串轉換整數
@@ -197,7 +197,7 @@ DrawWavFile_stereo(wav_file)
 
 
 # 多聲道繪製波形
-def DrawWavFile(wav_file):
+def DrawWavFile(wav_file: str) -> None:
     f = wave.open(wav_file)
     channels = f.getnchannels()  # 聲道
     f.close()

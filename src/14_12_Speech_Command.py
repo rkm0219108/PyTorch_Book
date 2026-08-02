@@ -22,6 +22,7 @@ import sys
 import audio_util
 from IPython.display import Audio
 from IPython.core.display import display
+from typing import List, Tuple
 
 # In[2]:
 
@@ -141,7 +142,7 @@ for label in labels:
     no_of_recordings.append(len(waves))
 
 # 繪圖
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']
+plt.rcParams['font.family'] = ['Zhuque Fangsong (technical preview)']
 plt.rcParams['axes.unicode_minus'] = False
 
 plt.figure(figsize=(10, 6))
@@ -195,13 +196,13 @@ n_mfcc = 40  # 萃取 MFCC 個數
 
 
 class SPEECH_DS(Dataset):
-    def __init__(self, dataset1):
+    def __init__(self, dataset1: Dataset) -> None:
         self.dataset1 = dataset1
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.dataset1)
 
-    def __getitem__(self, n):
+    def __getitem__(self, n: int) -> Tuple[torch.Tensor, int]:
         waveform, sample_rate, label, _, _ = self.dataset1[n]
         if waveform.shape[1] < TOTAL_FRAME_COUNT:  # 長度不足，右邊補 0
             waveform = F.pad(waveform, (0, TOTAL_FRAME_COUNT - waveform.shape[1]), 'constant')
@@ -262,7 +263,7 @@ Linear_Input = 6400
 
 
 class ConvNet(nn.Module):
-    def __init__(self, num_classes=3):
+    def __init__(self, num_classes: int = 3) -> None:
         super(ConvNet, self).__init__()
         self.layer1 = nn.Sequential(
             # Conv2d 參數： in-channel, out-channel, kernel size, Stride, Padding
@@ -279,7 +280,7 @@ class ConvNet(nn.Module):
         )
         self.fc = nn.Linear(Linear_Input, num_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.layer1(x)
         out = self.layer2(out)
         out = out.reshape(out.size(0), -1)
@@ -295,7 +296,7 @@ model = ConvNet(num_classes=3).to(device)
 # In[25]:
 
 
-def score_model():
+def score_model() -> Tuple[List[int], List[int]]:
     model.eval()
     test_loss = 0
     correct = 0
@@ -388,7 +389,7 @@ model = torch.load('Speech_Command.pth')
 
 
 # 預測函數
-def predict(wav_file):
+def predict(wav_file: str) -> int:
     waveform, sample_rate = torchaudio.load(wav_file)
 
     if waveform.shape[1] < TOTAL_FRAME_COUNT:  # 長度不足，右邊補 0

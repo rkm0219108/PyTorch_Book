@@ -12,6 +12,7 @@
 import torch
 from torch_geometric.data import Data
 import networkx as nx
+from typing import Any, Tuple
 
 # ## 載入內建資料集
 
@@ -94,8 +95,8 @@ from torch_geometric.nn import global_mean_pool
 from torch_geometric.nn import GraphConv
 
 
-class GCN(torch.nn.Module):
-    def __init__(self, hidden_channels):
+class GCN(nn.Module):
+    def __init__(self, hidden_channels: int) -> None:
         super().__init__()
         torch.manual_seed(12345)
         self.conv1 = GraphConv(dataset.num_node_features, hidden_channels)
@@ -103,7 +104,7 @@ class GCN(torch.nn.Module):
         self.conv3 = GraphConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels, dataset.num_classes)
 
-    def forward(self, x, edge_index, batch):
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
         x = self.conv1(x, edge_index)
         x = x.relu()
         x = self.conv2(x, edge_index)
@@ -129,10 +130,10 @@ print(model)
 import numpy as np
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-criterion = torch.nn.CrossEntropyLoss()
+criterion = nn.CrossEntropyLoss()
 
 
-def train():
+def train() -> None:
     model.train()
 
     for data in train_loader:
@@ -144,7 +145,7 @@ def train():
         optimizer.zero_grad()
 
 
-def test(loader):
+def test(loader: DataLoader) -> Tuple[float, np.ndarray, np.ndarray]:
     model.eval()
 
     correct = 0
@@ -185,7 +186,7 @@ import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
 
-def visualize(h, color):
+def visualize(h: torch.Tensor, color: Any) -> None:
     # 降維至2個主成份
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
 

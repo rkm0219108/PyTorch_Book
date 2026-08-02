@@ -13,7 +13,6 @@
 import numpy as np
 import random
 import networkx as nx
-from IPython.display import Image
 import matplotlib.pyplot as plt
 
 # ## 建立圖形

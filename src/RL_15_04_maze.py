@@ -55,7 +55,7 @@ x
 # 環境類別
 class Environment:
     # 初始化
-    def __init__(self):
+    def __init__(self) -> None:
         # 儲存狀態值函數
         self.state_value = np.full(NODE_COUNT, 0.0)
 
@@ -63,24 +63,24 @@ class Environment:
         self.state_value_count = np.full(NODE_COUNT, 0)
 
     # 初始化
-    def reset(self):
+    def reset(self) -> None:
         self.poistion = 0  # 玩家開始的位置
         self.trajectory = [self.poistion]  # 行動軌跡
 
-    def get_states(self):
+    def get_states(self) -> list[int]:
         # 狀態空間(State Space)
         return [i for i in range(NODE_COUNT)]
 
-    def get_actions(self):
+    def get_actions(self) -> list[int]:
         # 行動空間(Action Space)
         return [UP, DOWN, LEFT, RIGHT]  # 上/下/左/右
 
-    def is_done(self):  # 判斷比賽回合是否結束
+    def is_done(self) -> bool:  # 判斷比賽回合是否結束
         # 是否走到終點
         return self.poistion == WIN_TERMINAL or self.poistion == LOSS_TERMINAL
 
     # 更新位置
-    def update_poistion(self, action):
+    def update_poistion(self, action: int) -> int:
         if action == DOWN:
             new_poistion = self.poistion - COLUMN_COUNT
         if action == UP:
@@ -96,7 +96,7 @@ class Environment:
         return new_poistion
 
     # 步驟
-    def step(self, action):
+    def step(self, action: int) -> tuple[int, float]:
         # 是否回合已結束
         if self.is_done():
             raise Exception("Game over")
@@ -112,7 +112,7 @@ class Environment:
 
         return self.poistion, reward
 
-    def update_state_value(self, final_value):
+    def update_state_value(self, final_value: float) -> None:
         # 考慮節點被走過兩次或以上，分數會被重複扣分
         # 採首次訪問(first visit)的報酬更新狀態值
         distinct_node_list = list(set(self.trajectory))
@@ -135,7 +135,7 @@ class Environment:
             self.state_value_count[val] += 1
 
     # 取得狀態值函數期望值
-    def get_observation(self):
+    def get_observation(self) -> np.ndarray:
         mean1 = np.full(NODE_COUNT, 0.0)
         for i in range(NODE_COUNT):
             if self.state_value_count[i] == 0:
@@ -151,11 +151,11 @@ class Environment:
 # 代理人類別
 class Agent:
     # 初始化
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     # 取得可以行走的方向
-    def check_possible_action(self, env):
+    def check_possible_action(self, env: Environment) -> list[int]:
         possible_actions = env.get_actions()
         if env.poistion < COLUMN_COUNT:  # 最下一列不可向下
             possible_actions.remove(DOWN)
@@ -177,7 +177,7 @@ class Agent:
 
         return possible_actions
 
-    def action(self, env):
+    def action(self, env: Environment) -> int:
         # 取得狀態值函數期望值
         state_value = env.get_observation()
 

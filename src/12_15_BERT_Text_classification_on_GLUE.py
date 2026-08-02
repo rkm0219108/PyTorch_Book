@@ -26,12 +26,14 @@ dataset
 dataset["train"][1]
 
 import random
+from typing import Any, Dict, Tuple
+
 import pandas as pd
 from IPython.display import display, HTML
 
 
 # 隨機抽取資料函數
-def show_random_elements(dataset, num_examples=10):
+def show_random_elements(dataset: datasets.Dataset, num_examples: int = 10) -> None:
     picks = []
     for _ in range(num_examples):
         pick = random.randint(0, len(dataset) - 1)
@@ -94,7 +96,7 @@ else:
 
 
 # 測試 5 筆資料分詞
-def preprocess_function(examples):
+def preprocess_function(examples: Dict[str, Any]) -> Any:
     if sentence2_key is None:
         return tokenizer(examples[sentence1_key], truncation=True)
     return tokenizer(examples[sentence1_key], examples[sentence2_key], truncation=True)
@@ -128,7 +130,7 @@ args = TrainingArguments(
 
 
 # 定義效能衡量指標計算的函數
-def compute_metrics(eval_pred):
+def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:
     predictions, labels = eval_pred
     if task != "stsb":
         predictions = np.argmax(predictions, axis=1)
@@ -162,13 +164,13 @@ trainer.save_model('./cola')
 
 # 預測
 class SimpleDataset:
-    def __init__(self, tokenized_texts):
+    def __init__(self, tokenized_texts: Any) -> None:
         self.tokenized_texts = tokenized_texts
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.tokenized_texts["input_ids"])
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Dict[str, Any]:
         return {k: v[idx] for k, v in self.tokenized_texts.items()}
 
 
@@ -191,7 +193,7 @@ trainer.predict(new_dataset)
 # get_ipython().system('pip install ray[tune]')
 
 
-def model_init():
+def model_init() -> Any:
     return AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels)
 
 

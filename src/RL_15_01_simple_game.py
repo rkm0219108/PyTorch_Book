@@ -1,25 +1,26 @@
 # 載入相關套件
 import random
+from typing import List, Tuple
 
 
 # 環境類別
 class Environment:
-    def __init__(self):  # 初始化
+    def __init__(self) -> None:  # 初始化
         self.poistion = 3  # 玩家一開始站中間位置
 
-    def get_observation(self):
+    def get_observation(self) -> List[int]:
         # 狀態空間(State Space)，共有5個位置
         return [i for i in range(1, 6)]
 
-    def get_actions(self):
+    def get_actions(self) -> List[int]:
         return [-1, 1]  # 行動空間(Action Space)
 
-    def is_done(self):  # 判斷比賽回合是否結束
+    def is_done(self) -> bool:  # 判斷比賽回合是否結束
         # 是否走到左右端點
         return self.poistion == 1 or self.poistion == 5
 
     # 步驟
-    def step(self, action):
+    def step(self, action: int) -> Tuple[int, float]:
         # 是否回合已結束
         if self.is_done():
             raise Exception("Game over")
@@ -38,10 +39,10 @@ class Environment:
 # 代理人類別
 class Agent:
     # 初始化
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def action(self, env):
+    def action(self, env: Environment) -> int:
         # 取得狀態
         current_obs = env.get_observation()
         # 隨機行動

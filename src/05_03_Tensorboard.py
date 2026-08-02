@@ -51,7 +51,7 @@ classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shi
 
 
 # Helper function for inline image display
-def matplotlib_imshow(img, one_channel=False):
+def matplotlib_imshow(img: torch.Tensor, one_channel: bool = False) -> None:
     if one_channel:
         img = img.mean(dim=0)
     img = img / 2 + 0.5  # unnormalize
@@ -114,7 +114,7 @@ writer.flush()
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
@@ -123,7 +123,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 16 * 4 * 4)
@@ -236,7 +236,7 @@ writer.flush()
 
 
 # Select a random subset of data and corresponding labels
-def select_n_random(data, labels, n=100):
+def select_n_random(data: torch.Tensor, labels: torch.Tensor, n: int = 100) -> tuple[torch.Tensor, torch.Tensor]:
     assert len(data) == len(labels)
 
     perm = torch.randperm(len(data))

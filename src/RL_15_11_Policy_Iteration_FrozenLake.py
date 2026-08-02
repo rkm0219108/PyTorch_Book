@@ -9,6 +9,7 @@
 # 載入相關套件
 import numpy as np
 import gymnasium as gym
+from typing import Callable, Tuple
 
 # In[2]:
 
@@ -33,7 +34,7 @@ env.P
 
 
 # 策略評估函數
-def policy_eval(policy, env, discount_factor=1.0, theta=0.00001):
+def policy_eval(policy: np.ndarray, env: gym.Env, discount_factor: float = 1.0, theta: float = 0.00001) -> np.ndarray:
     # 狀態值函數初始化
     V = np.zeros(nS)
     V1 = np.copy(V)
@@ -73,9 +74,13 @@ print(v.reshape((int(nS**0.5), int(nS**0.5))))
 # In[15]:
 
 
-def policy_improvement(env, policy_eval_fn=policy_eval, discount_factor=1.0):
+def policy_improvement(
+    env: gym.Env,
+    policy_eval_fn: Callable[[np.ndarray, gym.Env, float], np.ndarray] = policy_eval,
+    discount_factor: float = 1.0,
+) -> Tuple[np.ndarray, np.ndarray]:
     # 計算行動值函數
-    def one_step_lookahead(state, V):
+    def one_step_lookahead(state: int, V: np.ndarray) -> np.ndarray:
         A = np.zeros(nA)
         for a in range(nA):
             for prob, next_state, reward, done in env.P[state][a]:

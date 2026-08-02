@@ -66,7 +66,7 @@ test_loader = torch.utils.data.DataLoader(
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Net, self).__init__()
 
         self.conv_layers = nn.Sequential(
@@ -82,7 +82,7 @@ class Net(nn.Module):
             nn.Linear(320, 50), nn.ReLU(), nn.Dropout(), nn.Linear(50, 10), nn.Softmax(dim=1)
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv_layers(x)
         x = x.view(-1, 320)
         x = self.fc_layers(x)
@@ -97,7 +97,13 @@ model = Net().to(device)
 
 
 # 訓練函數
-def train(model, device, train_loader, optimizer, epoch):
+def train(
+    model: nn.Module,
+    device: torch.device,
+    train_loader: torch.utils.data.DataLoader,
+    optimizer: optim.Optimizer,
+    epoch: int,
+) -> None:
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
@@ -119,7 +125,7 @@ def train(model, device, train_loader, optimizer, epoch):
 
 
 # 測試函數
-def test(model, device, test_loader):
+def test(model: nn.Module, device: torch.device, test_loader: torch.utils.data.DataLoader) -> None:
     model.eval()
     test_loss = 0
     correct = 0

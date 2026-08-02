@@ -1,4 +1,6 @@
 # 載入相關套件
+from __future__ import annotations
+
 import numpy as np
 import pickle
 import os

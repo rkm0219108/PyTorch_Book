@@ -30,7 +30,7 @@ y += np.random.uniform(-10, 10, n)
 
 
 # 定義模型
-def create_model(input_feature, output_feature):
+def create_model(input_feature: int, output_feature: int) -> torch.nn.Module:
     model = torch.nn.Sequential(
         torch.nn.Linear(input_feature, output_feature), torch.nn.Flatten(0, -1)  # 所有維度轉成一維
     )
@@ -51,7 +51,12 @@ output.size()
 # In[16]:
 
 
-def train(X, y, epochs=2000, lr=1e-6):
+def train(
+    X: torch.Tensor,
+    y: torch.Tensor,
+    epochs: int = 2000,
+    lr: float = 1e-6,
+) -> tuple[list[float], list[float], list[float]]:
     model = create_model(1, 1)
 
     # 定義損失函數

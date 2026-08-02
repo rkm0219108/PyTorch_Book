@@ -18,6 +18,7 @@ from tqdm.notebook import tqdm
 from itertools import chain
 from collections import OrderedDict
 import random
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
@@ -194,7 +195,7 @@ plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:10], padding=
 # In[52]:
 
 
-def plot_images_test(dataloader_test_horses, dataloader_zebra_test):
+def plot_images_test(dataloader_test_horses: DataLoader, dataloader_zebra_test: DataLoader) -> None:
     batch_a_test = next(iter(dataloader_test_horses))[0].to(device)
     real_a_test = batch_a_test.cpu().detach()
     # 將馬變成斑馬
@@ -235,7 +236,7 @@ def plot_images_test(dataloader_test_horses, dataloader_zebra_test):
 # In[53]:
 
 
-def plot_all_images(image_number, dataloader_test_horses, dataloader_zebra_test):
+def plot_all_images(image_number: int, dataloader_test_horses: DataLoader, dataloader_zebra_test: DataLoader) -> None:
     # generate fake zebras
     batch_a_test = next(iter(dataloader_test_horses))[0].to(device)
     real_a_test = batch_a_test.cpu().detach()
@@ -321,14 +322,14 @@ def plot_all_images(image_number, dataloader_test_horses, dataloader_zebra_test)
 # In[54]:
 
 
-def save_models(G_A2B, G_B2A, D_A, D_B, name):
+def save_models(G_A2B: nn.Module, G_B2A: nn.Module, D_A: nn.Module, D_B: nn.Module, name: str) -> None:
     torch.save(G_A2B, "/content/gdrive/My Drive/model_proj3/" + name + "_G_A2B.pt")
     torch.save(G_B2A, "/content/gdrive/My Drive/model_proj3/" + name + "_G_B2A.pt")
     torch.save(D_A, "/content/gdrive/My Drive/model_proj3/" + name + "_D_A.pt")
     torch.save(D_B, "/content/gdrive/My Drive/model_proj3/" + name + "_D_B.pt")
 
 
-def load_models(name):
+def load_models(name: str) -> Tuple[nn.Module, nn.Module, nn.Module, nn.Module]:
     G_A2B = torch.load("/content/gdrive/My Drive/model_proj3/" + name + "_G_A2B.pt")
     G_B2A = torch.load("/content/gdrive/My Drive/model_proj3/" + name + "_G_B2A.pt")
     D_A = torch.load("/content/gdrive/My Drive/model_proj3/" + name + "_D_A.pt")
@@ -348,17 +349,17 @@ norm_layer = nn.InstanceNorm2d
 
 
 class ResBlock(nn.Module):
-    def __init__(self, f):
+    def __init__(self, f: int) -> None:
         super(ResBlock, self).__init__()
         self.conv = nn.Sequential(nn.Conv2d(f, f, 3, 1, 1), norm_layer(f), nn.ReLU(), nn.Conv2d(f, f, 3, 1, 1))
         self.norm = norm_layer(f)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return F.relu(self.norm(self.conv(x) + x))
 
 
 class Generator(nn.Module):
-    def __init__(self, f=64, blocks=9):
+    def __init__(self, f: int = 64, blocks: int = 9) -> None:
         super(Generator, self).__init__()
         layers = [
             nn.ReflectionPad2d(3),
@@ -391,7 +392,7 @@ class Generator(nn.Module):
         )
         self.conv = nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.conv(x)
 
 
@@ -405,7 +406,7 @@ ndf = 64
 
 
 class Discriminator(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Discriminator, self).__init__()
         self.main = nn.Sequential(
             # input is (nc) x 128 x 128
@@ -428,7 +429,7 @@ class Discriminator(nn.Module):
             # state size. 1 x 14 x 14
         )
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
         return self.main(input)
 
 
@@ -437,11 +438,11 @@ class Discriminator(nn.Module):
 # In[57]:
 
 
-def LSGAN_D(real, fake):
+def LSGAN_D(real: torch.Tensor, fake: torch.Tensor) -> torch.Tensor:
     return torch.mean((real - 1) ** 2) + torch.mean(fake**2)
 
 
-def LSGAN_G(fake):
+def LSGAN_G(fake: torch.Tensor) -> torch.Tensor:
     return torch.mean((fake - 1) ** 2)
 
 
@@ -458,7 +459,7 @@ D_A = Discriminator().to(device)
 D_B = Discriminator().to(device)
 
 # Initialize Loss function
-criterion_Im = torch.nn.L1Loss()
+criterion_Im = nn.L1Loss()
 
 # Learning rate for optimizers
 lr = 0.0002
@@ -476,7 +477,15 @@ optimizer_D_B = torch.optim.Adam(D_B.parameters(), lr=lr, betas=(0.5, 0.999))
 # In[63]:
 
 
-def training(G_A2B, G_B2A, D_A, D_B, num_epochs, name, old=True):
+def training(
+    G_A2B: nn.Module,
+    G_B2A: nn.Module,
+    D_A: nn.Module,
+    D_B: nn.Module,
+    num_epochs: int,
+    name: str,
+    old: bool = True,
+) -> Tuple[List, List, List, List, List, List, List, List]:
     # Lists to keep track of progress
     img_list = []
     G_losses = []

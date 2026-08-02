@@ -14,6 +14,8 @@ from tensorflow.keras.layers import Embedding, Dense, LSTM, Dropout
 from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
+from typing import Tuple
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -65,7 +67,9 @@ array = scl.fit_transform(array)
 
 # 前置處理函數，取得模型輸入的格式
 # look_back：特徵(X)個數，forward_days：目標(y)個數，jump：移動視窗
-def processData(data, look_back, forward_days, jump=1):
+def processData(
+    data: np.ndarray, look_back: int, forward_days: int, jump: int = 1
+) -> Tuple[np.ndarray, np.ndarray]:
     X, Y = [], []
     for i in range(0, len(data) - look_back - forward_days + 1, jump):
         X.append(data[i : (i + look_back)])

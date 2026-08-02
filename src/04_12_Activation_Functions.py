@@ -11,7 +11,7 @@
 # 載入套件
 import torch
 
-m = torch.nn.ReLU()
+m = nn.ReLU()
 input = torch.tensor([5, 2, 0, -10])
 output = m(input)
 output
@@ -21,7 +21,7 @@ output
 # In[7]:
 
 
-m = torch.nn.LeakyReLU()
+m = nn.LeakyReLU()
 input = torch.tensor([5, 2, 0, -10, -100], dtype=float)
 output = m(input)
 output
@@ -31,7 +31,7 @@ output
 # In[8]:
 
 
-m = torch.nn.Sigmoid()
+m = nn.Sigmoid()
 input = torch.tensor([5, 2, 0, -10, -100], dtype=float)
 output = m(input)
 output
@@ -41,7 +41,7 @@ output
 # In[14]:
 
 
-m = torch.nn.Tanh()
+m = nn.Tanh()
 input = torch.tensor([5, 2, 0, -10, -100], dtype=float)
 output = m(input)
 output
@@ -51,7 +51,7 @@ output
 # In[20]:
 
 
-m = torch.nn.Softmax(dim=1)
+m = nn.Softmax(dim=1)
 input = torch.tensor([[1.0, 2.0, 3.0, 4.0]], dtype=float)
 output = m(input)
 output

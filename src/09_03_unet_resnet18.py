@@ -11,6 +11,7 @@
 
 
 import os
+from typing import Any, Callable, Dict, List, Optional
 
 # if not os.path.exists("pytorch_unet"):
 #     get_ipython().system('git clone https://github.com/usuyama/pytorch-unet.git')
@@ -77,19 +78,20 @@ helper.plot_side_by_side([input_images_rgb, target_masks_rgb])
 
 
 from torch.utils.data import Dataset, DataLoader
+from torch.optim import Optimizer
 from torchvision import transforms, datasets, models
 
 
 # 自訂資料集，一次傳回原圖、遮罩圖像各一個
 class SimDataset(Dataset):
-    def __init__(self, count, transform=None):
+    def __init__(self, count: int, transform: Optional[Callable] = None) -> None:
         self.input_images, self.target_masks = simulation.generate_random_data(192, 192, count=count)
         self.transform = transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.input_images)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> List[Any]:
         image = self.input_images[idx]
         mask = self.target_masks[idx]
         if self.transform:
@@ -130,7 +132,7 @@ import torchvision.utils
 
 
 # 還原轉換
-def reverse_transform(inp):
+def reverse_transform(inp: torch.Tensor) -> np.ndarray:
     inp = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
@@ -155,7 +157,7 @@ import torch.nn as nn
 import torchvision.models
 
 
-def convrelu(in_channels, out_channels, kernel, padding):
+def convrelu(in_channels: int, out_channels: int, kernel: int, padding: int) -> nn.Sequential:
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, kernel, padding=padding),
         nn.ReLU(inplace=True),
@@ -163,7 +165,7 @@ def convrelu(in_channels, out_channels, kernel, padding):
 
 
 class ResNetUNet(nn.Module):
-    def __init__(self, n_class):
+    def __init__(self, n_class: int) -> None:
         super().__init__()
 
         # 載入 resnet18 模型
@@ -194,7 +196,7 @@ class ResNetUNet(nn.Module):
 
         self.conv_last = nn.Conv2d(64, n_class, 1)
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
         x_original = self.conv_original_size0(input)
         x_original = self.conv_original_size1(x_original)
 
@@ -280,7 +282,7 @@ checkpoint_path = "checkpoint.pth"
 
 
 # 損失採 binary cross entropy + dice loss
-def calc_loss(pred, target, metrics, bce_weight=0.5):
+def calc_loss(pred: torch.Tensor, target: torch.Tensor, metrics: Dict[str, float], bce_weight: float = 0.5) -> torch.Tensor:
     bce = F.binary_cross_entropy_with_logits(pred, target)
 
     pred = torch.sigmoid(pred)
@@ -296,7 +298,7 @@ def calc_loss(pred, target, metrics, bce_weight=0.5):
 
 
 # 計算效能衡量指標
-def print_metrics(metrics, epoch_samples, phase):
+def print_metrics(metrics: Dict[str, float], epoch_samples: int, phase: str) -> None:
     outputs = []
     for k in metrics.keys():
         outputs.append(f"{k}: {(metrics[k] / epoch_samples):4f}")
@@ -309,7 +311,7 @@ def print_metrics(metrics, epoch_samples, phase):
 # In[12]:
 
 
-def train_model(model, optimizer, scheduler, num_epochs=25):
+def train_model(model: nn.Module, optimizer: Optimizer, scheduler: Any, num_epochs: int = 25) -> nn.Module:
     best_loss = 1e10
 
     for epoch in range(num_epochs):

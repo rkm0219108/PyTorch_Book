@@ -53,13 +53,13 @@ print(train_ds.data.shape, test_ds.data.shape)
 
 
 # 建立模型
-model = torch.nn.Sequential(
-    torch.nn.Flatten(),
-    torch.nn.Linear(28 * 28, 256),
+model = nn.Sequential(
+    nn.Flatten(),
+    nn.Linear(28 * 28, 256),
     nn.Dropout(0.2),
-    torch.nn.Linear(256, 64),
+    nn.Linear(256, 64),
     nn.Dropout(0.2),
-    torch.nn.Linear(64, 10),
+    nn.Linear(64, 10),
 ).to(device)
 
 # ## 步驟6：結合訓練資料及模型，進行模型訓練

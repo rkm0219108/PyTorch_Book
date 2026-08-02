@@ -43,24 +43,3 @@ files.download('./runs/train/yolov73/weights/best.pt')
 
 # Run evaluation
 # !python detect.py --weights ./runs/train/yolov73/weights/best.pt --conf 0.03 --source ./OID/Dataset/test/Balloon/76e41712939b97f2.jpg
-
-
-# ls /content/yolov7/runs/detect/
-
-from IPython.display import Image, display
-
-imageName = './OID/Dataset/test/Balloon/76e41712939b97f2.jpg'
-display(Image(filename=imageName))
-
-# display inference on ALL test images
-
-import glob
-from IPython.display import Image, display
-
-i = 0
-limit = 10000  # max images to print
-for imageName in glob.glob('/content/yolov7/runs/detect/exp2/*.jpg'):  # assuming JPG
-    if i < limit:
-        display(Image(filename=imageName))
-        print("\n")
-    i = i + 1

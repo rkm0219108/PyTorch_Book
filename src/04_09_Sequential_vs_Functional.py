@@ -10,7 +10,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-# # [Sequential model](https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html) 兩種寫法
+# # [Sequential model](https://pytorch.org/docs/stable/generated/nn.Sequential.html) 兩種寫法
 
 # In[19]:
 
@@ -83,14 +83,14 @@ summary(model, (1, 256))
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Net, self).__init__()
         self.fc1 = nn.Linear(784, 256)
         self.fc2 = nn.Linear(256, 10)
         self.dropout1 = nn.Dropout(0.2)
         self.dropout2 = nn.Dropout(0.2)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = torch.flatten(x, 1)
         x = self.fc1(x)
         x = self.dropout1(x)

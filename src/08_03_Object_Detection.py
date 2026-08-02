@@ -9,9 +9,12 @@
 # In[1]:
 
 
+from typing import Iterator
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.nn import functional as F
 from torch.optim import lr_scheduler
 import torchvision
 from torchvision import datasets, models, transforms
@@ -19,6 +22,7 @@ from torchvision.models import ResNet50_Weights
 import numpy as np
 import time
 import cv2
+from PIL import Image
 
 # In[2]:
 
@@ -68,7 +72,7 @@ orig.size
 
 
 # 滑動視窗函數
-def sliding_window(image, step, ws):
+def sliding_window(image: Image.Image, step: int, ws: tuple[int, int]) -> Iterator[tuple[int, int, Image.Image]]:
     for y in range(0, image.size[1] - ws[1], step):  # 向下滑動 stepSize 格
         for x in range(0, image.size[0] - ws[0], step):  # 向右滑動 stepSize 格
             # 傳回裁剪後的視窗
@@ -77,7 +81,9 @@ def sliding_window(image, step, ws):
 
 # 影像金字塔函數
 # image：原圖，scale：每次縮小倍數，minSize：最小尺寸
-def image_pyramid(image, scale=1.5, minSize=(224, 224)):
+def image_pyramid(
+    image: Image.Image, scale: float = 1.5, minSize: tuple[int, int] = (224, 224)
+) -> Iterator[Image.Image]:
     # 第一次傳回原圖
     yield image
 
@@ -111,7 +117,7 @@ transform = transforms.Compose(
 
 
 # PIL格式轉換為OpenCV格式
-def PIL2CV2(orig):
+def PIL2CV2(orig: Image.Image) -> np.ndarray:
     pil_image = orig.copy()
     open_cv_image = np.array(pil_image)
     return open_cv_image[:, :, ::-1].copy()
@@ -182,7 +188,7 @@ with torch.no_grad():
     output = model(rois)
 
 # 轉成機率
-probabilities = torch.nn.functional.softmax(output, dim=1)
+probabilities = F.softmax(output, dim=1)
 
 # 取得第一名
 top_prob, top_catid = torch.topk(probabilities, 1)
@@ -245,7 +251,7 @@ labels['mountain bike']
 
 
 # https://learnopencv.com/non-maximum-suppression-theory-and-implementation-in-pytorch/
-def nms_pytorch(P, thresh_iou):
+def nms_pytorch(P: torch.Tensor, thresh_iou: float) -> list[torch.Tensor]:
     # we extract coordinates for every
     # prediction box present in P
     x1 = P[:, 0]
@@ -330,7 +336,7 @@ def nms_pytorch(P, thresh_iou):
 # In[50]:
 
 
-def non_max_suppression_slow(boxes, overlapThresh=0.5):
+def non_max_suppression_slow(boxes: np.ndarray, overlapThresh: float = 0.5) -> np.ndarray | list:
     if len(boxes) == 0:
         return []
 

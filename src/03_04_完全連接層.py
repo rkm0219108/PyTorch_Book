@@ -8,6 +8,7 @@
 
 # 載入套件
 import torch
+from torch import nn
 
 # ## 產生隨機亂數的輸入資料
 
@@ -24,7 +25,7 @@ input.shape
 
 # 建立神經層
 # Linear參數依序為：輸入神經元個數, 輸出神經元個數
-layer1 = torch.nn.Linear(20, 30)
+layer1 = nn.Linear(20, 30)
 
 # ## 神經層計算：矩陣內積 (128, 20) @ (20, 30) = (128, 30)
 
@@ -39,7 +40,7 @@ output.shape
 # In[ ]:
 
 
-layer2 = torch.nn.Bilinear(20, 30, 40)
+layer2 = nn.Bilinear(20, 30, 40)
 input1 = torch.randn(128, 20)
 input2 = torch.randn(128, 30)
 
@@ -70,7 +71,7 @@ output.shape
 # 載入套件
 import torch
 
-m = torch.nn.Dropout(p=0.2)
+m = nn.Dropout(p=0.2)
 input = torch.randn(20, 16)
 output = m(input)
 output.shape

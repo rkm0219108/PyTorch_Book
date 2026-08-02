@@ -16,11 +16,14 @@
 # In[5]:
 
 
+from typing import List, Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchtext
+from torchtext.vocab import Vocab
 import numpy as np
 
 # ## 嵌入層測試
@@ -181,7 +184,7 @@ string.punctuation
 import string
 
 
-def create_vocabulary(text_list):
+def create_vocabulary(text_list: List[str]) -> Tuple[Vocab, List[str], List[List[int]]]:
     # 取得標點符號
     stopwords = list(string.punctuation)
 
@@ -291,20 +294,20 @@ print(embed_output.shape)
 
 
 class RecurrentNet(nn.Module):
-    def __init__(self, vocab_size, embed_dim, num_class):
+    def __init__(self, vocab_size: int, embed_dim: int, num_class: int) -> None:
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.fc = nn.Linear(embed_dim * maxlen, num_class)  # 要乘以 maxlen
         self.embed_dim = embed_dim
         self.init_weights()
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         initrange = 0.5
         self.embedding.weight.data.uniform_(-initrange, initrange)
         self.fc.weight.data.uniform_(-initrange, initrange)
         self.fc.bias.data.zero_()
 
-    def forward(self, text):
+    def forward(self, text: torch.Tensor) -> torch.Tensor:
         embedded = self.embedding(text)
         out = embedded.reshape(embedded.size(0), -1)  # 轉換成1維
         return self.fc(out)
@@ -318,20 +321,20 @@ model = RecurrentNet(vocab_object.__len__(), 10, 1)
 
 
 class RecurrentNet(nn.Module):
-    def __init__(self, vocab_size, embed_dim, num_class):
+    def __init__(self, vocab_size: int, embed_dim: int, num_class: int) -> None:
         super().__init__()
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim)
         self.fc = nn.Linear(embed_dim, num_class)
         self.embed_dim = embed_dim
         self.init_weights()
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         initrange = 0.5
         self.embedding.weight.data.uniform_(-initrange, initrange)
         self.fc.weight.data.uniform_(-initrange, initrange)
         self.fc.bias.data.zero_()
 
-    def forward(self, text):
+    def forward(self, text: torch.Tensor) -> torch.Tensor:
         embedded = self.embedding(text)
         return self.fc(embedded)
 
@@ -413,14 +416,14 @@ vec.stoi['great']
 
 
 class RecurrentNet(nn.Module):
-    def __init__(self, weights_matrix, num_embeddings, embedding_dim, num_class):
+    def __init__(self, weights_matrix: torch.Tensor, num_embeddings: int, embedding_dim: int, num_class: int) -> None:
         super().__init__()
         self.embedding = nn.EmbeddingBag(num_embeddings, embedding_dim)
         # 設定嵌入層權重
         self.embedding.load_state_dict({'weight': weights_matrix})
         self.fc = nn.Linear(embedding_dim, num_class)
 
-    def forward(self, text):
+    def forward(self, text: torch.Tensor) -> torch.Tensor:
         embedded = self.embedding(text)
         return self.fc(embedded)
 
@@ -536,13 +539,13 @@ model(X)
 
 
 class RecurrentNet2(nn.Module):
-    def __init__(self, vec, embedding_dim, num_class):
+    def __init__(self, vec: torch.Tensor, embedding_dim: int, num_class: int) -> None:
         super().__init__()
         # 將整個詞向量設定為嵌入層權重，且嵌入層設為不訓練
         self.embedding = nn.EmbeddingBag.from_pretrained(vec, freeze=True)
         self.fc = nn.Linear(embedding_dim, num_class)
 
-    def forward(self, text):
+    def forward(self, text: torch.Tensor) -> torch.Tensor:
         embedded = self.embedding(text)
         return self.fc(embedded)
 

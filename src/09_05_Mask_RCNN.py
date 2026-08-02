@@ -138,7 +138,7 @@ model
 
 
 # 設定遮罩的顏色
-def random_colour_masks(image):
+def random_colour_masks(image: np.ndarray) -> np.ndarray:
     colours = [
         [0, 255, 0],
         [0, 0, 255],
@@ -164,7 +164,7 @@ def random_colour_masks(image):
 
 
 # 物件偵測，傳回遮罩、邊框、類別
-def get_prediction(img_path, threshold):
+def get_prediction(img_path: str, threshold: float) -> tuple[np.ndarray, list[list[tuple[int, int]]], list[str]]:
     img = Image.open(img_path)
     transform = T.Compose([T.ToTensor()])
     img = transform(img)
@@ -184,7 +184,9 @@ def get_prediction(img_path, threshold):
 
 
 # 物件偵測含遮罩上色、顯示結果
-def instance_segmentation_api(img_path, threshold=0.5, rect_th=3, text_size=2, text_th=2):
+def instance_segmentation_api(
+    img_path: str, threshold: float = 0.5, rect_th: int = 3, text_size: int = 2, text_th: int = 2
+) -> None:
     masks, boxes, pred_cls = get_prediction(img_path, threshold)
     img = cv2.imread(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -302,7 +304,9 @@ instance_segmentation_api('./Mask_RCNN/cat_dog.jpg', 0.95, rect_th=5, text_size=
 
 
 # 偵測所有物件，傳回遮罩
-def pick_person_mask(img_path, threshold=0.5, rect_th=3, text_size=3, text_th=3):
+def pick_person_mask(
+    img_path: str, threshold: float = 0.5, rect_th: int = 3, text_size: int = 3, text_th: int = 3
+) -> np.ndarray:
     # get the predicted masks and boxes and their corresponding labels
     masks, boxes, pred_cls = get_prediction(img_path, threshold)
     # pick the indices belonging to person
@@ -338,7 +342,7 @@ final_img = np.where(person_mask == 1, img, img_blur)
 # fix 中文亂碼
 from matplotlib.font_manager import FontProperties
 
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 微軟正黑體
+plt.rcParams['font.family'] = ['Zhuque Fangsong (technical preview)']  # 微軟正黑體
 plt.rcParams['axes.unicode_minus'] = False
 
 # 顯示原圖與生成圖，比較背景的處理效果

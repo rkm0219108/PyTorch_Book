@@ -27,9 +27,11 @@ nA = env.action_space.n
 
 
 # 值循環函數
-def value_iteration(env, theta=0.0001, discount_factor=1.0):
+def value_iteration(
+    env: gym.Env, theta: float = 0.0001, discount_factor: float = 1.0
+) -> tuple[np.ndarray, np.ndarray]:
     # 計算行動值函數
-    def one_step_lookahead(state, V):
+    def one_step_lookahead(state: int, V: np.ndarray) -> np.ndarray:
         A = np.zeros(nA)
         for a in range(nA):
             for prob, next_state, reward, done in env.P[state][a]:

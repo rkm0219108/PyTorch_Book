@@ -9,11 +9,15 @@
 # In[1]:
 
 
+from typing import List
+
 import torch
 import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
+from torch.optim import Optimizer
+from torch.utils.data import DataLoader
 
 # ## 判斷是否使用GPU
 
@@ -71,7 +75,7 @@ import numpy as np
 
 
 # 圖像顯示函數
-def imshow(img):
+def imshow(img: torch.Tensor) -> None:
     img = img * 0.5 + 0.5  # 還原圖像
     npimg = img.numpy()
     # 顏色換至最後一維
@@ -99,7 +103,7 @@ print(' '.join(f'{classes[labels[j]]:5s}' for j in range(batch_size_tmp)))
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # 顏色要放在第1維，3:RGB三顏色
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -109,7 +113,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
@@ -125,7 +129,14 @@ class Net(nn.Module):
 # In[23]:
 
 
-def train(model, device, train_loader, criterion, optimizer, epoch):
+def train(
+    model: nn.Module,
+    device: torch.device,
+    train_loader: DataLoader,
+    criterion: nn.Module,
+    optimizer: Optimizer,
+    epoch: int,
+) -> List[float]:
     model.train()
     loss_list = []
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -149,7 +160,7 @@ def train(model, device, train_loader, criterion, optimizer, epoch):
 # In[21]:
 
 
-def test(model, device, test_loader):
+def test(model: nn.Module, device: torch.device, test_loader: DataLoader) -> None:
     model.eval()
     test_loss = 0
     correct = 0

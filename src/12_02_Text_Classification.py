@@ -9,6 +9,10 @@
 # In[1]:
 
 
+from __future__ import annotations
+
+from typing import Callable, Iterable, Iterator
+
 import torch
 from torchtext.datasets import AG_NEWS
 
@@ -47,7 +51,7 @@ tokenizer = get_tokenizer('basic_english')
 
 
 # 建立 Generator 函數
-def yield_tokens(data_iter):
+def yield_tokens(data_iter: Iterable[tuple[int, str]]) -> Iterator[list[str]]:
     for _, text in data_iter:
         yield tokenizer(text)
 
@@ -101,19 +105,19 @@ from torch import nn
 
 
 class TextClassificationModel(nn.Module):
-    def __init__(self, vocab_size, embed_dim, num_class):
+    def __init__(self, vocab_size: int, embed_dim: int, num_class: int) -> None:
         super().__init__()
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim, sparse=True)
         self.fc = nn.Linear(embed_dim, num_class)
         self.init_weights()
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         initrange = 0.5
         self.embedding.weight.data.uniform_(-initrange, initrange)
         self.fc.weight.data.uniform_(-initrange, initrange)
         self.fc.bias.data.zero_()
 
-    def forward(self, text, offsets):
+    def forward(self, text: torch.Tensor, offsets: torch.Tensor) -> torch.Tensor:
         embedded = self.embedding(text, offsets)
         return self.fc(embedded)
 
@@ -129,7 +133,7 @@ import time
 
 
 # 訓練函數
-def train(dataloader):
+def train(dataloader: DataLoader) -> None:
     model.train()
     total_acc, total_count = 0, 0
     log_interval = 500
@@ -155,7 +159,7 @@ def train(dataloader):
 
 
 # 評估函數
-def evaluate(dataloader):
+def evaluate(dataloader: DataLoader) -> float:
     model.eval()
     total_acc, total_count = 0, 0
 
@@ -179,7 +183,7 @@ from torchtext.data.functional import to_map_style_dataset
 
 
 # 批次處理
-def collate_batch(batch):
+def collate_batch(batch: Iterable[tuple[str, str]]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     label_list, text_list, offsets = [], [], [0]
     for _label, _text in batch:
         label_list.append(label_pipeline(_label))
@@ -247,7 +251,7 @@ ag_news_label = {1: "World", 2: "Sports", 3: "Business", 4: "Sci/Tec"}
 
 
 # 預測
-def predict(text, text_pipeline):
+def predict(text: str, text_pipeline: Callable[[str], list[int]]) -> int:
     with torch.no_grad():
         text = torch.tensor(text_pipeline(text)).to(device)
         output = model(text, torch.tensor([0]).to(device))

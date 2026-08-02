@@ -9,6 +9,7 @@
 # 載入套件
 import numpy as np
 import torch
+from torch import nn
 
 # ## 產生隨機資料
 
@@ -30,10 +31,8 @@ y += np.random.uniform(-10, 10, n)
 
 
 # 定義模型
-def create_model(input_feature, output_feature):
-    model = torch.nn.Sequential(
-        torch.nn.Linear(input_feature, output_feature), torch.nn.Flatten(0, -1)  # 所有維度轉成一維
-    )
+def create_model(input_feature: int, output_feature: int) -> nn.Module:
+    model = nn.Sequential(nn.Linear(input_feature, output_feature), nn.Flatten(0, -1))  # 所有維度轉成一維
     return model
 
 
@@ -42,11 +41,16 @@ def create_model(input_feature, output_feature):
 # In[4]:
 
 
-def train(X, y, epochs=100, lr=1e-4):
+def train(
+    X: torch.Tensor,
+    y: torch.Tensor,
+    epochs: int = 100,
+    lr: float = 1e-4,
+) -> tuple[list[float], list[float], list[float]]:
     model = create_model(1, 1)
 
     # 定義損失函數
-    loss_fn = torch.nn.MSELoss(reduction='sum')
+    loss_fn = nn.MSELoss(reduction='sum')
 
     # 定義優化器
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)

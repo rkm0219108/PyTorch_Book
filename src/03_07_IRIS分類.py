@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 from sklearn import datasets
 import torch
+from torch import nn
+from torch.nn import functional as F
 
 # ## 載入 IRIS 資料集
 
@@ -43,7 +45,7 @@ y_test_encoding = pd.get_dummies(y_test)
 
 
 # 使用 PyTorch 函數
-torch.nn.functional.one_hot(torch.LongTensor(y_train))
+F.one_hot(torch.LongTensor(y_train))
 
 # ## 轉成 PyTorch Tensor
 
@@ -62,14 +64,14 @@ X_train.shape, y_train_encoding.shape
 # In[100]:
 
 
-model = torch.nn.Sequential(torch.nn.Linear(4, 3), torch.nn.Softmax(dim=1))
+model = nn.Sequential(nn.Linear(4, 3), nn.Softmax(dim=1))
 
 # ## 定義損失函數、優化器
 
 # In[101]:
 
 
-loss_function = torch.nn.MSELoss(reduction='sum')
+loss_function = nn.MSELoss(reduction='sum')
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 # ## 訓練模型
@@ -110,7 +112,7 @@ import matplotlib.pyplot as plt
 # fix 中文亂碼
 from matplotlib.font_manager import FontProperties
 
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 微軟正黑體
+plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 微軟正黑體
 plt.rcParams['axes.unicode_minus'] = False
 
 plt.figure(figsize=(12, 6))

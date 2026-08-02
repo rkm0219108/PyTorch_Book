@@ -37,7 +37,7 @@ BATCH_SIZE = 256 if AVAIL_GPUS else 64
 
 # 建立模型
 class LitMNIST(LightningModule):
-    def __init__(self, data_dir=PATH_DATASETS, hidden_size=64, learning_rate=2e-4):
+    def __init__(self, data_dir: str = PATH_DATASETS, hidden_size: int = 64, learning_rate: float = 2e-4) -> None:
 
         super().__init__()
 
@@ -71,17 +71,17 @@ class LitMNIST(LightningModule):
 
         self.accuracy = Accuracy(task="multiclass", num_classes=self.num_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.model(x)
         return F.log_softmax(x, dim=1)
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
         x, y = batch
         logits = self(x)
         loss = F.nll_loss(logits, y)
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
         x, y = batch
         logits = self(x)
         loss = F.nll_loss(logits, y)
@@ -93,11 +93,11 @@ class LitMNIST(LightningModule):
         self.log("val_acc", self.accuracy, prog_bar=True)
         return loss
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
         # Here we just reuse the validation_step for testing
         return self.validation_step(batch, batch_idx)
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
 
@@ -105,12 +105,12 @@ class LitMNIST(LightningModule):
     # DATA RELATED HOOKS
     ####################
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         # download
         MNIST(self.data_dir, train=True, download=True)
         MNIST(self.data_dir, train=False, download=True)
 
-    def setup(self, stage=None):
+    def setup(self, stage: str | None = None) -> None:
 
         # Assign train/val datasets for use in dataloaders
         if stage == "fit" or stage is None:
@@ -121,13 +121,13 @@ class LitMNIST(LightningModule):
         if stage == "test" or stage is None:
             self.mnist_test = MNIST(self.data_dir, train=False, transform=self.transform)
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         return DataLoader(self.mnist_train, batch_size=BATCH_SIZE)
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         return DataLoader(self.mnist_val, batch_size=BATCH_SIZE)
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         return DataLoader(self.mnist_test, batch_size=BATCH_SIZE)
 
 

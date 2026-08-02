@@ -9,6 +9,7 @@
 # 載入相關套件
 import numpy as np
 import random
+from typing import List, Tuple
 
 # In[164]:
 
@@ -23,7 +24,7 @@ NORMAL_REWARD = -0.02  # 每走一步扣分 0.02
 # 環境類別
 class Environment:
     # 初始化
-    def __init__(self):
+    def __init__(self) -> None:
         # 儲存狀態值函數，索引值[0]:不用，從1開始
         self.state_value = np.full((NODE_COUNT + 1), 0.0)
 
@@ -31,23 +32,23 @@ class Environment:
         self.state_value_count = np.full((NODE_COUNT + 1), 0)
 
     # 初始化
-    def reset(self):
+    def reset(self) -> None:
         self.poistion = int((1 + NODE_COUNT) / 2)  # 玩家一開始站中間位置
         self.trajectory = [self.poistion]  # 行動軌跡
 
-    def get_states(self):
+    def get_states(self) -> List[int]:
         # 狀態空間(State Space)
         return [i for i in range(1, NODE_COUNT + 1)]
 
-    def get_actions(self):
+    def get_actions(self) -> List[int]:
         return [-1, 1]  # 行動空間(Action Space)
 
-    def is_done(self):  # 判斷比賽回合是否結束
+    def is_done(self) -> bool:  # 判斷比賽回合是否結束
         # 是否走到左右端點
         return self.poistion == 1 or self.poistion == NODE_COUNT
 
     # 步驟
-    def step(self, action):
+    def step(self, action: int) -> Tuple[int, float]:
         # 是否回合已結束
         if self.is_done():
             raise Exception("Game over")
@@ -63,7 +64,7 @@ class Environment:
 
         return self.poistion, reward
 
-    def update_state_value(self, final_value):
+    def update_state_value(self, final_value: float) -> None:
         # 倒推，更新狀態值函數
         # 缺點：未考慮節點被走過兩次或以上，分數會被重複扣分
         for i in range(len(self.trajectory) - 1, -1, -1):
@@ -72,7 +73,7 @@ class Environment:
             self.state_value_count[self.trajectory[i]] += 1
 
     # 取得狀態值函數期望值
-    def get_observation(self):
+    def get_observation(self) -> np.ndarray:
         mean1 = np.full((NODE_COUNT + 1), 0.0)
         for i in range(1, NODE_COUNT + 1):
             if self.state_value_count[i] == 0:
@@ -88,10 +89,10 @@ class Environment:
 # 代理人類別
 class Agent:
     # 初始化
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def action(self, env):
+    def action(self, env: Environment) -> int:
         # 取得狀態值函數期望值
         state_value = env.get_observation()
 

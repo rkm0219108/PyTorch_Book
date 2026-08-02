@@ -9,6 +9,7 @@
 
 
 import os
+from typing import Any, Callable
 import torch
 from torchvision.datasets import MNIST, FashionMNIST
 from torch.utils.data import DataLoader, random_split
@@ -104,7 +105,7 @@ import numpy as np
 import torchvision.transforms as T
 
 
-def plot(imgs, with_orig=True, row_title=None, **imshow_kwargs):
+def plot(imgs: list[Any], with_orig: bool = True, row_title: list[str] | None = None, **imshow_kwargs: Any) -> None:
     if not isinstance(imgs[0], list):
         # Make a 2d grid even if there's just 1 row
         imgs = [imgs]
@@ -197,16 +198,16 @@ import re
 
 
 class CustomImageDataset(Dataset):
-    def __init__(self, img_dir, transform=None, target_transform=None):
+    def __init__(self, img_dir: str, transform: Callable | None = None, target_transform: Callable | None = None) -> None:
         self.img_labels = [file_name for file_name in os.listdir(img_dir)]
         self.img_dir = img_dir
         self.transform = transform
         self.target_transform = target_transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.img_labels)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
         # 組合檔案完整路徑
         img_path = os.path.join(self.img_dir, self.img_labels[idx])
         # 讀取圖檔

@@ -7,6 +7,8 @@
 
 
 # 載入相關套件
+from typing import Any, Callable
+
 import numpy as np
 from lib.envs.gridworld import GridworldEnv
 
@@ -22,7 +24,7 @@ env = GridworldEnv()
 
 
 # 策略評估函數
-def policy_eval(policy, env, discount_factor=1.0, theta=0.00001):
+def policy_eval(policy: np.ndarray, env: Any, discount_factor: float = 1.0, theta: float = 0.00001) -> np.ndarray:
     # 狀態值函數初始化
     V = np.zeros(env.nS)
     V1 = np.copy(V)
@@ -52,9 +54,11 @@ def policy_eval(policy, env, discount_factor=1.0, theta=0.00001):
 # In[23]:
 
 
-def policy_improvement(env, policy_eval_fn=policy_eval, discount_factor=1.0):
+def policy_improvement(
+    env: Any, policy_eval_fn: Callable[..., np.ndarray] = policy_eval, discount_factor: float = 1.0
+) -> tuple[np.ndarray, np.ndarray]:
     # 計算行動值函數
-    def one_step_lookahead(state, V):
+    def one_step_lookahead(state: int, V: np.ndarray) -> np.ndarray:
         A = np.zeros(env.nA)
         for a in range(env.nA):
             for prob, next_state, reward, done in env.P[state][a]:

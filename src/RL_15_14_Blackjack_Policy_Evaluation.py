@@ -7,6 +7,7 @@
 
 
 # 載入相關套件
+from typing import Callable
 import numpy as np
 from lib.envs.blackjack import BlackjackEnv
 from lib import plotting
@@ -26,12 +27,12 @@ env = BlackjackEnv()
 
 
 # 試玩
-def print_observation(observation):
+def print_observation(observation: tuple[int, int, bool]) -> None:
     score, dealer_score, usable_ace = observation
     print(f"玩家分數: {score} (是否持有A: {usable_ace}), 莊家分數: {dealer_score}")
 
 
-def strategy(observation):
+def strategy(observation: tuple[int, int, bool]) -> int:
     score, dealer_score, usable_ace = observation
     # 超過20點，不補牌(stick)，否則都跟莊家要一張牌(hit)
     return 0 if score >= 20 else 1
@@ -55,7 +56,12 @@ for i_episode in range(20):
 
 
 # 策略評估函數
-def policy_eval(policy, env, num_episodes, discount_factor=1.0):
+def policy_eval(
+    policy: Callable[[tuple[int, int, bool]], int],
+    env: BlackjackEnv,
+    num_episodes: int,
+    discount_factor: float = 1.0,
+) -> dict[tuple[int, int, bool], float]:
     returns_sum = defaultdict(float)  # 記錄每一個狀態的報酬
     returns_count = defaultdict(float)  # 記錄每一個狀態的訪問個數
     V = defaultdict(float)  # 狀態值函數
@@ -99,7 +105,7 @@ def policy_eval(policy, env, num_episodes, discount_factor=1.0):
 
 
 # 採相同策略
-def sample_policy(observation):
+def sample_policy(observation: tuple[int, int, bool]) -> int:
     score, dealer_score, usable_ace = observation
     # 超過20點，不補牌(stick)，否則都跟莊家要一張牌(hit)
     return 0 if score >= 20 else 1

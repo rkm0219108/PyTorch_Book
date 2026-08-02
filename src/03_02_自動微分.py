@@ -7,6 +7,7 @@
 
 
 import torch
+from torch.nn import functional as F
 
 # In[2]:
 
@@ -44,20 +45,12 @@ for i, name in zip([x, y, z], "xyz"):
 # In[3]:
 
 
-# https://pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html
-from IPython.display import Image
-
-Image('./images/cross_entropy.png', width=500)
-
-# In[4]:
-
-
 x = torch.ones(5)
 y = torch.zeros(3)
 w = torch.randn(5, 3, requires_grad=True)
 b = torch.randn(3, requires_grad=True)
 z = torch.matmul(x, w) + b
-loss = torch.nn.functional.binary_cross_entropy_with_logits(z, y)
+loss = F.binary_cross_entropy_with_logits(z, y)
 
 print('z 梯度函數：', z.grad_fn)
 print('loss 梯度函數：', loss.grad_fn)
@@ -143,17 +136,19 @@ print(f'x 梯度下降 = {x.grad}')  # 6 * x^5
 
 
 # 載入套件
+from typing import Any, Callable
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 # 目標函數(損失函數):y=x^2
-def func(x):
+def func(x: float | np.ndarray) -> float | np.ndarray:
     return x**2
 
 
 # 目標函數的一階導數:dy/dx=2*x
-def dfunc(x):
+def dfunc(x: float | np.ndarray) -> float | np.ndarray:
     return 2 * x
 
 
@@ -164,14 +159,19 @@ lr = 0.3  # 學習率
 
 
 # 梯度下降法
-def GD(x_start, df, epochs, lr):
+def GD(
+    x_start: float,
+    df: Callable[[float], Any],
+    epochs: int,
+    lr: float,
+) -> np.ndarray:
     xs = np.zeros(epochs + 1)
     x = x_start
     xs[0] = x
     for i in range(epochs):
         dx = df(x)
         # 更新 x_new = x — learning_rate * gradient
-        x += -dx * lr
+        x -= dx * lr
         xs[i + 1] = x
     return xs
 
@@ -185,7 +185,7 @@ plt.plot(t, func(t), c='b')
 plt.plot(w, func(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 正黑體
+plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -205,12 +205,12 @@ import matplotlib.pyplot as plt
 
 
 # 目標函數(損失函數):y=x^2
-def func(x):
+def func(x: float | np.ndarray) -> float | np.ndarray:
     return x**2
 
 
 # 自動微分
-def dfunc(x):
+def dfunc(x: float) -> torch.Tensor:
     x = torch.tensor(float(x), requires_grad=True)
     y = x**2  # 目標函數(損失函數)
     y.backward()
@@ -224,14 +224,19 @@ lr = 0.3  # 學習率
 
 
 # 梯度下降法
-def GD(x_start, df, epochs, lr):
+def GD(
+    x_start: float,
+    df: Callable[[float], Any],
+    epochs: int,
+    lr: float,
+) -> np.ndarray:
     xs = np.zeros(epochs + 1)
     x = x_start
     xs[0] = x
     for i in range(epochs):
         dx = df(x)
         # x更新 x_new = x — learning_rate * gradient
-        x += -dx * lr
+        x -= dx * lr
         xs[i + 1] = x
     return xs
 
@@ -245,7 +250,7 @@ plt.plot(t, func(t), c='b')
 plt.plot(w, func(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 正黑體
+plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -265,12 +270,12 @@ import matplotlib.pyplot as plt
 
 
 # 目標函數(損失函數):y=x^2
-def func(x):
+def func(x: float | np.ndarray) -> float | np.ndarray:
     return x**2
 
 
 # 自動微分
-def dfunc(x_value):
+def dfunc(x_value: float) -> np.ndarray:
     x = tf.Variable(x_value, dtype=tf.float32)  # 宣告 TensorFlow 變數(Variable)
     with tf.GradientTape() as g:  # 自動微分
         y = x**2  # y = x^2
@@ -285,14 +290,19 @@ lr = 0.3  # 學習率
 
 
 # 梯度下降法
-def GD(x_start, df, epochs, lr):
+def GD(
+    x_start: float,
+    df: Callable[[float], Any],
+    epochs: int,
+    lr: float,
+) -> np.ndarray:
     xs = np.zeros(epochs + 1)
     x = x_start
     xs[0] = x
     for i in range(epochs):
         dx = df(x)
         # x更新 x_new = x — learning_rate * gradient
-        x += -dx * lr
+        x -= dx * lr
         xs[i + 1] = x
     return xs
 
@@ -306,7 +316,7 @@ plt.plot(t, func(t), c='b')
 plt.plot(w, func(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 正黑體
+plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -318,12 +328,12 @@ plt.show()
 
 
 # 損失函數
-def func(x):
+def func(x: float | np.ndarray) -> float | np.ndarray:
     return 2 * x**4 - 3 * x**2 + 2 * x - 20
 
 
 # 自動微分
-def dfunc(x):
+def dfunc(x: float) -> torch.Tensor:
     x = torch.tensor(float(x), requires_grad=True)
     y = 2 * x**4 - 3 * x**2 + 2 * x - 20
     y.backward()
@@ -344,7 +354,7 @@ plt.plot(t, func(t), c='b')
 plt.plot(w, func(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 正黑體
+plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)

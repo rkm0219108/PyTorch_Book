@@ -11,6 +11,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.nn import functional as F
 from torch.optim import lr_scheduler
 import torchvision
 from torchvision import datasets, models, transforms
@@ -18,6 +19,7 @@ from torchvision.models import ResNet50_Weights
 import numpy as np
 import time
 import cv2
+from typing import List, Tuple, Union
 
 # In[2]:
 
@@ -74,7 +76,7 @@ transform = transforms.Compose(
 
 
 # PIL格式轉換為OpenCV格式
-def PIL2CV2(orig):
+def PIL2CV2(orig: Image.Image) -> np.ndarray:
     pil_image = orig.copy()
     open_cv_image = np.array(pil_image)
     return open_cv_image[:, :, ::-1].copy()
@@ -91,7 +93,7 @@ import matplotlib.pyplot as plt
 plt.figure(figsize=(16, 16))
 
 
-def Selective_Search(img_path):
+def Selective_Search(img_path: str) -> Tuple[torch.Tensor, List[Tuple[int, int, int, int]]]:
     img = cv2.imread(img_path)
     img = cv2.resize(img, (WIDTH, int(orig.size[1] / orig.size[0] * WIDTH)), interpolation=cv2.INTER_AREA)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -171,7 +173,7 @@ with torch.no_grad():
     output = model(rois)
 
 # 轉成機率
-probabilities = torch.nn.functional.softmax(output, dim=1)
+probabilities = F.softmax(output, dim=1)
 
 # 取得第一名
 top_prob, top_catid = torch.topk(probabilities, 1)
@@ -229,7 +231,7 @@ labels['mountain bike']
 # In[44]:
 
 
-def non_max_suppression_slow(boxes, overlapThresh=0.5):
+def non_max_suppression_slow(boxes: np.ndarray, overlapThresh: float = 0.5) -> Union[np.ndarray, list]:
     if len(boxes) == 0:
         return []
 

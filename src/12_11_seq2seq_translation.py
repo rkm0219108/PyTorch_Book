@@ -39,18 +39,18 @@ EOS_token = 1  # 字句的結尾加一標誌
 
 # 前置處理函數
 class Lang:
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.word2index = {}  # 單字轉代碼的字典
         self.word2count = {}
         self.index2word = {0: "SOS", 1: "EOS"}  # 代碼轉單字的字典
         self.n_words = 2  # Count SOS and EOS
 
-    def addSentence(self, sentence):
+    def addSentence(self, sentence: str) -> None:
         for word in sentence.split(' '):
             self.addWord(word)  # 分詞
 
-    def addWord(self, word):  # 建立詞彙表
+    def addWord(self, word: str) -> None:  # 建立詞彙表
         if word not in self.word2index:
             self.word2index[word] = self.n_words
             self.word2count[word] = 1
@@ -65,12 +65,12 @@ class Lang:
 
 # Unicode 轉 ASCII
 # https://stackoverflow.com/a/518232/2809427
-def unicodeToAscii(s):
+def unicodeToAscii(s: str) -> str:
     return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
 
 
 # 轉小寫、去除前後的空白、去除標點符號
-def normalizeString(s):
+def normalizeString(s: str) -> str:
     s = unicodeToAscii(s.lower().strip())
     s = re.sub(r"([.!?])", r" \1", s)
     s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
@@ -81,7 +81,7 @@ def normalizeString(s):
 
 
 # 讀取檔案
-def readLangs(lang1, lang2, reverse=False):
+def readLangs(lang1: str, lang2: str, reverse: bool = False) -> tuple[Lang, Lang, list[list[str]]]:
     print("Reading lines...")
 
     # 讀取檔案、分行
@@ -126,11 +126,11 @@ eng_prefixes = (
 
 
 # 超過 10 個單字的字句刪除
-def filterPair(p):
+def filterPair(p: list[str]) -> bool:
     return len(p[0].split(' ')) < MAX_LENGTH and len(p[1].split(' ')) < MAX_LENGTH and p[1].startswith(eng_prefixes)
 
 
-def filterPairs(pairs):
+def filterPairs(pairs: list[list[str]]) -> list[list[str]]:
     return [pair for pair in pairs if filterPair(pair)]
 
 
@@ -138,7 +138,7 @@ def filterPairs(pairs):
 
 
 # 前置處理：整合以上函數
-def prepareData(lang1, lang2, reverse=False):
+def prepareData(lang1: str, lang2: str, reverse: bool = False) -> tuple[Lang, Lang, list[list[str]]]:
     input_lang, output_lang, pairs = readLangs(lang1, lang2, reverse)
     print("Read %s sentence pairs" % len(pairs))
     pairs = filterPairs(pairs)
@@ -166,20 +166,20 @@ print(random.choice(pairs))
 
 
 class EncoderRNN(nn.Module):
-    def __init__(self, input_size, hidden_size):
+    def __init__(self, input_size: int, hidden_size: int) -> None:
         super(EncoderRNN, self).__init__()
         self.hidden_size = hidden_size
 
         self.embedding = nn.Embedding(input_size, hidden_size)
         self.gru = nn.GRU(hidden_size, hidden_size)
 
-    def forward(self, input, hidden):
+    def forward(self, input: torch.Tensor, hidden: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         embedded = self.embedding(input).view(1, 1, -1)
         output = embedded
         output, hidden = self.gru(output, hidden)
         return output, hidden
 
-    def initHidden(self):
+    def initHidden(self) -> torch.Tensor:
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
 
@@ -189,7 +189,7 @@ class EncoderRNN(nn.Module):
 
 
 class DecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size):
+    def __init__(self, hidden_size: int, output_size: int) -> None:
         super(DecoderRNN, self).__init__()
         self.hidden_size = hidden_size
 
@@ -198,14 +198,14 @@ class DecoderRNN(nn.Module):
         self.out = nn.Linear(hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=1)
 
-    def forward(self, input, hidden):
+    def forward(self, input: torch.Tensor, hidden: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         output = self.embedding(input).view(1, 1, -1)
         output = F.relu(output)
         output, hidden = self.gru(output, hidden)
         output = self.softmax(self.out(output[0]))
         return output, hidden
 
-    def initHidden(self):
+    def initHidden(self) -> torch.Tensor:
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
 
@@ -215,7 +215,9 @@ class DecoderRNN(nn.Module):
 
 
 class AttnDecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH):
+    def __init__(
+        self, hidden_size: int, output_size: int, dropout_p: float = 0.1, max_length: int = MAX_LENGTH
+    ) -> None:
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
@@ -229,7 +231,9 @@ class AttnDecoderRNN(nn.Module):
         self.gru = nn.GRU(self.hidden_size, self.hidden_size)
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, input, hidden, encoder_outputs):
+    def forward(
+        self, input: torch.Tensor, hidden: torch.Tensor, encoder_outputs: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         embedded = self.embedding(input).view(1, 1, -1)
         embedded = self.dropout(embedded)
 
@@ -245,7 +249,7 @@ class AttnDecoderRNN(nn.Module):
         output = F.log_softmax(self.out(output[0]), dim=1)
         return output, hidden, attn_weights
 
-    def initHidden(self):
+    def initHidden(self) -> torch.Tensor:
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
 
@@ -254,17 +258,17 @@ class AttnDecoderRNN(nn.Module):
 # In[29]:
 
 
-def indexesFromSentence(lang, sentence):
+def indexesFromSentence(lang: Lang, sentence: str) -> list[int]:
     return [lang.word2index[word] for word in sentence.split(' ')]
 
 
-def tensorFromSentence(lang, sentence):
+def tensorFromSentence(lang: Lang, sentence: str) -> torch.Tensor:
     indexes = indexesFromSentence(lang, sentence)
     indexes.append(EOS_token)
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
-def tensorsFromPair(pair):
+def tensorsFromPair(pair: list[str]) -> tuple[torch.Tensor, torch.Tensor]:
     input_tensor = tensorFromSentence(input_lang, pair[0])
     target_tensor = tensorFromSentence(output_lang, pair[1])
     return (input_tensor, target_tensor)
@@ -279,15 +283,15 @@ teacher_forcing_ratio = 0.5  # 採用 Teacher Forcing 的機率
 
 
 def train(
-    input_tensor,
-    target_tensor,
-    encoder,
-    decoder,
-    encoder_optimizer,
-    decoder_optimizer,
-    criterion,
-    max_length=MAX_LENGTH,
-):
+    input_tensor: torch.Tensor,
+    target_tensor: torch.Tensor,
+    encoder: EncoderRNN,
+    decoder: AttnDecoderRNN,
+    encoder_optimizer: optim.Optimizer,
+    decoder_optimizer: optim.Optimizer,
+    criterion: nn.Module,
+    max_length: int = MAX_LENGTH,
+) -> float:
     encoder_hidden = encoder.initHidden()
 
     encoder_optimizer.zero_grad()
@@ -348,14 +352,14 @@ import math
 
 
 # 換算為分鐘
-def asMinutes(s):
+def asMinutes(s: float) -> str:
     m = math.floor(s / 60)
     s -= m * 60
     return f'{m}m {s}s'
 
 
 # 計算執行時間
-def timeSince(since, percent):
+def timeSince(since: float, percent: float) -> str:
     now = time.time()
     s = now - since
     es = s / (percent)
@@ -368,7 +372,14 @@ def timeSince(since, percent):
 # In[32]:
 
 
-def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
+def trainIters(
+    encoder: EncoderRNN,
+    decoder: AttnDecoderRNN,
+    n_iters: int,
+    print_every: int = 1000,
+    plot_every: int = 100,
+    learning_rate: float = 0.01,
+) -> None:
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # 初始化列印的損失值
@@ -415,7 +426,7 @@ import matplotlib.ticker as ticker
 import numpy as np
 
 
-def showPlot(points):
+def showPlot(points: list[float]) -> None:
     plt.figure()
     fig, ax = plt.subplots()
     # this locator puts ticks at regular intervals
@@ -429,7 +440,9 @@ def showPlot(points):
 # In[35]:
 
 
-def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
+def evaluate(
+    encoder: EncoderRNN, decoder: AttnDecoderRNN, sentence: str, max_length: int = MAX_LENGTH
+) -> tuple[list[str], torch.Tensor]:
     with torch.no_grad():
         input_tensor = tensorFromSentence(input_lang, sentence)
         input_length = input_tensor.size()[0]
@@ -479,7 +492,7 @@ trainIters(encoder1, attn_decoder1, 75000, print_every=5000)
 # In[ ]:
 
 
-def evaluateRandomly(encoder, decoder, n=10):
+def evaluateRandomly(encoder: EncoderRNN, decoder: AttnDecoderRNN, n: int = 10) -> None:
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
@@ -505,7 +518,7 @@ plt.matshow(attentions.numpy())
 # In[ ]:
 
 
-def showAttention(input_sentence, output_words, attentions):
+def showAttention(input_sentence: str, output_words: list[str], attentions: torch.Tensor) -> None:
     # Set up figure with colorbar
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -523,7 +536,7 @@ def showAttention(input_sentence, output_words, attentions):
     plt.show()
 
 
-def evaluateAndShowAttention(input_sentence):
+def evaluateAndShowAttention(input_sentence: str) -> None:
     output_words, attentions = evaluate(encoder1, attn_decoder1, input_sentence)
     print('input =', input_sentence)
     print('output =', ' '.join(output_words))

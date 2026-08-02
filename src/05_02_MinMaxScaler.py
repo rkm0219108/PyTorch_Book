@@ -9,6 +9,7 @@
 
 
 import os
+from typing import Callable
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -127,13 +128,13 @@ test_ds.data = test_ds.data / 255.0
 
 
 # 建立模型
-model = torch.nn.Sequential(
-    torch.nn.Flatten(),
-    torch.nn.Linear(28 * 28, 256),
+model = nn.Sequential(
+    nn.Flatten(),
+    nn.Linear(28 * 28, 256),
     nn.Dropout(0.2),
-    torch.nn.Linear(256, 10),
+    nn.Linear(256, 10),
     # 使用nn.CrossEntropyLoss()時，不需要將輸出經過softmax層，否則計算的損失會有誤
-    # torch.nn.Softmax(dim=1)
+    # nn.Softmax(dim=1)
 ).to(device)
 
 # ## 步驟6：結合訓練資料及模型，進行模型訓練
@@ -302,16 +303,16 @@ import re
 
 
 class CustomImageDataset(Dataset):
-    def __init__(self, img_dir, transform=None, target_transform=None):
+    def __init__(self, img_dir: str, transform: Callable | None = None, target_transform: Callable | None = None) -> None:
         self.img_labels = [file_name for file_name in os.listdir(img_dir)]
         self.img_dir = img_dir
         self.transform = transform
         self.target_transform = target_transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.img_labels)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
         # 組合檔案完整路徑
         img_path = os.path.join(self.img_dir, self.img_labels[idx])
         # 讀取圖檔

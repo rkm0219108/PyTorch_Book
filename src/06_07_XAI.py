@@ -65,7 +65,7 @@ summary(rn18.to(device), input_size=(3, 224, 224))
 
 
 class new_model(nn.Module):
-    def __init__(self, output_layer):
+    def __init__(self, output_layer: str) -> None:
         super().__init__()
         self.output_layer = output_layer
         self.pretrained = models.resnet18(weights=ResNet18_Weights.DEFAULT)
@@ -82,7 +82,7 @@ class new_model(nn.Module):
         self.net = nn.Sequential(*self.children_list)
         self.pretrained = None
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.net(x)
         return x
 
@@ -122,7 +122,7 @@ out.shape
 
 
 # 重建 8x8 圖像
-def show_grid(out):
+def show_grid(out: torch.Tensor) -> None:
     square = 8
     plt.figure(figsize=(12, 10))
     for fmap in out.cpu().detach().numpy():

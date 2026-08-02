@@ -40,13 +40,6 @@ plt.show()
 # In[2]:
 
 
-from IPython.display import Image
-
-Image('./images/長度(magnitude).png')
-
-# In[3]:
-
-
 # 向量(Vector)
 v = np.array([2, 1])
 
@@ -55,9 +48,6 @@ v = np.array([2, 1])
 
 # In[4]:
 
-
-# 使用 np.linalg.norm() 計算向量長度(magnitude)
-import numpy as np
 
 magnitude = np.linalg.norm(v)
 print(magnitude)
@@ -74,7 +64,6 @@ torch.linalg.norm(torch.FloatTensor(v))
 
 
 import math
-import numpy as np
 
 # 向量(Vector)
 v = np.array([2, 1])
@@ -93,10 +82,6 @@ print('角度(degree) =', round(math.degrees(theta), 2))
 
 # In[13]:
 
-
-# 載入套件
-import numpy as np
-import matplotlib.pyplot as plt
 
 # 向量(Vector) + 2
 v = np.array([2, 1])
@@ -126,10 +111,6 @@ plt.show()
 # In[14]:
 
 
-# 載入套件
-import numpy as np
-import matplotlib.pyplot as plt
-
 # 向量(Vector) * 2
 v = np.array([2, 1])
 v1 = np.array([2, 1]) * 2
@@ -157,10 +138,6 @@ plt.show()
 
 # In[15]:
 
-
-# 載入套件
-import numpy as np
-import matplotlib.pyplot as plt
 
 # 向量(Vector) * 2
 v = np.array([2, 1])
@@ -190,9 +167,6 @@ plt.show()
 # In[17]:
 
 
-# 載入套件
-import numpy as np
-
 # 向量(Vector)
 v = np.array([2, 1])
 s = np.array([-3, 2])
@@ -209,7 +183,6 @@ print(d)
 
 # 載入套件
 import math
-import numpy as np
 
 # 向量(Vector)
 v = np.array([2, 1])
@@ -233,9 +206,6 @@ print(theta)
 
 # In[18]:
 
-
-# 載入套件
-import numpy as np
 
 # 矩陣
 A = np.array([[1, 2, 3], [4, 5, 6]])
@@ -360,9 +330,6 @@ print(np.around(A @ np.linalg.inv(A)))
 # In[32]:
 
 
-# 載入套件
-import numpy as np
-
 # 向量(Vector)
 v = np.array([2, 1])
 s = np.array([-3, 2])
@@ -451,8 +418,6 @@ type((A @ B).numpy())
 # In[9]:
 
 
-import numpy as np
-
 array = np.array([[1, 2]])
 # Numpy -> PyTorch
 tensor = torch.from_numpy(array)
@@ -539,8 +504,6 @@ print(torch.cuda.is_available())
 
 # In[21]:
 
-
-import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 

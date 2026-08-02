@@ -20,6 +20,7 @@ from torch import nn
 import torch.nn.functional as F
 import torch.optim as optim
 from sklearn.manifold import TSNE
+from typing import Callable
 
 # ## 參數設定
 
@@ -77,7 +78,7 @@ test_loader = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffl
 
 
 class Encoder(nn.Module):
-    def __init__(self, encoded_space_dim, fc2_input_dim):
+    def __init__(self, encoded_space_dim: int, fc2_input_dim: int) -> None:
         super().__init__()
 
         # Convolution
@@ -100,7 +101,7 @@ class Encoder(nn.Module):
         self.encFC1 = nn.Linear(128, encoded_space_dim)
         self.encFC2 = nn.Linear(128, encoded_space_dim)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         x = self.encoder_cnn(x)
         x = self.flatten(x)
         x = self.encoder_lin(x)
@@ -114,7 +115,7 @@ class Encoder(nn.Module):
 # In[10]:
 
 
-def resample(mu, logVar):
+def resample(mu: torch.Tensor, logVar: torch.Tensor) -> torch.Tensor:
     std = torch.exp(logVar / 2)
     eps = torch.randn_like(std)  # N(0, 1) 抽樣
     return mu + std * eps
@@ -126,7 +127,7 @@ def resample(mu, logVar):
 
 
 class Decoder(nn.Module):
-    def __init__(self, encoded_space_dim, fc2_input_dim):
+    def __init__(self, encoded_space_dim: int, fc2_input_dim: int) -> None:
         super().__init__()
 
         self.decoder_lin = nn.Sequential(
@@ -146,7 +147,7 @@ class Decoder(nn.Module):
             nn.ConvTranspose2d(8, 1, 3, stride=2, padding=1, output_padding=1),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.decoder_lin(x)
         x = self.unflatten(x)
         x = self.decoder_conv(x)
@@ -173,7 +174,7 @@ decoder = Decoder(encoded_space_dim=d, fc2_input_dim=128).to(device)
 
 
 # KL divergence
-def loss_fn(out, imgs, mu, logVar):
+def loss_fn(out: torch.Tensor, imgs: torch.Tensor, mu: torch.Tensor, logVar: torch.Tensor) -> torch.Tensor:
     kl_divergence = 0.5 * torch.sum(1 + logVar - mu.pow(2) - logVar.exp())
     return F.binary_cross_entropy(out, imgs, size_average=False) - kl_divergence
 
@@ -189,7 +190,7 @@ optim = torch.optim.Adam(params_to_optimize, lr=lr)
 # In[14]:
 
 
-def add_noise(inputs, noise_factor=0.3):
+def add_noise(inputs: torch.Tensor, noise_factor: float = 0.3) -> torch.Tensor:
     noise = inputs + torch.randn_like(inputs) * noise_factor
     noise = torch.clip(noise, 0.0, 1.0)
     return noise
@@ -200,7 +201,15 @@ def add_noise(inputs, noise_factor=0.3):
 # In[15]:
 
 
-def train_epoch_den(encoder, decoder, device, dataloader, loss_fn, optimizer, noise_factor=0.3):
+def train_epoch_den(
+    encoder: Encoder,
+    decoder: Decoder,
+    device: torch.device,
+    dataloader: DataLoader,
+    loss_fn: Callable[[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor], torch.Tensor],
+    optimizer: torch.optim.Optimizer,
+    noise_factor: float = 0.3,
+) -> float:
     # 指定為訓練階段
     encoder.train()
     decoder.train()
@@ -233,7 +242,14 @@ def train_epoch_den(encoder, decoder, device, dataloader, loss_fn, optimizer, no
 # In[16]:
 
 
-def test_epoch_den(encoder, decoder, device, dataloader, loss_fn, noise_factor=0.3):
+def test_epoch_den(
+    encoder: Encoder,
+    decoder: Decoder,
+    device: torch.device,
+    dataloader: DataLoader,
+    loss_fn: Callable[[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor], torch.Tensor],
+    noise_factor: float = 0.3,
+) -> torch.Tensor:
     # 指定為評估階段
     encoder.eval()
     decoder.eval()
@@ -269,11 +285,11 @@ def test_epoch_den(encoder, decoder, device, dataloader, loss_fn, noise_factor=0
 # fix 中文亂碼
 from matplotlib.font_manager import FontProperties
 
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 微軟正黑體
+plt.rcParams['font.family'] = ['Zhuque Fangsong (technical preview)']  # 微軟正黑體
 plt.rcParams['axes.unicode_minus'] = False
 
 
-def plot_ae_outputs_den(epoch, encoder, decoder, n=5, noise_factor=0.3):
+def plot_ae_outputs_den(epoch: int, encoder: Encoder, decoder: Decoder, n: int = 5, noise_factor: float = 0.3) -> None:
     plt.figure(figsize=(10, 4.5))
     for i in range(n):
         ax = plt.subplot(3, n, i + 1)
@@ -359,7 +375,9 @@ test_epoch_den(encoder, decoder, device, test_loader, loss_fn).item()
 # In[20]:
 
 
-def plot_reconstructed(decoder, r0=(-5, 10), r1=(-10, 5), n=10):
+def plot_reconstructed(
+    decoder: Decoder, r0: tuple[float, float] = (-5, 10), r1: tuple[float, float] = (-10, 5), n: int = 10
+) -> None:
     plt.figure(figsize=(20, 8.5))
     w = 28
     img = np.zeros((n * w, n * w))

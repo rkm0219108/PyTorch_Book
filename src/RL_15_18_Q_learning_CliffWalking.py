@@ -7,6 +7,8 @@
 
 
 # 載入相關套件
+from typing import Callable
+
 import gymnasium as gym
 import itertools
 import matplotlib
@@ -48,8 +50,10 @@ env.render()
 
 
 # 定義 ε-greedy策略
-def make_epsilon_greedy_policy(Q, epsilon, nA):
-    def policy_fn(observation):
+def make_epsilon_greedy_policy(
+    Q: dict[int, np.ndarray], epsilon: float, nA: int
+) -> Callable[[int], np.ndarray]:
+    def policy_fn(observation: int) -> np.ndarray:
         # 每個行動的機率初始化，均為 ε / n
         A = np.ones(nA, dtype=float) * epsilon / nA
         best_action = np.argmax(Q[observation])
@@ -64,7 +68,13 @@ def make_epsilon_greedy_policy(Q, epsilon, nA):
 
 
 # 定義 Q_learning 策略
-def q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
+def q_learning(
+    env: CliffWalkingEnv,
+    num_episodes: int,
+    discount_factor: float = 1.0,
+    alpha: float = 0.5,
+    epsilon: float = 0.1,
+) -> tuple[dict[int, np.ndarray], plotting.EpisodeStats]:
     # 行動值函數初始化
     Q = defaultdict(lambda: np.zeros(env.action_space.n))
     # 記錄 所有回合的長度及獎勵

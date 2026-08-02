@@ -29,14 +29,6 @@ data  # 節點及邊均為二維
 # In[4]:
 
 
-# 建立圖形如下
-from IPython.display import Image
-
-Image('./graph/pyg_image1.png')
-
-# In[5]:
-
-
 # 邊有另一種寫法較直覺，每一元素均為(起點，終點)
 edge_index = torch.tensor([[0, 1], [1, 0], [1, 2], [2, 1]], dtype=torch.long)
 
@@ -86,7 +78,7 @@ list(data["edge_index"].cpu().numpy().T)
 from torch_geometric.utils.convert import to_networkx
 
 
-def draw_pyg(Data):
+def draw_pyg(Data: Data) -> None:
     G = to_networkx(Data, to_undirected=True)
     # 繪圖
     nx.draw(
@@ -106,7 +98,7 @@ draw_pyg(data)
 # In[24]:
 
 
-def draw_pyg2(data):
+def draw_pyg2(data: Data) -> None:
     G = nx.Graph()
 
     # nodes

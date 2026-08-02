@@ -13,6 +13,7 @@ from lib import plotting
 import sys
 from collections import defaultdict
 import matplotlib
+from typing import Any, Callable, Dict, Tuple
 
 matplotlib.style.use('ggplot')  # 設定繪圖的風格
 
@@ -26,10 +27,10 @@ env = BlackjackEnv()
 
 
 # 隨機策略
-def create_random_policy(nA):
+def create_random_policy(nA: int) -> Callable[[Any], np.ndarray]:
     A = np.ones(nA, dtype=float) / nA
 
-    def policy_fn(observation):
+    def policy_fn(observation: Any) -> np.ndarray:
         return A
 
     return policy_fn
@@ -39,8 +40,8 @@ def create_random_policy(nA):
 
 
 # 貪婪(greedy)策略
-def create_greedy_policy(Q):
-    def policy_fn(state):
+def create_greedy_policy(Q: Dict[Any, np.ndarray]) -> Callable[[Any], np.ndarray]:
+    def policy_fn(state: Any) -> np.ndarray:
         # 每個行動的機率初始化，均為 0
         A = np.zeros_like(Q[state], dtype=float)
         best_action = np.argmax(Q[state])
@@ -55,7 +56,12 @@ def create_greedy_policy(Q):
 
 
 # 定義值循環策略，使用重要性加權抽樣
-def mc_control_importance_sampling(env, num_episodes, behavior_policy, discount_factor=1.0):
+def mc_control_importance_sampling(
+    env: BlackjackEnv,
+    num_episodes: int,
+    behavior_policy: Callable[[Any], np.ndarray],
+    discount_factor: float = 1.0,
+) -> Tuple[Dict[Any, np.ndarray], Callable[[Any], np.ndarray]]:
     Q = defaultdict(lambda: np.zeros(env.action_space.n))  # 行動值函數
     # 重要性加權抽樣(weighted importance sampling)的累計分母
     C = defaultdict(lambda: np.zeros(env.action_space.n))

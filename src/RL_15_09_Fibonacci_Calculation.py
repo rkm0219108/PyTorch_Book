@@ -6,7 +6,7 @@
 # In[1]:
 
 
-def fibonacci(n):
+def fibonacci(n: int) -> int:
     if n == 0 or n == 1:
         return n
     else:

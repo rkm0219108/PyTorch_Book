@@ -9,14 +9,6 @@
 # In[16]:
 
 
-# OLS 公式
-from IPython.display import Image
-
-Image('./formula/regression_wb.png')
-
-# In[4]:
-
-
 # 使用 OLS 公式計算 w、b
 # 載入套件
 import matplotlib.pyplot as plt
@@ -44,8 +36,6 @@ print(f'w={coef[0]}, b={coef[1]}')
 # In[15]:
 
 
-import numpy as np
-
 X = df[['year']].values
 
 # b = b * 1
@@ -66,7 +56,6 @@ print(f'w={w[0, 0]}, b={w[1, 0]}')
 
 
 from typing import cast
-import numpy as np
 from sklearn.datasets import fetch_california_housing
 
 # 載入 Boston 房價資料集
@@ -101,7 +90,6 @@ lr.coef_, lr.intercept_
 # In[4]:
 
 
-import numpy as np
 import torch
 
 # 載入 Boston 房價資料集

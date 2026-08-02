@@ -17,6 +17,7 @@ from torchmetrics import Accuracy
 import torchvision
 from torchvision import transforms
 import numpy as np
+from typing import List, Optional, Union, Callable, Tuple, Any
 
 # ## 設定參數
 
@@ -86,7 +87,7 @@ print(train_ds.data.shape, test_ds.data.shape)
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # 顏色要放在第1維，3:RGB三顏色
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -96,7 +97,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
@@ -112,7 +113,14 @@ class Net(nn.Module):
 # In[39]:
 
 
-def train(model, device, train_loader, criterion, optimizer, epoch):
+def train(
+    model: nn.Module,
+    device: torch.device,
+    train_loader: DataLoader,
+    criterion: nn.Module,
+    optimizer: torch.optim.Optimizer,
+    epoch: int,
+) -> List[float]:
     model.train()
     loss_list = []
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -137,7 +145,7 @@ def train(model, device, train_loader, criterion, optimizer, epoch):
 # In[40]:
 
 
-def test(model, device, test_loader):
+def test(model: nn.Module, device: torch.device, test_loader: DataLoader) -> None:
     model.eval()
     test_loss = 0
     correct = 0
@@ -233,7 +241,7 @@ print('prediction: ', ' '.join(predictions[0:20]))
 import matplotlib.pyplot as plt
 
 
-def imshow(X):
+def imshow(X: np.ndarray) -> None:
     # 繪製點陣圖，cmap='gray':灰階
     plt.imshow(X.reshape(28, 28), cmap='gray')
 
@@ -315,7 +323,14 @@ for i in range(10):
 
 
 class CustomImageDataset(torch.utils.data.Dataset):
-    def __init__(self, img_dir, transform=None, target_transform=None, to_gray=False, size=28):
+    def __init__(
+        self,
+        img_dir: str,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        to_gray: bool = False,
+        size: int = 28,
+    ) -> None:
         self.img_labels = [file_name for file_name in os.listdir(img_dir)]
         self.img_dir = img_dir
         self.transform = transform
@@ -323,10 +338,10 @@ class CustomImageDataset(torch.utils.data.Dataset):
         self.to_gray = to_gray
         self.size = size
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.img_labels)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Tuple[Union[Image.Image, torch.Tensor], int]:
         # 組合檔案完整路徑
         img_path = os.path.join(self.img_dir, self.img_labels[idx])
         # 讀取圖檔

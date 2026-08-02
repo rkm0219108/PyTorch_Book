@@ -55,7 +55,7 @@ dataset[0][0]
 
 
 class Generator(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # 設定嵌入層，作為 Label 的輸入
@@ -72,7 +72,7 @@ class Generator(nn.Module):
             nn.Tanh(),
         )
 
-    def forward(self, z, labels):
+    def forward(self, z: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
         z = z.view(z.size(0), 100)
         c = self.label_emb(labels)
         x = torch.cat([z, c], 1)  # 合併輸入
@@ -86,7 +86,7 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # 設定嵌入層，作為 Label 的輸入
@@ -106,7 +106,7 @@ class Discriminator(nn.Module):
             nn.Sigmoid(),
         )
 
-    def forward(self, x, labels):
+    def forward(self, x: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
         x = x.view(x.size(0), 784)
         c = self.label_emb(labels)
         x = torch.cat([x, c], 1)  # 合併輸入
@@ -136,7 +136,13 @@ g_optimizer = torch.optim.Adam(generator.parameters(), lr=1e-4)
 # In[9]:
 
 
-def generator_train_step(batch_size, discriminator, generator, g_optimizer, criterion):
+def generator_train_step(
+    batch_size: int,
+    discriminator: nn.Module,
+    generator: nn.Module,
+    g_optimizer: torch.optim.Optimizer,
+    criterion: nn.Module,
+) -> float:
     g_optimizer.zero_grad()
     z = torch.randn(batch_size, 100).to(device)
     fake_labels = torch.LongTensor(np.random.randint(0, 10, batch_size)).to(device)  # 隨機亂數 [1, 10]
@@ -153,7 +159,15 @@ def generator_train_step(batch_size, discriminator, generator, g_optimizer, crit
 # In[10]:
 
 
-def discriminator_train_step(batch_size, discriminator, generator, d_optimizer, criterion, real_images, labels):
+def discriminator_train_step(
+    batch_size: int,
+    discriminator: nn.Module,
+    generator: nn.Module,
+    d_optimizer: torch.optim.Optimizer,
+    criterion: nn.Module,
+    real_images: torch.Tensor,
+    labels: torch.Tensor,
+) -> float:
     d_optimizer.zero_grad()
 
     # 訓練真實影像

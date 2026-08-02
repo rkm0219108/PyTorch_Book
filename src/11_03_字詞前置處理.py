@@ -7,6 +7,8 @@
 
 
 # 載入相關套件
+from typing import List, Tuple
+
 import nltk
 
 # In[17]:
@@ -66,7 +68,7 @@ stopword_list = set(nltk.corpus.stopwords.words('english') + list(string.punctua
 
 
 # 移除停用詞(Removing Stopwords)
-def remove_stopwords(text, is_lower_case=False):
+def remove_stopwords(text: str, is_lower_case: bool = False) -> Tuple[str, List[str]]:
     if is_lower_case:
         text = text.lower()
     tokens = nltk.word_tokenize(text)
@@ -105,7 +107,7 @@ print(word_freqs.most_common(20))
 lem = nltk.WordNetLemmatizer()
 
 
-def remove_stopwords_regex(text, is_lower_case=False):
+def remove_stopwords_regex(text: str, is_lower_case: bool = False) -> Tuple[str, List[str]]:
     if is_lower_case:
         text = text.lower()
     tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')  # 篩選文數字(Alphanumeric)

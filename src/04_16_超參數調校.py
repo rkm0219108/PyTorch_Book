@@ -16,6 +16,7 @@
 
 
 import os
+from typing import Any
 import numpy as np
 import torch
 import torch.optim as optim
@@ -40,14 +41,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class ConvNet(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(ConvNet, self).__init__()
         # In this example, we don't change the model architecture
         # due to simplicity.
         self.conv1 = nn.Conv2d(1, 3, kernel_size=3)
         self.fc = nn.Linear(192, 10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = F.relu(F.max_pool2d(self.conv1(x), 3))
         x = x.view(-1, 192)
         x = self.fc(x)
@@ -64,7 +65,7 @@ EPOCH_SIZE = 5
 
 
 # 定義模型訓練函數
-def train(model, optimizer, train_loader):
+def train(model: nn.Module, optimizer: optim.Optimizer, train_loader: DataLoader) -> None:
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
@@ -76,7 +77,7 @@ def train(model, optimizer, train_loader):
 
 
 # 定義模型測試函數
-def test(model, data_loader):
+def test(model: nn.Module, data_loader: DataLoader) -> float:
     model.eval()
     correct = 0
     total = 0
@@ -104,7 +105,7 @@ mnist_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normali
 # In[42]:
 
 
-def train_mnist(config):
+def train_mnist(config: dict[str, Any]) -> None:
     # 載入 MNIST 手寫阿拉伯數字資料
     train_loader = DataLoader(datasets.MNIST("", train=True, transform=mnist_transforms), batch_size=64, shuffle=True)
     test_loader = DataLoader(datasets.MNIST("", train=False, transform=mnist_transforms), batch_size=64, shuffle=True)

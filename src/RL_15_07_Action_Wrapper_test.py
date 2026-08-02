@@ -5,11 +5,11 @@ import random
 
 # 繼承 gym.ActionWrapper 基礎類別
 class RandomActionWrapper(gym.ActionWrapper):
-    def __init__(self, env, epsilon=0.1):
+    def __init__(self, env: gym.Env, epsilon: float = 0.1) -> None:
         super(RandomActionWrapper, self).__init__(env)
         self.epsilon = epsilon  # 隨機行動的機率
 
-    def action(self, action):
+    def action(self, action: int) -> int:
         # 隨機亂數小於 epsilon，採取隨機行動
         if random.random() < self.epsilon:
             print("Random!")

@@ -8,6 +8,8 @@
 # In[1]:
 
 
+from typing import List, Tuple
+
 from facenet_pytorch import MTCNN, InceptionResnetV1
 import torch
 from torch.utils.data import DataLoader
@@ -104,7 +106,7 @@ resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)
 # In[71]:
 
 
-def collate_fn(x):
+def collate_fn(x: List[Tuple[Image.Image, int]]) -> Tuple[Image.Image, int]:
     return x[0]
 
 

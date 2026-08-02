@@ -5,10 +5,11 @@ import os
 import math
 import IPython
 from IPython.display import Audio, display
+from typing import Optional, Tuple
 
 
 # 取得一段語音的描述統計量
-def print_stats(waveform, sample_rate=None):
+def print_stats(waveform: torch.Tensor, sample_rate: Optional[int] = None) -> None:
     if sample_rate:
         print("Sample Rate:", sample_rate)
     print("維度:", tuple(waveform.shape))
@@ -23,7 +24,13 @@ def print_stats(waveform, sample_rate=None):
 
 
 # 繪製語音的波形
-def plot_waveform(waveform, sample_rate, title="Waveform", xlim=None, ylim=None):
+def plot_waveform(
+    waveform: torch.Tensor,
+    sample_rate: int,
+    title: str = "Waveform",
+    xlim: Optional[Tuple[float, float]] = None,
+    ylim: Optional[Tuple[float, float]] = None,
+) -> None:
     waveform = waveform.numpy()
 
     num_channels, num_frames = waveform.shape
@@ -46,7 +53,9 @@ def plot_waveform(waveform, sample_rate, title="Waveform", xlim=None, ylim=None)
 
 
 # 繪製語音的頻譜
-def plot_specgram(waveform, sample_rate, title="Spectrogram", xlim=None):
+def plot_specgram(
+    waveform: torch.Tensor, sample_rate: int, title: str = "Spectrogram", xlim: Optional[Tuple[float, float]] = None
+) -> None:
     waveform = waveform.numpy()
 
     num_channels, num_frames = waveform.shape
@@ -66,7 +75,7 @@ def plot_specgram(waveform, sample_rate, title="Spectrogram", xlim=None):
 
 
 # 播放語音
-def play_audio(waveform, sample_rate):
+def play_audio(waveform: torch.Tensor, sample_rate: int) -> None:
     waveform = waveform.numpy()
 
     num_channels, num_frames = waveform.shape
@@ -79,7 +88,7 @@ def play_audio(waveform, sample_rate):
 
 
 # 取得檔案資訊
-def inspect_file(path):
+def inspect_file(path: str) -> None:
     print("-" * 10)
     print("Source:", path)
     print("-" * 10)

@@ -72,12 +72,12 @@ from torch_geometric.nn import GCNConv
 
 
 class GCN(torch.nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.conv1 = GCNConv(dataset.num_node_features, 16)
         self.conv2 = GCNConv(16, dataset.num_classes)
 
-    def forward(self, data):
+    def forward(self, data: Data) -> torch.Tensor:
         x, edge_index = data.x, data.edge_index
 
         x = self.conv1(x, edge_index)
@@ -135,7 +135,7 @@ import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
 
-def visualize(h, color):
+def visualize(h: torch.Tensor, color: torch.Tensor) -> None:
     # 降維至2個主成份
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
 

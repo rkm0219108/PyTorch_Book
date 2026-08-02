@@ -8,6 +8,8 @@
 # In[1]:
 
 
+from typing import List, Tuple
+
 import torch
 from torch import nn
 import torchaudio
@@ -103,13 +105,13 @@ n_mfcc = 40
 
 
 class GTZAN_DS(Dataset):
-    def __init__(self, dataset1):
+    def __init__(self, dataset1: Dataset) -> None:
         self.dataset1 = dataset_GTZAN
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.dataset1)
 
-    def __getitem__(self, n):
+    def __getitem__(self, n: int) -> Tuple[torch.Tensor, int]:
         waveform, sample_rate, label = self.dataset1[n]
 
         mfcc_transform = T.MFCC(
@@ -174,7 +176,7 @@ test_loader = DataLoader(test_ds, BATCH_SIZE, shuffle=False)
 
 # 建立模型
 class ConvNet(nn.Module):
-    def __init__(self, num_classes=10):
+    def __init__(self, num_classes: int = 10) -> None:
         super(ConvNet, self).__init__()
         self.layer1 = nn.Sequential(
             # Conv2d 參數： in-channel, out-channel, kernel size, Stride, Padding
@@ -192,7 +194,7 @@ class ConvNet(nn.Module):
         self.fc1 = nn.Linear(52800, num_classes)
         # self.fc2 = nn.Linear(1280, num_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.layer1(x)
         out = self.layer2(out)
         out = out.reshape(out.size(0), -1)
@@ -209,7 +211,7 @@ model = ConvNet().to(device)
 # In[18]:
 
 
-def score_model():
+def score_model() -> Tuple[List[int], List[int]]:
     model.eval()
     test_loss = 0
     correct = 0

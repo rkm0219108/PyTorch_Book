@@ -58,30 +58,30 @@ import math
 
 
 # W, F, P, S：image Width, Filter width, Padding, Stride
-def Conv_Width(W, F, P, S):
+def Conv_Width(W: int, F: int, P: int, S: int) -> int:
     return math.floor(((W - F + 2 * P) / S) + 1)
 
 
-def Conv_Output_Volume(W, F, P, S, out):
+def Conv_Output_Volume(W: int, F: int, P: int, S: int, out: int) -> int:
     return Conv_Width(W, F, P, S) ** 2 * out
 
 
 # C: no of channels
-def Conv_Parameter_Count(F, C, out):
+def Conv_Parameter_Count(F: int, C: int, out: int) -> int:
     return F**2 * C * out
 
 
-def Pool_Width(W, F, P, S):
+def Pool_Width(W: int, F: int, P: int, S: int) -> int:
     return Conv_Width(W, F, P, S)
 
 
 # filter_count: no of filter in last conv
 # stride count default value = Filter width
-def Pool_Output_Volume(W, F, P, S, filter_count):
+def Pool_Output_Volume(W: int, F: int, P: int, S: int, filter_count: int) -> int:
     return Conv_Output_Volume(W, F, P, S, filter_count)
 
 
-def Pool_Parameter_Count(W, F, S):
+def Pool_Parameter_Count(W: int, F: int, S: int) -> int:
     return 0
 
 
@@ -94,7 +94,7 @@ print(Pool_Width(Conv_Width(16, 3, 1, 1), 2, 0, 2))
 print(Pool_Width(Conv_Width(8, 3, 1, 1), 2, 0, 2))
 
 
-def Conv_Pool_Width(W, F, P, S, F2, P2, S2, n):
+def Conv_Pool_Width(W: int, F: int, P: int, S: int, F2: int, P2: int, S2: int, n: int) -> int:
     for i in range(n):
         W = Pool_Width(Conv_Width(W, F, P, S), F2, P2, S2)
     return W
@@ -129,7 +129,7 @@ p2_out, 7 * 7 * 32
 
 # 建立模型
 class ConvNet(nn.Module):
-    def __init__(self, num_classes=10):
+    def __init__(self, num_classes: int = 10) -> None:
         super(ConvNet, self).__init__()
         self.layer1 = nn.Sequential(
             # Conv2d 參數： in-channel, out-channel, kernel size, Stride, Padding
@@ -146,7 +146,7 @@ class ConvNet(nn.Module):
         )
         self.fc = nn.Linear(7 * 7 * 32, num_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.layer1(x)
         out = self.layer2(out)
         out = out.reshape(out.size(0), -1)

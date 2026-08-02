@@ -31,7 +31,7 @@ print(f'TP={tp}, FP={fp}, TN={tn}, FN={fn}')
 
 
 # 修正中文問題
-plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']
+plt.rcParams['font.family'] = ['Microsoft JhengHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 # 顯示矩陣

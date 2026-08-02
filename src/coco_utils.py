@@ -1,5 +1,6 @@
 import copy
 import os
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import torch
 import torch.utils.data
@@ -10,11 +11,11 @@ from pycocotools.coco import COCO
 
 
 class FilterAndRemapCocoCategories:
-    def __init__(self, categories, remap=True):
+    def __init__(self, categories: List[int], remap: bool = True) -> None:
         self.categories = categories
         self.remap = remap
 
-    def __call__(self, image, target):
+    def __call__(self, image: Any, target: Dict[str, Any]) -> Tuple[Any, Dict[str, Any]]:
         anno = target["annotations"]
         anno = [obj for obj in anno if obj["category_id"] in self.categories]
         if not self.remap:
@@ -27,7 +28,7 @@ class FilterAndRemapCocoCategories:
         return image, target
 
 
-def convert_coco_poly_to_mask(segmentations, height, width):
+def convert_coco_poly_to_mask(segmentations: List[Any], height: int, width: int) -> torch.Tensor:
     masks = []
     for polygons in segmentations:
         rles = coco_mask.frPyObjects(polygons, height, width)
@@ -45,7 +46,7 @@ def convert_coco_poly_to_mask(segmentations, height, width):
 
 
 class ConvertCocoPolysToMask:
-    def __call__(self, image, target):
+    def __call__(self, image: Any, target: Dict[str, Any]) -> Tuple[Any, Dict[str, Any]]:
         w, h = image.size
 
         image_id = target["image_id"]
@@ -100,16 +101,18 @@ class ConvertCocoPolysToMask:
         return image, target
 
 
-def _coco_remove_images_without_annotations(dataset, cat_list=None):
-    def _has_only_empty_bbox(anno):
+def _coco_remove_images_without_annotations(
+    dataset: torchvision.datasets.CocoDetection, cat_list: Optional[List[int]] = None
+) -> torch.utils.data.Subset:
+    def _has_only_empty_bbox(anno: List[Dict[str, Any]]) -> bool:
         return all(any(o <= 1 for o in obj["bbox"][2:]) for obj in anno)
 
-    def _count_visible_keypoints(anno):
+    def _count_visible_keypoints(anno: List[Dict[str, Any]]) -> int:
         return sum(sum(1 for v in ann["keypoints"][2::3] if v > 0) for ann in anno)
 
     min_keypoints_per_image = 10
 
-    def _has_valid_annotation(anno):
+    def _has_valid_annotation(anno: List[Dict[str, Any]]) -> bool:
         # if it's empty, there is no annotation
         if len(anno) == 0:
             return False
@@ -140,7 +143,7 @@ def _coco_remove_images_without_annotations(dataset, cat_list=None):
     return dataset
 
 
-def convert_to_coco_api(ds):
+def convert_to_coco_api(ds: torch.utils.data.Dataset) -> COCO:
     coco_ds = COCO()
     # annotation IDs need to start at 1, not 0, see torchvision issue #1530
     ann_id = 1
@@ -192,7 +195,7 @@ def convert_to_coco_api(ds):
     return coco_ds
 
 
-def get_coco_api_from_dataset(dataset):
+def get_coco_api_from_dataset(dataset: torch.utils.data.Dataset) -> COCO:
     for _ in range(10):
         if isinstance(dataset, torchvision.datasets.CocoDetection):
             break
@@ -204,11 +207,11 @@ def get_coco_api_from_dataset(dataset):
 
 
 class CocoDetection(torchvision.datasets.CocoDetection):
-    def __init__(self, img_folder, ann_file, transforms):
+    def __init__(self, img_folder: str, ann_file: str, transforms: Optional[Callable]) -> None:
         super().__init__(img_folder, ann_file)
         self._transforms = transforms
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Tuple[Any, Dict[str, Any]]:
         img, target = super().__getitem__(idx)
         image_id = self.ids[idx]
         target = dict(image_id=image_id, annotations=target)
@@ -217,7 +220,9 @@ class CocoDetection(torchvision.datasets.CocoDetection):
         return img, target
 
 
-def get_coco(root, image_set, transforms, mode="instances"):
+def get_coco(
+    root: str, image_set: str, transforms: Optional[Callable], mode: str = "instances"
+) -> torch.utils.data.Dataset:
     anno_file_template = "{}_{}2017.json"
     PATHS = {
         "train": ("train2017", os.path.join("annotations", anno_file_template.format(mode, "train"))),
@@ -245,5 +250,5 @@ def get_coco(root, image_set, transforms, mode="instances"):
     return dataset
 
 
-def get_coco_kp(root, image_set, transforms):
+def get_coco_kp(root: str, image_set: str, transforms: Optional[Callable]) -> torch.utils.data.Dataset:
     return get_coco(root, image_set, transforms, mode="person_keypoints")

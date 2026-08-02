@@ -64,7 +64,7 @@ ndf = 64  # 判別神經網路濾波器個數
 # In[7]:
 
 
-def weights_init(m):
+def weights_init(m: nn.Module) -> None:
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
         m.weight.data.normal_(0.0, 0.02)  # 卷積層權重初始值
@@ -79,7 +79,7 @@ def weights_init(m):
 
 
 class Generator(nn.Module):
-    def __init__(self, nc=1, nz=100, ngf=64):
+    def __init__(self, nc: int = 1, nz: int = 100, ngf: int = 64) -> None:
         super(Generator, self).__init__()
         self.main = nn.Sequential(
             # input is Z, going into a convolution
@@ -102,7 +102,7 @@ class Generator(nn.Module):
             nn.Tanh(),
         )
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
         output = self.main(input)
         return output
 
@@ -116,7 +116,7 @@ netG.apply(weights_init)
 
 
 class Discriminator(nn.Module):
-    def __init__(self, nc=1, ndf=64):
+    def __init__(self, nc: int = 1, ndf: int = 64) -> None:
         super(Discriminator, self).__init__()
         self.main = nn.Sequential(
             # input is (nc) x 64 x 64
@@ -135,7 +135,7 @@ class Discriminator(nn.Module):
             nn.Sigmoid(),
         )
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
         output = self.main(input)
         return output.view(-1, 1).squeeze(1)
 

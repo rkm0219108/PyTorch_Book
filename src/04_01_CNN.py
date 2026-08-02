@@ -79,11 +79,11 @@ import math
 #     return math.floor((W - F) / S) + 1
 
 
-def Conv_Width(W, F, P, S):
+def Conv_Width(W: int, F: int, P: int, S: int) -> int:
     return math.floor(((W - F + 2 * P) / S) + 1)
 
 
-def Pool_Width(W, F, S):
+def Pool_Width(W: int, F: int, S: int) -> int:
     return math.floor((W - F) / S + 1)
 
 
@@ -93,7 +93,7 @@ print(Pool_Width(Conv_Width(16, 3, 1, 1), 2, 2))
 print(Pool_Width(Conv_Width(8, 3, 1, 1), 2, 2))
 
 
-def Conv_Pool_Width(W, F, P, S, F2, S2, n):
+def Conv_Pool_Width(W: int, F: int, P: int, S: int, F2: int, S2: int, n: int) -> int:
     for i in range(n):
         W = Pool_Width(Conv_Width(W, F, P, S), F2, S2)
     return W
@@ -110,7 +110,7 @@ Adjusted_width = Conv_Pool_Width(32, 3, 1, 1, 2, 2, 3)
 
 
 class CNN(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(CNN, self).__init__()
         # Conv2d 參數： in-channel, out-channel, kernel size, Padding, Stride
         self.conv1 = nn.Conv2d(3, 10, 3, 1, 1)
@@ -122,7 +122,7 @@ class CNN(nn.Module):
         self.linear2 = nn.Linear(100, 10)
         self.dropout = nn.Dropout(0.2)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = self.pool(F.relu(self.conv3(x)))
@@ -256,7 +256,7 @@ print('Test Accuracy: %.2f' % (acc_test * 100 / no))
 
 
 # compute accuracy
-def get_accuracy(logit, target):
+def get_accuracy(logit: torch.Tensor, target: torch.Tensor) -> float:
     '''Obtain accuracy for training round'''
     batch_size = len(target)
     #     corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()

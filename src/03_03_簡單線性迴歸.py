@@ -16,7 +16,12 @@ import torch
 # In[74]:
 
 
-def train(X, y, epochs=100, lr=0.0001):
+def train(
+    X: torch.Tensor,
+    y: torch.Tensor,
+    epochs: int = 100,
+    lr: float = 0.0001,
+) -> tuple[list[float], list[float], list[float]]:
     loss_list, w_list, b_list = [], [], []
 
     # w、b 初始值均設為常態分配之隨機亂數

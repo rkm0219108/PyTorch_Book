@@ -7,6 +7,8 @@
 
 
 # 載入相關套件
+from typing import List
+
 import numpy as np
 
 # 載入GloVe詞向量檔 glove.6B.300d.txt
@@ -39,7 +41,7 @@ len(embeddings_dict.keys())
 from scipy.spatial.distance import euclidean
 
 
-def find_closest_embeddings(embedding):
+def find_closest_embeddings(embedding: np.ndarray) -> List[str]:
     return sorted(embeddings_dict.keys(), key=lambda word: euclidean(embeddings_dict[word], embedding))
 
 

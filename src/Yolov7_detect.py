@@ -43,7 +43,7 @@ stride = int(model.stride.max())  # model stride
 # In[4]:
 
 
-def detect(source, img_size=640, conf_thres=0.25, save_img=False):
+def detect(source: str, img_size: int = 640, conf_thres: float = 0.25, save_img: bool = False) -> None:
     dataset = LoadImages(source, img_size=img_size)
 
     # Get names and colors

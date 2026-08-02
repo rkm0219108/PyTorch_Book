@@ -38,7 +38,7 @@ model._modules
 
 
 class new_model(nn.Module):
-    def __init__(self, pretrained, output_layer):
+    def __init__(self, pretrained: nn.Module, output_layer: str) -> None:
         super().__init__()
         self.output_layer = output_layer
         self.pretrained = pretrained
@@ -55,7 +55,7 @@ class new_model(nn.Module):
         self.net = nn.Sequential(*self.children_list)
         self.pretrained = None
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.net(x)
         return x
 

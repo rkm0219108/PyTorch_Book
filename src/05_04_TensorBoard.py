@@ -91,7 +91,7 @@ os.makedirs(YESNO_DATASET_PATH, exist_ok=True)
 
 
 # 讀取資料
-def _download_yesno():
+def _download_yesno() -> None:
     if os.path.exists(os.path.join(YESNO_DATASET_PATH, "waves_yesno.tar.gz")):
         return
     torchaudio.datasets.YESNO(root=YESNO_DATASET_PATH, download=True)
@@ -118,7 +118,7 @@ from IPython.display import Audio, display
 
 
 # 播放語音函數
-def play_audio(waveform, sample_rate):
+def play_audio(waveform: torch.Tensor, sample_rate: int) -> None:
     waveform = waveform.numpy()
 
     num_channels, num_frames = waveform.shape
@@ -170,7 +170,7 @@ writer.add_audio('audio', waveform[0], sample_rate=sample_rate.numpy()[0])
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
@@ -179,7 +179,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 16 * 4 * 4)
@@ -213,7 +213,7 @@ tf.io.gfile = tb.compat.tensorflow_stub.io.gfile
 
 
 # 隨機抽樣函數
-def select_n_random(data, labels, n=100):
+def select_n_random(data: torch.Tensor, labels: torch.Tensor, n: int = 100) -> tuple[torch.Tensor, torch.Tensor]:
     perm = torch.randperm(len(data))
     return data[perm][:n], labels[perm][:n]
 

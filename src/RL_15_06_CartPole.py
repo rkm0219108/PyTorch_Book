@@ -7,6 +7,10 @@
 
 
 # 載入相關套件
+from __future__ import annotations
+
+from typing import List, Tuple
+
 import gymnasium as gym
 from gymnasium import envs
 
@@ -75,12 +79,12 @@ max_angle = 8  # 偏右8度以上，就往右前進，偏左也是同樣處理
 
 class Agent:
     # 初始化
-    def __init__(self):
+    def __init__(self) -> None:
         self.direction = left
         self.last_direction = right
 
     # 自訂策略
-    def act(self, observation):
+    def act(self, observation: np.ndarray) -> int:
         # 台車位置、台車速度、平衡桿角度、平衡桿速度
         cart_position, cart_velocity, pole_angle, pole_velocity = observation
 
@@ -159,7 +163,7 @@ import numpy as np
 env = gym.make('CartPole-v1')
 
 
-def play(env, policy):
+def play(env: gym.Env, policy: np.ndarray) -> Tuple[float, List[List[float]]]:
     observation, info = env.reset()
 
     done = False

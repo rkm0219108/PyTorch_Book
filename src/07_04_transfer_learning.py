@@ -81,7 +81,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # In[20]:
 
 
-def imshow(inp, title=None):
+def imshow(inp: torch.Tensor, title: str | None = None) -> None:
     inp = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
@@ -107,7 +107,13 @@ imshow(out, title=[class_names[x] for x in classes])
 
 
 # 同時含訓練/評估
-def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+def train_model(
+    model: nn.Module,
+    criterion: nn.Module,
+    optimizer: optim.Optimizer,
+    scheduler: lr_scheduler.LRScheduler,
+    num_epochs: int = 25,
+) -> nn.Module:
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -177,7 +183,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 # In[37]:
 
 
-def imshow2(inp, title=None):
+def imshow2(inp: torch.Tensor, title: str | None = None) -> None:
     inp = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
@@ -189,7 +195,7 @@ def imshow2(inp, title=None):
 # In[44]:
 
 
-def visualize_model(model, num_images=6):
+def visualize_model(model: nn.Module, num_images: int = 6) -> None:
     was_training = model.training
     model.eval()
     images_so_far = 0

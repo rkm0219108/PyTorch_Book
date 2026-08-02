@@ -15,7 +15,7 @@ import os, time, pickle, json
 from glob import glob
 from PIL import Image
 import cv2
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional, Union, Any
 from statistics import mean
 from tqdm import tqdm
 
@@ -43,7 +43,7 @@ STD = (
 RESIZE = 64
 
 
-def read_path(filepath) -> List[str]:
+def read_path(filepath: str) -> List[str]:
     root_path = "./datasets/facades"
     path = os.path.join(root_path, filepath)
     dataset = []
@@ -53,21 +53,26 @@ def read_path(filepath) -> List[str]:
 
 
 class Transform:
-    def __init__(self, resize=RESIZE, mean=MEAN, std=STD):
+    def __init__(
+        self,
+        resize: int = RESIZE,
+        mean: Tuple[float, float, float] = MEAN,
+        std: Tuple[float, float, float] = STD,
+    ) -> None:
         self.data_transform = transforms.Compose(
             [transforms.Resize((resize, resize)), transforms.ToTensor(), transforms.Normalize(mean, std)]
         )
 
-    def __call__(self, img: Image.Image):
+    def __call__(self, img: Image.Image) -> torch.Tensor:
         return self.data_transform(img)
 
 
 class Dataset(object):
-    def __init__(self, files: List[str]):
+    def __init__(self, files: List[str]) -> None:
         self.files = files
         self.trasformer = Transform()
 
-    def _separate(self, img) -> Tuple[Image.Image, Image.Image]:
+    def _separate(self, img: Image.Image) -> Tuple[Image.Image, Image.Image]:
         img = np.array(img, dtype=np.uint8)
         h, w, _ = img.shape
         w = int(w / 2)
@@ -80,7 +85,7 @@ class Dataset(object):
         output_tensor = self.trasformer(output)
         return input_tensor, output_tensor
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.files)
 
 
@@ -95,13 +100,13 @@ val_ds = Dataset(val)
 
 
 # 使像素值介於 [0, 1] 之間
-def clamp_image(img: torch.Tensor):
+def clamp_image(img: torch.Tensor) -> torch.Tensor:
     img = ((img.clamp(min=-1, max=1) + 1) / 2).permute(1, 2, 0)
     return img
 
 
 # 顯示兩個圖像
-def show_img_sample(img: torch.Tensor, img1: torch.Tensor):
+def show_img_sample(img: torch.Tensor, img1: torch.Tensor) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(10, 6))
     ax = axes.ravel()
     ax[0].imshow(clamp_image(img))
@@ -142,7 +147,7 @@ val_dl = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False, drop_last=Fals
 
 
 class Generator(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Generator, self).__init__()
         self.enc1 = self.conv2Relu(3, 32, 5)
         self.enc2 = self.conv2Relu(32, 64, pool_size=4)
@@ -154,7 +159,9 @@ class Generator(nn.Module):
         self.dec3 = self.deconv2Relu(64 + 64, 32, pool_size=4)
         self.dec4 = nn.Sequential(nn.Conv2d(32 + 32, 3, 5, padding=2), nn.Tanh())
 
-    def conv2Relu(self, in_c, out_c, kernel_size=3, pool_size=None):
+    def conv2Relu(
+        self, in_c: int, out_c: int, kernel_size: int = 3, pool_size: Optional[int] = None
+    ) -> nn.Sequential:
         layer = []
         if pool_size:
             # Down width and height
@@ -166,7 +173,14 @@ class Generator(nn.Module):
         layer.append(nn.ReLU(inplace=True))
         return nn.Sequential(*layer)
 
-    def deconv2Relu(self, in_c, out_c, kernel_size=3, stride=1, pool_size=None):
+    def deconv2Relu(
+        self,
+        in_c: int,
+        out_c: int,
+        kernel_size: int = 3,
+        stride: int = 1,
+        pool_size: Optional[int] = None,
+    ) -> nn.Sequential:
         layer = []
         if pool_size:
             # Up width and height
@@ -177,7 +191,7 @@ class Generator(nn.Module):
         layer.append(nn.ReLU(inplace=True))
         return nn.Sequential(*layer)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x1 = self.enc1(x)
         x2 = self.enc2(x1)
         x3 = self.enc3(x2)
@@ -197,7 +211,7 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Discriminator, self).__init__()
         self.layer1 = self.conv2relu(6, 16, 5, cnt=1)
         self.layer2 = self.conv2relu(16, 32, pool_size=4)
@@ -206,7 +220,14 @@ class Discriminator(nn.Module):
         self.layer5 = self.conv2relu(128, 256, pool_size=2)
         self.layer6 = nn.Conv2d(256, 1, kernel_size=1)
 
-    def conv2relu(self, in_c, out_c, kernel_size=3, pool_size=None, cnt=2):
+    def conv2relu(
+        self,
+        in_c: int,
+        out_c: int,
+        kernel_size: int = 3,
+        pool_size: Optional[int] = None,
+        cnt: int = 2,
+    ) -> nn.Sequential:
         layer = []
         for i in range(cnt):
             if i == 0 and pool_size != None:
@@ -218,7 +239,7 @@ class Discriminator(nn.Module):
             layer.append(nn.LeakyReLU(0.2, inplace=True))
         return nn.Sequential(*layer)
 
-    def forward(self, x, x1):
+    def forward(self, x: torch.Tensor, x1: torch.Tensor) -> torch.Tensor:
         x = torch.cat((x, x1), dim=1)
         out = self.layer5(self.layer4(self.layer3(self.layer2(self.layer1(x)))))
         return self.layer6(out)  # (b, 1, 2, 2)
@@ -229,7 +250,15 @@ class Discriminator(nn.Module):
 # In[ ]:
 
 
-def train_fn(train_dl, G, D, criterion_bce, criterion_mae, optimizer_g, optimizer_d):
+def train_fn(
+    train_dl: DataLoader,
+    G: nn.Module,
+    D: nn.Module,
+    criterion_bce: nn.Module,
+    criterion_mae: nn.Module,
+    optimizer_g: torch.optim.Optimizer,
+    optimizer_d: torch.optim.Optimizer,
+) -> Tuple[float, float, torch.Tensor]:
     G.train()
     D.train()
     LAMBDA = 100.0
@@ -269,23 +298,23 @@ def train_fn(train_dl, G, D, criterion_bce, criterion_mae, optimizer_g, optimize
     return mean(total_loss_g), mean(total_loss_d), fake_img.detach().cpu()
 
 
-def saving_img(fake_img, e):
+def saving_img(fake_img: torch.Tensor, e: int) -> None:
     os.makedirs("generated", exist_ok=True)
     save_image(fake_img, f"generated/fake{str(e)}.png", value_range=(-1.0, 1.0), normalize=True)
 
 
-def saving_logs(result):
+def saving_logs(result: Dict[str, List[float]]) -> None:
     with open("train.pkl", "wb") as f:
         pickle.dump([result], f)
 
 
-def saving_model(D, G, e):
+def saving_model(D: nn.Module, G: nn.Module, e: int) -> None:
     os.makedirs("weight", exist_ok=True)
     torch.save(G.state_dict(), f"weight/G{str(e+1)}.pth")
     torch.save(D.state_dict(), f"weight/D{str(e+1)}.pth")
 
 
-def show_losses(g, d):
+def show_losses(g: List[float], d: List[float]) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     ax = axes.ravel()
     ax[0].plot(np.arange(len(g)).tolist(), g)
@@ -300,7 +329,14 @@ def show_losses(g, d):
 # In[36]:
 
 
-def train_loop(train_dl, G, D, num_epoch, lr=0.0002, betas=(0.5, 0.999)):
+def train_loop(
+    train_dl: DataLoader,
+    G: nn.Module,
+    D: nn.Module,
+    num_epoch: int,
+    lr: float = 0.0002,
+    betas: Tuple[float, float] = (0.5, 0.999),
+) -> Tuple[nn.Module, nn.Module]:
     G.to(device)
     D.to(device)
     optimizer_g = torch.optim.Adam(G.parameters(), lr=lr, betas=betas)
@@ -339,14 +375,14 @@ trained_G, trained_D = train_loop(train_dl, G, D, EPOCH)
 # In[56]:
 
 
-def load_model(name):
+def load_model(name: Union[str, int]) -> nn.Module:
     G = Generator()
     G.load_state_dict(torch.load(f"weight/G{name}.pth", map_location={"cuda": "cpu"}))
     G.eval()
     return G.to(device)
 
 
-def train_show_img(name, G):
+def train_show_img(name: Union[str, int], G: nn.Module) -> None:
     root = "generated"
     fig, axes = plt.subplots(int(name), 1, figsize=(12, 18))
     ax = axes.ravel()
@@ -357,7 +393,7 @@ def train_show_img(name, G):
         ax[i].set_yticks([])
 
 
-def de_norm(img):
+def de_norm(img: torch.Tensor) -> np.ndarray:
     img_ = img.mul(torch.FloatTensor(STD).view(3, 1, 1))
     img_ = img_.add(torch.FloatTensor(MEAN).view(3, 1, 1)).detach()
     # img_ = ((img_.clamp(min=-1, max=1)+1)/2).permute(1, 2, 0)
@@ -365,7 +401,7 @@ def de_norm(img):
     return img_.numpy()
 
 
-def evaluate(val_dl, name, G):
+def evaluate(val_dl: DataLoader, name: Union[str, int], G: nn.Module) -> None:
     with torch.no_grad():
         fig, axes = plt.subplots(6, 8, figsize=(12, 12))
         ax = axes.ravel()

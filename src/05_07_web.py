@@ -11,7 +11,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 @st.cache_resource
-def load_model():
+def load_model() -> torch.nn.Module:
     return torch.load('./model.pt').to(device)
 
 

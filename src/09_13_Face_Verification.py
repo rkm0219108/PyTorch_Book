@@ -67,6 +67,7 @@ import dlib
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+from typing import List
 
 # ## 載入模型
 
@@ -84,18 +85,20 @@ detector = dlib.get_frontal_face_detector()
 
 
 # 找出哪一張臉最相似
-def compare_faces_ordered(encodings, face_names, encoding_to_check):
+def compare_faces_ordered(encodings: List[np.ndarray], face_names: List[str], encoding_to_check: np.ndarray) -> zip:
     distances = list(np.linalg.norm(encodings - encoding_to_check, axis=1))
     return zip(*sorted(zip(distances, face_names)))
 
 
 # 利用線性代數的法向量比較兩張臉的特徵點
-def compare_faces(encodings, encoding_to_check):
+def compare_faces(encodings: List[np.ndarray], encoding_to_check: np.ndarray) -> List[float]:
     return list(np.linalg.norm(encodings - encoding_to_check, axis=1))
 
 
 # 圖像編碼
-def face_encodings(face_image, number_of_times_to_upsample=1, num_jitters=1):
+def face_encodings(
+    face_image: np.ndarray, number_of_times_to_upsample: int = 1, num_jitters: int = 1
+) -> List[np.ndarray]:
     # 偵測臉部
     face_locations = detector(face_image, number_of_times_to_upsample)
     # 偵測臉部特徵點

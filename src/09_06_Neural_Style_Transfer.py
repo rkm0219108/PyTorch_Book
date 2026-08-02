@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 import torchvision.models as models
 import copy
+from typing import Optional, List, Tuple, Union
 
 # ## 判斷是否使用 GPU
 
@@ -45,7 +46,7 @@ loader = transforms.Compose([transforms.Resize((imsize, imsize)), transforms.ToT
 
 
 # 讀取圖檔，轉為張量
-def image_loader(image_name):
+def image_loader(image_name: str) -> torch.Tensor:
     image = Image.open(image_name)
     image = loader(image).unsqueeze(0)  # 增加一維
     return image.to(device, torch.float)
@@ -55,7 +56,7 @@ unloader = transforms.ToPILImage()  # 張量轉為 PIL Image 格式
 
 
 # 顯示圖像
-def imshow(tensor, title=None):
+def imshow(tensor: torch.Tensor, title: Optional[str] = None) -> None:
     image = tensor.cpu().clone()  # 複製張量
     image = image.squeeze(0)  # 減少一維
     image = unloader(image)
@@ -85,8 +86,8 @@ imshow(content_img, title='Content Image')
 class ContentLoss(nn.Module):
     def __init__(
         self,
-        target,
-    ):
+        target: torch.Tensor,
+    ) -> None:
         super(ContentLoss, self).__init__()
         # we 'detach' the target content from the tree used
         # to dynamically compute the gradient: this is a stated value,
@@ -94,7 +95,7 @@ class ContentLoss(nn.Module):
         # will throw an error.
         self.target = target.detach()
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
         self.loss = F.mse_loss(input, self.target)
         return input
 
@@ -104,7 +105,7 @@ class ContentLoss(nn.Module):
 # In[21]:
 
 
-def gram_matrix(input):
+def gram_matrix(input: torch.Tensor) -> torch.Tensor:
     # a: 批量(=1)
     # b: feature map 數量
     # (c,d): feature maps維度大小 (N=c*d)
@@ -123,11 +124,11 @@ def gram_matrix(input):
 
 
 class StyleLoss(nn.Module):
-    def __init__(self, target_feature):
+    def __init__(self, target_feature: torch.Tensor) -> None:
         super(StyleLoss, self).__init__()
         self.target = gram_matrix(target_feature).detach()
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
         G = gram_matrix(input)
         self.loss = F.mse_loss(G, self.target)
         return input
@@ -151,7 +152,7 @@ cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
 # 標準化函數
 class Normalization(nn.Module):
-    def __init__(self, mean, std):
+    def __init__(self, mean: torch.Tensor, std: torch.Tensor) -> None:
         super(Normalization, self).__init__()
         # .view the mean and std to make them [C x 1 x 1] so that they can
         # directly work with image Tensor of shape [B x C x H x W].
@@ -159,7 +160,7 @@ class Normalization(nn.Module):
         self.mean = torch.tensor(mean).view(-1, 1, 1)
         self.std = torch.tensor(std).view(-1, 1, 1)
 
-    def forward(self, img):
+    def forward(self, img: torch.Tensor) -> torch.Tensor:
         # normalize img
         return (img - self.mean) / self.std
 
@@ -180,14 +181,14 @@ style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 # 定義卷積層後的損失計算函數
 def get_style_model_and_losses(
-    cnn,
-    normalization_mean,
-    normalization_std,
-    style_img,
-    content_img,
-    content_layers=content_layers_default,
-    style_layers=style_layers_default,
-):
+    cnn: nn.Module,
+    normalization_mean: torch.Tensor,
+    normalization_std: torch.Tensor,
+    style_img: torch.Tensor,
+    content_img: torch.Tensor,
+    content_layers: List[str] = content_layers_default,
+    style_layers: List[str] = style_layers_default,
+) -> Tuple[nn.Sequential, List[StyleLoss], List[ContentLoss]]:
     # 標準化
     normalization = Normalization(normalization_mean, normalization_std).to(device)
 
@@ -245,23 +246,23 @@ def get_style_model_and_losses(
 # In[41]:
 
 
-def get_input_optimizer(input_img):
+def get_input_optimizer(input_img: torch.Tensor) -> optim.Optimizer:
     # 設定 input image 要優化
     optimizer = optim.LBFGS([input_img])
     return optimizer
 
 
 def run_style_transfer(
-    cnn,
-    normalization_mean,
-    normalization_std,
-    content_img,
-    style_img,
-    input_img,
-    num_steps=300,
-    style_weight=1000000,
-    content_weight=1,
-):
+    cnn: nn.Module,
+    normalization_mean: torch.Tensor,
+    normalization_std: torch.Tensor,
+    content_img: torch.Tensor,
+    style_img: torch.Tensor,
+    input_img: torch.Tensor,
+    num_steps: int = 300,
+    style_weight: Union[int, float] = 1000000,
+    content_weight: Union[int, float] = 1,
+) -> torch.Tensor:
     print('Building the style transfer model..')
     model, style_losses, content_losses = get_style_model_and_losses(
         cnn, normalization_mean, normalization_std, style_img, content_img
@@ -276,7 +277,7 @@ def run_style_transfer(
     run = [0]
     while run[0] <= num_steps:
 
-        def closure():
+        def closure() -> torch.Tensor:
             # 限定像素值介於 [0, 1]
             with torch.no_grad():
                 input_img.clamp_(0, 1)
