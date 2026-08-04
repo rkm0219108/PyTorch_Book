@@ -1,5 +1,5 @@
 # 載入相關套件
-from RL_15_01_simple_game import Environment, Agent
+from RL_15_01_simple_game import Agent, Environment
 
 # 建立實驗，含環境、代理人物件
 env = Environment()

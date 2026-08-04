@@ -8,17 +8,15 @@
 
 
 # 載入相關套件
-import tensorflow as tf
-from tensorflow.keras.datasets import imdb
-from tensorflow.keras.layers import Embedding, Dense, LSTM, Dropout
-from tensorflow.keras.losses import BinaryCrossentropy
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import Adam
-from typing import Tuple
+from typing import Tuple, cast
 
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.layers import GRU, LSTM, Dense
+from tensorflow.keras.models import Sequential
 
 # In[39]:
 
@@ -56,10 +54,9 @@ num_periods = 20  # 測試資料量設定 20 期
 
 
 # 特徵常態化
-from sklearn.preprocessing import MinMaxScaler
 
 scl = MinMaxScaler()
-array = df.values.reshape(df.shape[0], 1)
+array = df.to_numpy().reshape(df.shape[0], 1)
 array = scl.fit_transform(array)
 
 # In[12]:
@@ -101,9 +98,11 @@ X, y = processData(array_train, look_back, forward_days)
 y = np.array([list(a.ravel()) for a in y])
 
 # 資料切割成訓練資料及驗證資料
-from sklearn.model_selection import train_test_split
 
-X_train, X_validate, y_train, y_validate = train_test_split(X, y, test_size=0.20)
+X_train, X_validate, y_train, y_validate = cast(
+    Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    train_test_split(X, y, test_size=0.20),
+)
 
 # In[16]:
 
@@ -194,6 +193,7 @@ Xt.shape
 # 繪製測試資料預測值
 plt.figure(figsize=(12, 6))
 # 繪製 20 條預測值，scl.inverse_transform：還原常態化
+i = 0
 for i in range(0, len(Xt)):
     plt.plot([x + i * forward_days for x in range(len(Xt[i]))], scl.inverse_transform(Xt[i].reshape(-1, 1)), color='r')
 
@@ -282,7 +282,6 @@ for i in range(0, len(Xt)):
 # In[43]:
 
 
-from tensorflow.keras.layers import GRU
 
 model_GRU = Sequential()
 model_GRU.add(GRU(NUM_NEURONS_FirstLayer, input_shape=(look_back, 1), return_sequences=True))

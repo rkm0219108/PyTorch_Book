@@ -9,9 +9,11 @@
 # In[1]:
 
 
+from typing import Any
+
+import matplotlib.pyplot as plt
 import torch
 import torchvision
-import matplotlib.pyplot as plt
 
 # ## 載入預先訓練好的模型
 
@@ -22,7 +24,7 @@ use_gpu = True if torch.cuda.is_available() else False
 
 # trained on high-quality celebrity faces "celebA" dataset
 # this model outputs 512 x 512 pixel images
-model = torch.hub.load(
+model: Any = torch.hub.load(
     'facebookresearch/pytorch_GAN_zoo:hub', 'PGAN', model_name='celebAHQ-512', pretrained=True, useGPU=use_gpu
 )
 

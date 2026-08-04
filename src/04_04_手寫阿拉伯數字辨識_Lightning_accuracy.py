@@ -97,8 +97,8 @@ class LitMNIST(LightningModule):
         # Here we just reuse the validation_step for testing
         return self.validation_step(batch, batch_idx)
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+    def configure_optimizers(self) -> optim.Optimizer:
+        optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
 
     ####################

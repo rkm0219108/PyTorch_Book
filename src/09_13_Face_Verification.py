@@ -11,6 +11,10 @@
 
 
 # 載入相關套件
+from typing import List
+
+import cv2
+import dlib
 import face_recognition
 import numpy as np
 from matplotlib import pyplot as plt
@@ -63,11 +67,6 @@ print(results)
 
 
 # 載入相關套件
-import dlib
-import cv2
-import numpy as np
-from matplotlib import pyplot as plt
-from typing import List
 
 # ## 載入模型
 
@@ -104,8 +103,9 @@ def face_encodings(
     # 偵測臉部特徵點
     raw_landmarks = [pose_predictor_5_point(face_image, face_location) for face_location in face_locations]
     # 編碼
+    face_image_uint8 = np.asarray(face_image, dtype=np.uint8)
     return [
-        np.array(face_encoder.compute_face_descriptor(face_image, raw_landmark_set, num_jitters))
+        np.array(face_encoder.compute_face_descriptor(face_image_uint8, raw_landmark_set, num_jitters))
         for raw_landmark_set in raw_landmarks
     ]
 
@@ -121,6 +121,14 @@ known_image_2 = cv2.imread("./images_face/jared_2.jpg")
 known_image_3 = cv2.imread("./images_face/jared_3.jpg")
 known_image_4 = cv2.imread("./images_face/obama.jpg")
 unknown_image = cv2.imread("./images_face/jared_4.jpg")
+if (
+    known_image_1 is None
+    or known_image_2 is None
+    or known_image_3 is None
+    or known_image_4 is None
+    or unknown_image is None
+):
+    raise FileNotFoundError("images_face image")
 names = ["jared_1.jpg", "jared_2.jpg", "jared_3.jpg", "obama.jpg"]
 
 # ## 圖像編碼

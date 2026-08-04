@@ -8,9 +8,12 @@
 # In[2]:
 
 
-import torch
-from torch_geometric.data import Data
 import networkx as nx
+import torch
+import torch_geometric.transforms as T
+from torch_geometric.data import Data
+from torch_geometric.datasets import ShapeNet, TUDataset
+from torch_geometric.utils.convert import to_networkx
 
 # ## 建立圖形
 
@@ -75,7 +78,6 @@ list(data["edge_index"].cpu().numpy().T)
 # In[26]:
 
 
-from torch_geometric.utils.convert import to_networkx
 
 
 def draw_pyg(Data: Data) -> None:
@@ -132,7 +134,6 @@ draw_pyg2(data)
 # In[35]:
 
 
-from torch_geometric.datasets import TUDataset
 
 # 載入內建資料
 dataset = TUDataset(root='./graph/ENZYMES', name='ENZYMES')
@@ -167,8 +168,6 @@ dataset[0]
 # In[37]:
 
 
-import torch_geometric.transforms as T
-from torch_geometric.datasets import ShapeNet
 
 dataset = ShapeNet(root='./graph/ShapeNet')
 
@@ -177,8 +176,6 @@ dataset[0]
 # In[36]:
 
 
-import torch_geometric.transforms as T
-from torch_geometric.datasets import ShapeNet
 
 # KNNGraph：使用最近鄰(KNN)演算法，每一點取6個最近的節點
 dataset = ShapeNet(root='./graph/ShapeNet', categories=['Airplane'], pre_transform=T.KNNGraph(k=6))

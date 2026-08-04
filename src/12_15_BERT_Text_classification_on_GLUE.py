@@ -10,8 +10,22 @@ model_checkpoint = "distilbert-base-uncased"
 # 批量
 batch_size = 16
 
+import random
+from typing import Any, Dict, cast
+
 import datasets
 import evaluate
+import numpy as np
+import pandas as pd
+from IPython.display import HTML, display
+from torch.utils.data import Dataset
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    Trainer,
+    TrainingArguments,
+)
+from transformers.trainer_utils import BestRun, EvalPrediction
 
 actual_task = "mnli" if task == "mnli-mm" else task
 # 載入資料集
@@ -25,11 +39,7 @@ dataset
 # 顯示第一筆內容
 dataset["train"][1]
 
-import random
-from typing import Any, Dict, Tuple
 
-import pandas as pd
-from IPython.display import display, HTML
 
 
 # 隨機抽取資料函數
@@ -58,13 +68,11 @@ show_random_elements(dataset["train"])
 metric
 
 # 產生兩筆隨機亂數，測試效能衡量指標
-import numpy as np
 
 fake_preds = np.random.randint(0, 2, size=(64,))
 fake_labels = np.random.randint(0, 2, size=(64,))
 metric.compute(predictions=fake_preds, references=fake_labels)
 
-from transformers import AutoTokenizer
 
 # 分詞
 tokenizer = AutoTokenizer.from_pretrained(model_checkpoint, use_fast=True)
@@ -107,7 +115,6 @@ preprocess_function(dataset['train'][:5])
 # 將所有資料進行分詞
 encoded_dataset = dataset.map(preprocess_function, batched=True)
 
-from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
 
 # 載入預先訓練的模型
 num_labels = 3 if task.startswith("mnli") else 1 if task == "stsb" else 2
@@ -130,13 +137,16 @@ args = TrainingArguments(
 
 
 # 定義效能衡量指標計算的函數
-def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:
+def compute_metrics(eval_pred: EvalPrediction) -> Dict[str, float]:
     predictions, labels = eval_pred
+    predictions = cast(np.ndarray, predictions)
     if task != "stsb":
         predictions = np.argmax(predictions, axis=1)
     else:
         predictions = predictions[:, 0]
-    return metric.compute(predictions=predictions, references=labels)
+    result = metric.compute(predictions=predictions, references=labels)
+    assert result is not None
+    return result
 
 
 # 定義訓練者(Trainer)物件
@@ -149,7 +159,7 @@ trainer = Trainer(
     args,
     train_dataset=encoded_dataset["train"],
     eval_dataset=encoded_dataset[validation_key],
-    tokenizer=tokenizer,
+    processing_class=tokenizer,
     compute_metrics=compute_metrics,
 )
 
@@ -163,7 +173,7 @@ trainer.save_model('./cola')
 
 
 # 預測
-class SimpleDataset:
+class SimpleDataset(Dataset):
     def __init__(self, tokenized_texts: Any) -> None:
         self.tokenized_texts = tokenized_texts
 
@@ -202,11 +212,12 @@ trainer = Trainer(
     args=args,
     train_dataset=encoded_dataset["train"],
     eval_dataset=encoded_dataset[validation_key],
-    tokenizer=tokenizer,
+    processing_class=tokenizer,
     compute_metrics=compute_metrics,
 )
 
 best_run = trainer.hyperparameter_search(n_trials=10, direction="maximize")
+assert isinstance(best_run, BestRun)
 
 best_run
 

@@ -11,10 +11,13 @@
 
 # 使用 OLS 公式計算 w、b
 # 載入套件
-import matplotlib.pyplot as plt
+from typing import cast
+
 import numpy as np
-import math
 import pandas as pd
+import torch
+from sklearn.datasets import fetch_california_housing
+from sklearn.linear_model import LinearRegression
 
 # 載入資料集
 df = pd.read_csv('./data/population.csv')
@@ -36,7 +39,7 @@ print(f'w={coef[0]}, b={coef[1]}')
 # In[15]:
 
 
-X = df[['year']].values
+X = np.asarray(df[['year']].values, dtype=np.float64)
 
 # b = b * 1
 one = np.ones((len(df), 1))
@@ -44,7 +47,7 @@ one = np.ones((len(df), 1))
 # 將 x 與 one 合併
 X = np.concatenate((X, one), axis=1)
 
-y = df[['pop']].values
+y = np.asarray(df[['pop']].values, dtype=np.float64)
 
 # 求解
 w = np.linalg.inv(X.T @ X) @ X.T @ y
@@ -55,8 +58,6 @@ print(f'w={w[0, 0]}, b={w[1, 0]}')
 # In[18]:
 
 
-from typing import cast
-from sklearn.datasets import fetch_california_housing
 
 # 載入 Boston 房價資料集
 X, y = cast(tuple[np.ndarray, np.ndarray], fetch_california_housing(return_X_y=True))
@@ -76,7 +77,6 @@ w
 # In[19]:
 
 
-from sklearn.linear_model import LinearRegression
 
 X, y = cast(tuple[np.ndarray, np.ndarray], fetch_california_housing(return_X_y=True))
 
@@ -90,7 +90,6 @@ lr.coef_, lr.intercept_
 # In[4]:
 
 
-import torch
 
 # 載入 Boston 房價資料集
 X, y = cast(tuple[np.ndarray, np.ndarray], fetch_california_housing(return_X_y=True))
@@ -101,7 +100,7 @@ X_tensor = torch.from_numpy(X)
 one = torch.ones((X.shape[0], 1))
 
 # 將 x 與 one 合併
-X = torch.cat((X_tensor, one), axis=1)
+X = torch.cat((X_tensor, one), dim=1)
 
 
 # 求解

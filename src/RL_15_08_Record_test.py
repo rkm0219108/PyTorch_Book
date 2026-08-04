@@ -19,7 +19,7 @@ for _ in range(50):
         action = env.action_space.sample()
         obs, reward, terminated, truncated, _ = env.step(action)
         done = terminated or truncated
-        total_reward += reward
+        total_reward += float(reward)
         if done:
             break
 

@@ -23,6 +23,8 @@ from matplotlib import pyplot as plt
 # 載入圖檔
 image_file = "./images_Object_Detection/lena.jpg"
 image = cv2.imread(image_file)
+if image is None:
+    raise FileNotFoundError(image_file)
 
 # 顯示圖像
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -37,7 +39,7 @@ plt.show()
 
 # 偵測臉部
 cascade = cv2.CascadeClassifier("./cascade_files/haarcascade_frontalface_alt2.xml")
-faces = cascade.detectMultiScale(image, 1.5, 5)
+faces = np.array(cascade.detectMultiScale(image, 1.3, 5))
 print("faces", faces)
 
 # 建立臉部特徵點偵測的物件

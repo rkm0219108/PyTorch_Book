@@ -8,14 +8,14 @@
 # In[1]:
 
 
-from transformers import pipeline
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 # ## 載入模型
 
 # In[2]:
 
 
-summarizer = pipeline("summarization")
+summarizer = pipeline("summarization")  # pyright: ignore[reportCallIssue, reportArgumentType]
 
 # ## 測試
 
@@ -51,7 +51,6 @@ print(summarizer(ARTICLE, max_length=130, min_length=30, do_sample=False))
 
 
 # 載入相關套件
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 model = AutoModelForSeq2SeqLM.from_pretrained("t5-base")
 

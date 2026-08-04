@@ -9,14 +9,17 @@
 
 
 # 載入套件
+import math
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 
 # In[1]:
 
 
 # 載入套件
-import numpy as np
-import matplotlib.pyplot as plt
 
 # 向量(Vector)
 v = np.array([2, 1])
@@ -31,8 +34,8 @@ origin = [0], [0]
 # 畫有箭頭的線
 plt.quiver(*origin, *v, scale=10, color='r')
 
-plt.xticks(np.arange(-0.05, 0.06, 0.01), labels=np.arange(-5, 6, 1))
-plt.yticks(np.arange(-3, 5, 1) / 100, labels=np.arange(-3, 5, 1))
+plt.xticks(np.arange(-0.05, 0.06, 0.01), labels=[str(i) for i in np.arange(-5, 6, 1)])
+plt.yticks(np.arange(-3, 5, 1) / 100, labels=[str(i) for i in np.arange(-3, 5, 1)])
 plt.show()
 
 # ## 向量長度(magnitude)計算
@@ -63,7 +66,6 @@ torch.linalg.norm(torch.FloatTensor(v))
 # In[11]:
 
 
-import math
 
 # 向量(Vector)
 v = np.array([2, 1])
@@ -102,8 +104,8 @@ plt.annotate('orginal vector', (0.025, 0.01), xycoords='data', fontsize=16)
 plt.axis('equal')
 plt.grid()
 
-plt.xticks(np.arange(-0.05, 0.06, 0.01), labels=np.arange(-5, 6, 1))
-plt.yticks(np.arange(-3, 5, 1) / 100, labels=np.arange(-3, 5, 1))
+plt.xticks(np.arange(-0.05, 0.06, 0.01), labels=[str(i) for i in np.arange(-5, 6, 1)])
+plt.yticks(np.arange(-3, 5, 1) / 100, labels=[str(i) for i in np.arange(-3, 5, 1)])
 plt.show()
 
 # ## 向量乘除法：乘除一個常數，長度改變、方向不改變
@@ -130,8 +132,8 @@ plt.annotate('orginal vector', (0.025, 0.008), xycoords='data', color='b', fonts
 plt.axis('equal')
 plt.grid()
 
-plt.xticks(np.arange(-0.05, 0.06, 0.01), labels=np.arange(-5, 6, 1))
-plt.yticks(np.arange(-3, 5, 1) / 100, labels=np.arange(-3, 5, 1))
+plt.xticks(np.arange(-0.05, 0.06, 0.01), labels=[str(i) for i in np.arange(-5, 6, 1)])
+plt.yticks(np.arange(-3, 5, 1) / 100, labels=[str(i) for i in np.arange(-3, 5, 1)])
 plt.show()
 
 # ## 向量加減乘除另一個向量：兩個向量的相同位置的元素作加減乘除。
@@ -158,8 +160,8 @@ plt.annotate('orginal vector', (0.025, 0.008), xycoords='data', color='b', fonts
 plt.axis('equal')
 plt.grid()
 
-plt.xticks(np.arange(-0.05, 0.06, 0.01), labels=np.arange(-5, 6, 1))
-plt.yticks(np.arange(-3, 5, 1) / 100, labels=np.arange(-3, 5, 1))
+plt.xticks(np.arange(-0.05, 0.06, 0.01), labels=[str(i) for i in np.arange(-5, 6, 1)])
+plt.yticks(np.arange(-3, 5, 1) / 100, labels=[str(i) for i in np.arange(-3, 5, 1)])
 plt.show()
 
 # ## 『內積』(Inner Product)或稱『點積乘法』(Dot Product)
@@ -182,7 +184,6 @@ print(d)
 
 
 # 載入套件
-import math
 
 # 向量(Vector)
 v = np.array([2, 1])
@@ -345,7 +346,6 @@ print(d)
 
 
 # 載入套件
-import torch
 
 # 顯示 PyTorch 版本
 print(torch.__version__)
@@ -428,7 +428,7 @@ tensor
 
 # TensorFlow reduce_sum 的等式
 A = torch.FloatTensor([[1, 2, 3], [4, 5, 6]])
-A.sum(axis=1)
+A.sum(dim=1)
 
 # ## 變數搬移至CPU/GPU
 
@@ -463,7 +463,7 @@ tensor_gpu + tensor_cpu.cuda()
 
 
 # 彈性寫法
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.mps.is_available() else 'cpu'
 
 tensor_gpu.to(device) + tensor_cpu.to(device)
 
@@ -478,13 +478,13 @@ i = torch.LongTensor([[0, 1, 1], [2, 0, 2]])
 v = torch.FloatTensor([3, 4, 5])
 
 # 定義稀疏矩陣的尺寸(2, 3)，並轉為正常的矩陣
-torch.sparse.FloatTensor(i, v, torch.Size([2, 3])).to_dense()
+torch.sparse_coo_tensor(i, v, torch.Size([2, 3])).to_dense()
 
 # In[18]:
 
 
 # 稀疏矩陣運算
-a = torch.sparse.FloatTensor(i, v, torch.Size([2, 3])) + torch.sparse.FloatTensor(i, v, torch.Size([2, 3]))
+a = torch.sparse_coo_tensor(i, v, torch.Size([2, 3])) + torch.sparse_coo_tensor(i, v, torch.Size([2, 3]))
 a.to_dense()
 
 # ## 指定預設的 GPU
@@ -493,8 +493,6 @@ a.to_dense()
 
 
 # 載入套件
-import torch
-import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # 檢查 GPU 及 cuda toolkit 是否存在

@@ -8,7 +8,7 @@
 # In[1]:
 
 
-from transformers import pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 # ## 載入模型
 
@@ -35,7 +35,6 @@ print(text_generator("As far as I am concerned, I will", max_length=50, do_sampl
 
 
 # 載入相關套件
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 # 結合分詞器(Tokenizer)
 model = AutoModelForCausalLM.from_pretrained("xlnet-base-cased")

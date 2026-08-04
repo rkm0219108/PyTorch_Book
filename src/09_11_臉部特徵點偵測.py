@@ -12,9 +12,12 @@
 
 # 安裝套件： pip install face-recognition
 # 載入相關套件
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle
+import cv2
+import dlib
 import face_recognition
+import matplotlib.pyplot as plt
+from imutils import face_utils
+from PIL import Image, ImageDraw
 
 # ## 載入並顯示圖檔
 
@@ -36,7 +39,6 @@ plt.show()
 
 
 # 偵測臉部特徵點並顯示
-from PIL import Image, ImageDraw
 
 # 載入圖檔
 image = face_recognition.load_image_file(image_file)
@@ -72,11 +74,6 @@ plt.show()
 
 
 # 載入相關套件
-import dlib
-import cv2
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle
-from imutils import face_utils
 
 # ## 載入並顯示圖檔
 
@@ -85,7 +82,7 @@ from imutils import face_utils
 
 # 載入圖檔
 image_file = "./images_face/classmates.jpg"
-image = plt.imread(image_file)
+image = plt.imread(image_file).copy()  # copy 避免唯讀陣列導致 cv2.circle 出錯
 
 # 顯示圖像
 plt.imshow(image)

@@ -8,8 +8,10 @@
 
 
 # 載入套件
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from sklearn.linear_model import LinearRegression
 
 # ## 定義訓練函數
 
@@ -35,6 +37,8 @@ def train(
         MSE.backward()
 
         # 設定不參與梯度下降，w、b才能運算
+        assert w.grad is not None
+        assert b.grad is not None
         with torch.no_grad():
             # 新權重 = 原權重 — 學習率(learning_rate) * 梯度(gradient)
             w -= lr * w.grad
@@ -49,6 +53,8 @@ def train(
             loss_list.append(MSE.item())
 
         # 梯度重置
+        assert w.grad is not None
+        assert b.grad is not None
         w.grad.zero_()
         b.grad.zero_()
 
@@ -103,7 +109,6 @@ print(f'w={coef[0]}, b={coef[1]}')
 # In[95]:
 
 
-from sklearn.linear_model import LinearRegression
 
 X2 = X.reshape(X.shape[0], 1)
 
@@ -117,7 +122,6 @@ lr.coef_[0], lr.intercept_
 # In[96]:
 
 
-import matplotlib.pyplot as plt
 
 plt.scatter(X, y, label='data')
 plt.plot(X, w_list[-1] * X + b_list[-1], 'r-', label='predicted')
@@ -127,7 +131,6 @@ plt.legend()
 
 
 # NumPy 求得的迴歸線
-import matplotlib.pyplot as plt
 
 plt.scatter(X, y, label='data')
 plt.plot(X, coef[0] * X + coef[1], 'r-', label='predicted')

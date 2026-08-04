@@ -9,25 +9,27 @@
 # In[19]:
 
 
+import glob
 import os
+from typing import cast
+
+import imageio
+import matplotlib.pyplot as plt
 import torch
 from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchmetrics import Accuracy
 from torchvision import transforms
-from torchvision.datasets import MNIST
 from torchvision import utils as vutils
+from torchvision.datasets import MNIST
 
 # ## 設定參數
 
 # In[2]:
 
 
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 BATCH_SIZE = 64  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 載入 MNIST 手寫阿拉伯數字資料
 
@@ -45,7 +47,7 @@ transform = transforms.Compose(
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
 dataset = MNIST(PATH_DATASETS, train=True, download=True, transform=transform)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 # 訓練資料的維度
 print(dataset.data.shape)
@@ -67,10 +69,10 @@ ndf = 64  # 判別神經網路濾波器個數
 def weights_init(m: nn.Module) -> None:
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
-        m.weight.data.normal_(0.0, 0.02)  # 卷積層權重初始值
+        cast(torch.Tensor, m.weight).data.normal_(0.0, 0.02)  # 卷積層權重初始值
     elif classname.find('BatchNorm') != -1:
-        m.weight.data.normal_(1.0, 0.02)  # Batch Normalization 層權重初始值
-        m.bias.data.fill_(0)
+        cast(torch.Tensor, m.weight).data.normal_(1.0, 0.02)  # Batch Normalization 層權重初始值
+        cast(torch.Tensor, m.bias).data.fill_(0)
 
 
 # ## 定義生成神經網路
@@ -152,8 +154,8 @@ netD.apply(weights_init)
 criterion = nn.BCELoss()
 
 # 設定優化器(optimizer)
-optimizerD = torch.optim.Adam(netD.parameters(), lr=0.0002, betas=(0.5, 0.999))
-optimizerG = torch.optim.Adam(netG.parameters(), lr=0.0002, betas=(0.5, 0.999))
+optimizerD = optim.Adam(netD.parameters(), lr=0.0002, betas=(0.5, 0.999))
+optimizerG = optim.Adam(netG.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
 # ## 進行模型訓練
 
@@ -164,6 +166,8 @@ fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 real_label = 1.0
 fake_label = 0.0
 niter = 25
+os.makedirs('gan_output', exist_ok=True)
+os.makedirs('gan_weights', exist_ok=True)
 # 模型訓練
 for epoch in range(niter):
     for i, data in enumerate(dataloader, 0):
@@ -218,8 +222,6 @@ for epoch in range(niter):
 # In[31]:
 
 
-import matplotlib.pyplot as plt
-
 batch_size = 25
 latent_size = 100
 
@@ -245,9 +247,6 @@ plt.show()
 # In[30]:
 
 
-import imageio
-import glob
-
 # 產生 GIF 檔
 anim_file = './gan_output/dcgan.gif'
 with imageio.get_writer(anim_file, mode='I') as writer:
@@ -255,7 +254,7 @@ with imageio.get_writer(anim_file, mode='I') as writer:
     filenames = sorted(filenames)
     for filename in filenames:
         image = imageio.imread(filename)
-        writer.append_data(image)
+        cast(imageio.core.format.Format.Writer, writer).append_data(image)
 
 # <img src="./gan_output/dcgan.gif" align="left">
 

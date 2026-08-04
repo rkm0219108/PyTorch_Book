@@ -3,7 +3,7 @@ import errno
 import os
 import time
 from collections import defaultdict, deque
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Sized, Tuple, cast
 
 import torch
 import torch.distributed as dist
@@ -151,7 +151,7 @@ class MetricLogger:
         end = time.time()
         iter_time = SmoothedValue(fmt="{avg:.4f}")
         data_time = SmoothedValue(fmt="{avg:.4f}")
-        space_fmt = ":" + str(len(str(len(iterable)))) + "d"
+        space_fmt = ":" + str(len(str(len(cast(Sized, iterable))))) + "d"
         if torch.cuda.is_available():
             log_msg = self.delimiter.join(
                 [
@@ -173,14 +173,14 @@ class MetricLogger:
             data_time.update(time.time() - end)
             yield obj
             iter_time.update(time.time() - end)
-            if i % print_freq == 0 or i == len(iterable) - 1:
-                eta_seconds = iter_time.global_avg * (len(iterable) - i)
+            if i % print_freq == 0 or i == len(cast(Sized, iterable)) - 1:
+                eta_seconds = iter_time.global_avg * (len(cast(Sized, iterable)) - i)
                 eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
                 if torch.cuda.is_available():
                     print(
                         log_msg.format(
                             i,
-                            len(iterable),
+                            len(cast(Sized, iterable)),
                             eta=eta_string,
                             meters=str(self),
                             time=str(iter_time),
@@ -191,14 +191,19 @@ class MetricLogger:
                 else:
                     print(
                         log_msg.format(
-                            i, len(iterable), eta=eta_string, meters=str(self), time=str(iter_time), data=str(data_time)
+                            i,
+                            len(cast(Sized, iterable)),
+                            eta=eta_string,
+                            meters=str(self),
+                            time=str(iter_time),
+                            data=str(data_time),
                         )
                     )
             i += 1
             end = time.time()
         total_time = time.time() - start_time
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-        print(f"{header} Total time: {total_time_str} ({total_time / len(iterable):.4f} s / it)")
+        print(f"{header} Total time: {total_time_str} ({total_time / len(cast(Sized, iterable)):.4f} s / it)")
 
 
 def collate_fn(batch: Iterable[Any]) -> Tuple[Any, ...]:

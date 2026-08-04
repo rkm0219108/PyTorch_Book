@@ -16,24 +16,24 @@
 
 
 import os
-from typing import Any
-import numpy as np
+import tempfile
+
+import matplotlib.pyplot as plt
 import torch
-import torch.optim as optim
-import torch.nn as nn
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-import torch.nn.functional as F
+from torch import nn, optim
+from torch.nn import functional as F
 from ray import tune
-from ray.tune.schedulers import ASHAScheduler
+from ray.train import Checkpoint
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
 
 # ## 判斷是否有GPU
 
 # In[3]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 建立模型結構
 
@@ -100,15 +100,22 @@ def test(model: nn.Module, data_loader: DataLoader) -> float:
 
 mnist_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
 
+# Ray Tune 會將每個試驗的工作目錄切換到暫存目錄，故資料路徑須使用絕對路徑
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+
 # ## 定義資料載入及模型訓練函數
 
 # In[42]:
 
 
-def train_mnist(config: dict[str, Any]) -> None:
+def train_mnist(config: dict[str, float]) -> None:
     # 載入 MNIST 手寫阿拉伯數字資料
-    train_loader = DataLoader(datasets.MNIST("", train=True, transform=mnist_transforms), batch_size=64, shuffle=True)
-    test_loader = DataLoader(datasets.MNIST("", train=False, transform=mnist_transforms), batch_size=64, shuffle=True)
+    train_loader = DataLoader(
+        datasets.MNIST(DATA_DIR, train=True, transform=mnist_transforms), batch_size=64, shuffle=True
+    )
+    test_loader = DataLoader(
+        datasets.MNIST(DATA_DIR, train=False, transform=mnist_transforms), batch_size=64, shuffle=True
+    )
 
     # 建立模型
     model = ConvNet().to(device)
@@ -121,12 +128,15 @@ def train_mnist(config: dict[str, Any]) -> None:
         # 測試
         acc = test(model, test_loader)
 
-        # 訓練結果交回給 Ray Tune
-        tune.report(mean_accuracy=acc)
-
-        # 每 5 週期存檔一次
+        # 每 5 週期存檔一次，並以 Checkpoint 物件回傳，Ray Tune 才會將檔案同步保存到永久儲存位置
         if i % 5 == 0:
-            torch.save(model.state_dict(), "./model.pth")
+            with tempfile.TemporaryDirectory() as tmpdir:
+                torch.save(model.state_dict(), os.path.join(tmpdir, "model.pth"))
+                # 訓練結果交回給 Ray Tune
+                tune.report({"mean_accuracy": acc}, checkpoint=Checkpoint.from_directory(tmpdir))
+        else:
+            # 訓練結果交回給 Ray Tune
+            tune.report({"mean_accuracy": acc})
 
 
 # ## 參數調校
@@ -145,7 +155,8 @@ search_space = {
 # ray.init(address="auto")
 
 # 執行參數調校
-analysis = tune.run(train_mnist, config=search_space, resources_per_trial={'gpu': 1})
+# analysis = tune.run(train_mnist, config=search_space, resources_per_trial={'gpu': 1})
+analysis = tune.run(train_mnist, config=search_space)
 
 # ## 取得實驗的參數
 
@@ -159,8 +170,6 @@ for i in analysis.get_all_configs().keys():
 
 # In[107]:
 
-
-import matplotlib.pyplot as plt
 
 # 取得實驗的參數
 config_list = []
@@ -197,6 +206,7 @@ analysis.results_df
 
 
 best_trial = analysis.get_best_trial("mean_accuracy", "max", "last")
+assert best_trial is not None
 best_trial.config
 
 # ## 載入最佳模型
@@ -204,8 +214,11 @@ best_trial.config
 # In[75]:
 
 
-logdir = analysis.get_best_logdir("mean_accuracy", mode="max")
-state_dict = torch.load(os.path.join(logdir, "model.pth"))
+best_checkpoint = analysis.get_best_checkpoint(best_trial, "mean_accuracy", "max")
+assert best_checkpoint is not None
+
+with best_checkpoint.as_directory() as checkpoint_dir:
+    state_dict = torch.load(os.path.join(checkpoint_dir, "model.pth"))
 
 model = ConvNet().to(device)
 model.load_state_dict(state_dict)
@@ -215,7 +228,7 @@ model.load_state_dict(state_dict)
 # In[50]:
 
 
-test_ds = datasets.MNIST('', train=False, download=True, transform=mnist_transforms)
+test_ds = datasets.MNIST(DATA_DIR, train=False, download=True, transform=mnist_transforms)
 
 # 建立 DataLoader
 test_loader = DataLoader(test_ds, shuffle=False, batch_size=1000)
@@ -232,7 +245,7 @@ with torch.no_grad():
         correct += (predicted == target).sum().item()
 
 # 顯示測試結果
-data_count = len(test_loader.dataset)
+data_count = len(test_ds)
 percentage = 100.0 * correct / data_count
 print(f'準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 

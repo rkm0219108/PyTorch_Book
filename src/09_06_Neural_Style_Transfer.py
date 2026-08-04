@@ -15,23 +15,22 @@
 
 
 from __future__ import print_function
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from PIL import Image
+
+from typing import List, Optional, Tuple, Union, cast
+
 import matplotlib.pyplot as plt
-import torchvision.transforms as transforms
-import torchvision.models as models
-import copy
-from typing import Optional, List, Tuple, Union
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
+from torchvision import models, transforms
+from PIL import Image
 
 # ## 判斷是否使用 GPU
 
 # In[46]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 定義讀取圖檔、顯示/轉換圖像的函數
 
@@ -48,7 +47,7 @@ loader = transforms.Compose([transforms.Resize((imsize, imsize)), transforms.ToT
 # 讀取圖檔，轉為張量
 def image_loader(image_name: str) -> torch.Tensor:
     image = Image.open(image_name)
-    image = loader(image).unsqueeze(0)  # 增加一維
+    image = cast(torch.Tensor, loader(image)).unsqueeze(0)  # 增加一維
     return image.to(device, torch.float)
 
 
@@ -236,7 +235,7 @@ def get_style_model_and_losses(
         if isinstance(model[i], ContentLoss) or isinstance(model[i], StyleLoss):
             break
 
-    model = model[: (i + 1)]
+    model = cast(nn.Sequential, model[: (i + 1)])
 
     return model, style_losses, content_losses
 
@@ -246,7 +245,7 @@ def get_style_model_and_losses(
 # In[41]:
 
 
-def get_input_optimizer(input_img: torch.Tensor) -> optim.Optimizer:
+def get_input_optimizer(input_img: torch.Tensor) -> optim.LBFGS:
     # 設定 input image 要優化
     optimizer = optim.LBFGS([input_img])
     return optimizer
@@ -285,8 +284,8 @@ def run_style_transfer(
             # 計算損失
             optimizer.zero_grad()
             model(input_img)
-            style_score = 0
-            content_score = 0
+            style_score = torch.tensor(0.0)
+            content_score = torch.tensor(0.0)
 
             for sl in style_losses:
                 style_score += sl.loss

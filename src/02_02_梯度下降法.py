@@ -11,17 +11,17 @@
 # 載入套件
 from typing import Callable
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 # 目標函數(損失函數):y=x^2
-def func(x: float | np.ndarray) -> float | np.ndarray:
+def func1(x: float | np.ndarray) -> float | np.ndarray:
     return x**2  # np.square(x)
 
 
 # 目標函數的一階導數:dy/dx=2*x
-def dfunc(x: float | np.ndarray) -> float | np.ndarray:
+def dfunc1(x: float | np.ndarray) -> float | np.ndarray:
     return 2 * x
 
 
@@ -35,7 +35,7 @@ def dfunc(x: float | np.ndarray) -> float | np.ndarray:
 # lr: 學習率
 def GD(
     x_start: float,
-    df: Callable[[float], float],
+    df: Callable[[float | np.ndarray], float | np.ndarray],
     epochs: int,
     lr: float,
 ) -> np.ndarray:
@@ -61,15 +61,15 @@ epochs = 15  # 執行週期數
 lr = 0.3  # 學習率
 
 # 梯度下降法
-w = GD(x_start, dfunc, epochs, lr=lr)
+w = GD(x_start, dfunc1, epochs, lr=lr)
 
 # 函數 y=x^2 繪圖
 plt.figure(figsize=(12, 8))
 t = np.arange(-6.0, 6.0, 0.01)
-plt.plot(t, func(t), c='b')
+plt.plot(t, func1(t), c='b')
 
 
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -81,7 +81,7 @@ line_offset = 2  # 切線長度
 for i in range(5, -1, -1):
     # 取相近兩個點，畫切線(tangent line)
     z = np.array([i + 0.001, i])
-    vec = np.vectorize(func)
+    vec = np.vectorize(func1)
     cls = np.polyfit(z, vec(z), deg=1)
     p = np.poly1d(cls)
 
@@ -103,15 +103,15 @@ lr = 0.3  # 學習率
 
 # 梯度下降法
 # *** Function 可以直接當參數傳遞 ***
-w = GD(x_start, dfunc, epochs, lr=lr)
+w = GD(x_start, dfunc1, epochs, lr=lr)
 print(np.around(w, 2))
 
 t = np.arange(-6.0, 6.0, 0.01)
-plt.plot(t, func(t), c='b')
-plt.plot(w, func(w), c='r', marker='o', markersize=5)
+plt.plot(t, func1(t), c='b')
+plt.plot(w, func1(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -126,12 +126,12 @@ plt.show()
 
 
 # 損失函數
-def func(x: float | np.ndarray) -> float | np.ndarray:
+def func2(x: float | np.ndarray) -> float | np.ndarray:
     return 2 * x**4 - 3 * x**2 + 2 * x - 20
 
 
 # 損失函數一階導數
-def dfunc(x: float | np.ndarray) -> float | np.ndarray:
+def dfunc2(x: float | np.ndarray) -> float | np.ndarray:
     return 8 * x**3 - 6 * x + 2
 
 
@@ -139,10 +139,10 @@ def dfunc(x: float | np.ndarray) -> float | np.ndarray:
 
 
 t = np.arange(-6.0, 6.0, 0.01)
-plt.plot(t, func(t), c='b')
+plt.plot(t, func2(t), c='b')
 
 # 設定中文字型
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -162,17 +162,17 @@ lr = 0.001  # 學習率
 
 # 梯度下降法
 # *** Function 可以直接當參數傳遞 ***
-w = GD(x_start, dfunc, epochs, lr=lr)
+w = GD(x_start, dfunc2, epochs, lr=lr)
 print(np.around(w, 2))
 
 color = 'r'
 
 t = np.arange(-6.0, 6.0, 0.01)
-plt.plot(t, func(t), c='b')
-plt.plot(w, func(w), c='r', marker='o', markersize=5)
+plt.plot(t, func2(t), c='b')
+plt.plot(w, func2(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)

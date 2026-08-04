@@ -7,17 +7,18 @@
 
 
 # 載入相關套件
-from typing import Any, Callable, Dict, Tuple
-
-import gymnasium as gym
 import itertools
-import matplotlib
-import numpy as np
-import pandas as pd
 import sys
 from collections import defaultdict
-from lib.envs.windy_gridworld import WindyGridworldEnv
+from typing import Any, Callable, Dict, Tuple
+
+import matplotlib
+import matplotlib.style
+import numpy as np
 from lib import plotting
+from lib.envs.windy_gridworld import (
+    WindyGridworldEnv,
+)
 
 matplotlib.style.use('ggplot')  # 設定繪圖的風格
 
@@ -67,7 +68,7 @@ def make_epsilon_greedy_policy(Q: Dict[Any, np.ndarray], epsilon: float, nA: int
 
 # 定義 Q_learning 策略
 def q_learning(
-    env: gym.Env,
+    env: WindyGridworldEnv,
     num_episodes: int,
     discount_factor: float = 1.0,
     alpha: float = 0.5,

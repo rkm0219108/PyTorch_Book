@@ -8,21 +8,24 @@
 # In[49]:
 
 
+from typing import cast
+
+import numpy as np
 import torch
-from torchvision import models
-from torchvision.models import VGG16_Weights, ResNet50_Weights
+from PIL import Image
 from torch import nn
 from torch.nn import functional as F
-import numpy as np
 from torchsummary import summary
+from torchvision import models, transforms
+from torchvision.models import ResNet50_Weights, VGG16_Weights
 
 # ## 檢查 GPU
 
 # In[50]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 使用較簡單的VGG模型
 
@@ -66,7 +69,7 @@ model.features
 # In[57]:
 
 
-model.features[0]
+cast(nn.Sequential, model.features)[0]
 
 # In[58]:
 
@@ -89,8 +92,6 @@ summary(model, input_size=(3, 224, 224))
 # In[61]:
 
 
-from PIL import Image
-from torchvision import transforms
 
 filename = './images_test/cat.jpg'
 input_image = Image.open(filename)
@@ -102,7 +103,7 @@ transform = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
-input_tensor = transform(input_image)
+input_tensor = cast(torch.Tensor, transform(input_image))
 input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 # 預測
@@ -127,7 +128,7 @@ print(f'{torch.argmax(probabilities).item()}: {torch.max(probabilities).item()}'
 with open("imagenet.categories", "r") as f:
     # 取第一欄
     categories = [s.strip().split(',')[0] for s in f.readlines()]
-categories[torch.argmax(probabilities).item()]
+categories[int(torch.argmax(probabilities).item())]
 
 # In[64]:
 
@@ -142,7 +143,7 @@ transform = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
-input_tensor = transform(input_image)
+input_tensor = cast(torch.Tensor, transform(input_image))
 input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 # 預測
@@ -152,7 +153,7 @@ with torch.no_grad():
 
 # 轉成機率
 probabilities = F.softmax(output[0], dim=0)
-max_item = torch.argmax(probabilities).item()
+max_item = int(torch.argmax(probabilities).item())
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
 # ## 使用 resnet50 模型
@@ -182,7 +183,7 @@ transform = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
-input_tensor = transform(input_image)
+input_tensor = cast(torch.Tensor, transform(input_image))
 input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 model.eval()
@@ -191,7 +192,7 @@ with torch.no_grad():
 
 # 轉成機率
 probabilities = F.softmax(output[0], dim=0)
-max_item = torch.argmax(probabilities).item()
+max_item = int(torch.argmax(probabilities).item())
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
 # ## 官網程式，轉換先Resize(256)，再CenterCrop(224)
@@ -214,7 +215,7 @@ transform = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
-input_tensor = transform(input_image)
+input_tensor = cast(torch.Tensor, transform(input_image))
 input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 model.eval()
@@ -223,7 +224,7 @@ with torch.no_grad():
 
 # 轉成機率
 probabilities = F.softmax(output[0], dim=0)
-max_item = torch.argmax(probabilities).item()
+max_item = int(torch.argmax(probabilities).item())
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
 # In[68]:
@@ -242,7 +243,6 @@ sum(probabilities.cpu().numpy())
 # In[70]:
 
 
-import numpy as np
 
 probabilities.cpu().numpy().argsort()[-5:][::-1]
 
@@ -264,7 +264,7 @@ transform = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
-input_tensor = transform(input_image)
+input_tensor = cast(torch.Tensor, transform(input_image))
 input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 # 預測
@@ -274,7 +274,7 @@ with torch.no_grad():
 
 # 轉成機率
 probabilities = F.softmax(output[0], dim=0)
-max_item = torch.argmax(probabilities).item()
+max_item = int(torch.argmax(probabilities).item())
 print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
 # In[ ]:

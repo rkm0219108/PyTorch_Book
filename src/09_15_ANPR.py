@@ -12,10 +12,9 @@
 # 載入相關套件
 import cv2
 import imutils
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import pytesseract
-from PIL import Image
 
 # ## 載入並顯示圖檔
 
@@ -24,6 +23,8 @@ from PIL import Image
 
 # 載入圖檔
 image = cv2.imread('./images_ocr/2.jpg', cv2.IMREAD_COLOR)
+if image is None:
+    raise FileNotFoundError('./images_ocr/2.jpg')
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -62,8 +63,8 @@ plt.show()
 
 
 # 取得等高線區域，並排序，取前10個區域
-cnts = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-cnts = imutils.grab_contours(cnts)
+cnts_raw = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+cnts = imutils.grab_contours(cnts_raw)
 cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
 
 # In[33]:
@@ -104,6 +105,8 @@ if screenCnt is None:
 else:
     detected = 1
 
+assert screenCnt is not None
+
 if detected == 1:
     cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 3)
     print(f'車牌座標=\n{screenCnt}')
@@ -119,7 +122,7 @@ new_image = cv2.drawContours(
     mask,
     [screenCnt],
     0,
-    255,
+    (255,),
     -1,
 )
 new_image = cv2.bitwise_and(image, image, mask=mask)

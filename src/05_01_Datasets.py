@@ -9,20 +9,27 @@
 
 
 import os
+import re
 from typing import Any, Callable
+
+import matplotlib.pyplot as plt
+import numpy as np
+import skimage
 import torch
-from torchvision.datasets import MNIST, FashionMNIST
-from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
+from PIL import Image
 from torch import nn
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
+from torchvision.datasets import MNIST, FashionMNIST
+from torchvision.io import read_image
 
 # ## 檢查GPU
 
 # In[3]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 載入 MNIST 手寫阿拉伯數字資料
 
@@ -30,10 +37,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST("", train=True, download=True, transform=transforms.ToTensor())
+train_ds = MNIST("data", train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST("", train=False, download=True, transform=transforms.ToTensor())
+test_ds = MNIST("data", train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -42,7 +49,6 @@ print(train_ds.data.shape, test_ds.data.shape)
 
 
 # 顯示第1張圖片圖像
-import matplotlib.pyplot as plt
 
 # 第一筆資料
 X = train_ds.data[0]
@@ -85,7 +91,7 @@ labels_map = {
 figure = plt.figure(figsize=(8, 8))
 cols, rows = 3, 3
 for i in range(1, cols * rows + 1):
-    sample_idx = torch.randint(len(training_data), size=(1,)).item()
+    sample_idx = int(torch.randint(len(training_data), size=(1,)).item())
     img, label = training_data[sample_idx]
     figure.add_subplot(rows, cols, i)
     plt.title(labels_map[label])
@@ -96,13 +102,6 @@ plt.show()
 # ## Transforms
 
 # In[10]:
-
-
-from PIL import Image
-from pathlib import Path
-import matplotlib.pyplot as plt
-import numpy as np
-import torchvision.transforms as T
 
 
 def plot(imgs: list[Any], with_orig: bool = True, row_title: list[str] | None = None, **imshow_kwargs: Any) -> None:
@@ -133,8 +132,6 @@ def plot(imgs: list[Any], with_orig: bool = True, row_title: list[str] | None = 
 # In[83]:
 
 
-import skimage
-
 orig_img = skimage.data.astronaut()
 skimage.io.imsave('images_test/astronaut.jpg', orig_img)
 plt.axis('off')
@@ -144,7 +141,6 @@ plt.imshow(orig_img)
 
 
 # 轉換輸入須為 Pillow 格式
-from PIL import Image
 
 orig_img = Image.open('images_test/astronaut.jpg')
 
@@ -152,31 +148,31 @@ orig_img = Image.open('images_test/astronaut.jpg')
 
 
 # resize
-resized_imgs = [T.Resize(size=size)(orig_img) for size in (30, 50, 100, orig_img.size)]
+resized_imgs = [transforms.Resize(size=size)(orig_img) for size in (30, 50, 100, orig_img.size)]
 plot(resized_imgs)
 
 # In[88]:
 
 
-center_crops = [T.CenterCrop(size=size)(orig_img) for size in (30, 50, 100, orig_img.size)]
+center_crops = [transforms.CenterCrop(size=size)(orig_img) for size in (30, 50, 100, orig_img.size)]
 plot(center_crops)
 
 # In[89]:
 
 
-top_left, top_right, bottom_left, bottom_right, center = T.FiveCrop(size=(100, 100))(orig_img)
+top_left, top_right, bottom_left, bottom_right, center = transforms.FiveCrop(size=(100, 100))(orig_img)
 plot([top_left, top_right, bottom_left, bottom_right, center])
 
 # In[90]:
 
 
-gray_img = T.Grayscale()(orig_img)
+gray_img = transforms.Grayscale()(orig_img)
 plot([gray_img], cmap='gray')
 
 # In[91]:
 
 
-padded_imgs = [T.Pad(padding=padding)(orig_img) for padding in (3, 10, 30, 50)]
+padded_imgs = [transforms.Pad(padding=padding)(orig_img) for padding in (3, 10, 30, 50)]
 plot(padded_imgs)
 
 # ## 自訂資料集(Custom Dataset)
@@ -190,15 +186,10 @@ labels_code = {v.lower(): k for k, v in labels_map.items()}
 # In[95]:
 
 
-import os
-import pandas as pd
-from torchvision.io import read_image
-from torch.utils.data import Dataset
-import re
-
-
 class CustomImageDataset(Dataset):
-    def __init__(self, img_dir: str, transform: Callable | None = None, target_transform: Callable | None = None) -> None:
+    def __init__(
+        self, img_dir: str, transform: Callable | None = None, target_transform: Callable | None = None
+    ) -> None:
         self.img_labels = [file_name for file_name in os.listdir(img_dir)]
         self.img_dir = img_dir
         self.transform = transform
@@ -253,7 +244,8 @@ transform = transforms.Compose(
 )
 
 # 建立 DataLoader
-test_loader = DataLoader(CustomImageDataset('./fashion_test_data', transform), shuffle=False, batch_size=10)
+test_image_ds = CustomImageDataset('./fashion_test_data', transform)
+test_loader = DataLoader(test_image_ds, shuffle=False, batch_size=10)
 
 model.eval()
 criterion = nn.CrossEntropyLoss()
@@ -273,11 +265,11 @@ with torch.no_grad():
         correct += pred.eq(target.view_as(pred)).sum().item()
 
 # 平均損失
-test_loss /= len(test_loader.dataset)
+test_loss /= len(test_image_ds)
 # 顯示測試結果
-data_count = len(test_loader.dataset)
+data_count = len(test_image_ds)
 percentage = 100.0 * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 
 # In[98]:
 

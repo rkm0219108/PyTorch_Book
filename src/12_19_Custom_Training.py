@@ -34,10 +34,22 @@ batch_size = 16
 # In[ ]:
 
 
-from typing import Any, Dict, Tuple
+import random
+from typing import Any, Dict, cast
 
 import datasets
 import evaluate
+import numpy as np
+import pandas as pd
+from IPython.display import HTML, display
+from torch.utils.data import Dataset
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    Trainer,
+    TrainingArguments,
+)
+from transformers.trainer_utils import BestRun, EvalPrediction
 
 actual_task = "mnli" if task == "mnli-mm" else task
 # 載入資料集
@@ -64,9 +76,6 @@ dataset["train"][0]
 # In[7]:
 
 
-import random
-import pandas as pd
-from IPython.display import display, HTML
 
 
 # 隨機抽取資料函數
@@ -114,7 +123,6 @@ metric
 # In[10]:
 
 
-import numpy as np
 
 fake_preds = np.random.randint(0, 2, size=(64,))
 fake_labels = np.random.randint(0, 2, size=(64,))
@@ -139,7 +147,6 @@ metric.compute(predictions=fake_preds, references=fake_labels)
 # In[11]:
 
 
-from transformers import AutoTokenizer
 
 # 分詞
 tokenizer = AutoTokenizer.from_pretrained(model_checkpoint, use_fast=True)
@@ -209,7 +216,6 @@ encoded_dataset = dataset.map(preprocess_function, batched=True)
 # In[18]:
 
 
-from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
 
 # 載入預先訓練的模型
 num_labels = 3 if task.startswith("mnli") else 1 if task == "stsb" else 2
@@ -239,13 +245,16 @@ args = TrainingArguments(
 # In[20]:
 
 
-def compute_metrics(eval_pred: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:
+def compute_metrics(eval_pred: EvalPrediction) -> Dict[str, float]:
     predictions, labels = eval_pred
+    predictions = cast(np.ndarray, predictions)
     if task != "stsb":
         predictions = np.argmax(predictions, axis=1)
     else:
         predictions = predictions[:, 0]
-    return metric.compute(predictions=predictions, references=labels)
+    result = metric.compute(predictions=predictions, references=labels)
+    assert result is not None
+    return result
 
 
 # ## 定義訓練者(Trainer)物件
@@ -262,7 +271,7 @@ trainer = Trainer(
     args,
     train_dataset=encoded_dataset["train"],
     eval_dataset=encoded_dataset[validation_key],
-    tokenizer=tokenizer,
+    processing_class=tokenizer,
     compute_metrics=compute_metrics,
 )
 
@@ -292,7 +301,7 @@ trainer.save_model('./cola')
 # In[57]:
 
 
-class SimpleDataset:
+class SimpleDataset(Dataset):
     def __init__(self, tokenized_texts: Any) -> None:
         self.tokenized_texts = tokenized_texts
 
@@ -355,7 +364,7 @@ trainer = Trainer(
     args=args,
     train_dataset=encoded_dataset["train"],
     eval_dataset=encoded_dataset[validation_key],
-    tokenizer=tokenizer,
+    processing_class=tokenizer,
     compute_metrics=compute_metrics,
 )
 
@@ -369,6 +378,7 @@ trainer = Trainer(
 
 
 best_run = trainer.hyperparameter_search(n_trials=10, direction="maximize")
+assert isinstance(best_run, BestRun)
 
 # The `hyperparameter_search` method returns a `BestRun` objects, which contains the value of the objective maximized (by default the sum of all metrics) and the hyperparameters it used for that run.
 

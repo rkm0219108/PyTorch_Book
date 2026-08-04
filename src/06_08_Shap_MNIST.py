@@ -13,28 +13,28 @@
 # In[3]:
 
 
-import torch, torchvision
-from torchvision import datasets, transforms
-from torch import nn, optim
-from torch.nn import functional as F
+from typing import Sized, cast
 
 import numpy as np
 import shap
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
+from torchvision import datasets, transforms
+from torchvision.datasets import MNIST
 
 # ## 檢查 GPU
 
 # In[4]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 載入 MNIST 手寫阿拉伯數字資料
 
 # In[9]:
 
-
-from torchvision.datasets import MNIST
 
 batch_size = 128
 num_epochs = 2
@@ -48,13 +48,13 @@ test_ds = MNIST('.', train=False, download=True, transform=transforms.ToTensor()
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
 
-train_loader = torch.utils.data.DataLoader(
+train_loader = DataLoader(
     datasets.MNIST('mnist_data', train=True, download=True, transform=transforms.Compose([transforms.ToTensor()])),
     batch_size=batch_size,
     shuffle=True,
 )
 
-test_loader = torch.utils.data.DataLoader(
+test_loader = DataLoader(
     datasets.MNIST('mnist_data', train=False, transform=transforms.Compose([transforms.ToTensor()])),
     batch_size=batch_size,
     shuffle=True,
@@ -99,8 +99,8 @@ model = Net().to(device)
 # 訓練函數
 def train(
     model: nn.Module,
-    device: torch.device,
-    train_loader: torch.utils.data.DataLoader,
+    device: str,
+    train_loader: DataLoader,
     optimizer: optim.Optimizer,
     epoch: int,
 ) -> None:
@@ -117,7 +117,7 @@ def train(
                 'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch,
                     batch_idx * len(data),
-                    len(train_loader.dataset),
+                    len(cast(Sized, train_loader.dataset)),
                     100.0 * batch_idx / len(train_loader),
                     loss.item(),
                 )
@@ -125,7 +125,7 @@ def train(
 
 
 # 測試函數
-def test(model: nn.Module, device: torch.device, test_loader: torch.utils.data.DataLoader) -> None:
+def test(model: nn.Module, device: str, test_loader: DataLoader) -> None:
     model.eval()
     test_loss = 0
     correct = 0
@@ -137,10 +137,13 @@ def test(model: nn.Module, device: torch.device, test_loader: torch.utils.data.D
             pred = output.max(1, keepdim=True)[1]
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-    test_loss /= len(test_loader.dataset)
+    test_loss /= len(cast(Sized, test_loader.dataset))
     print(
         '\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            test_loss, correct, len(test_loader.dataset), 100.0 * correct / len(test_loader.dataset)
+            test_loss,
+            correct,
+            len(cast(Sized, test_loader.dataset)),
+            100.0 * correct / len(cast(Sized, test_loader.dataset)),
         )
     )
 

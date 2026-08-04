@@ -21,7 +21,7 @@ from transformers import pipeline
 
 
 # 載入模型
-classifier = pipeline('sentiment-analysis')
+classifier = pipeline('sentiment-analysis')  # pyright: ignore[reportCallIssue, reportArgumentType]
 
 # In[3]:
 
@@ -47,7 +47,7 @@ for result in results:
 
 
 # 載入多語系模型，支援 English, French, Dutch, German, Italian, Spanish
-classifier = pipeline('sentiment-analysis', model='nlptown/bert-base-multilingual-uncased-sentiment')
+classifier = pipeline('sentiment-analysis', model='nlptown/bert-base-multilingual-uncased-sentiment')  # pyright: ignore[reportCallIssue, reportArgumentType]
 
 # In[7]:
 

@@ -6,6 +6,10 @@
 # In[7]:
 
 
+import random
+
+import matplotlib.pyplot as plt
+import numpy as np
 from IPython.display import Image
 
 Image('./images/maze.png', width=300)
@@ -16,8 +20,6 @@ Image('./images/maze.png', width=300)
 
 
 # 載入相關套件
-import numpy as np
-import random
 
 # In[9]:
 
@@ -81,6 +83,7 @@ class Environment:
 
     # 更新位置
     def update_poistion(self, action: int) -> int:
+        new_poistion = self.poistion
         if action == DOWN:
             new_poistion = self.poistion - COLUMN_COUNT
         if action == UP:
@@ -268,7 +271,6 @@ print(f"累計報酬: {total_reward_list}")
 
 
 # 繪圖
-import matplotlib.pyplot as plt
 
 plt.figure(figsize=(10, 6))
 plt.plot(total_reward_list)

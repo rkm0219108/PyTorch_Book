@@ -2,7 +2,7 @@
 # pip install sqlalchemy
 
 # 載入相關套件
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, jsonify, make_response, request
 from sqlalchemy import create_engine, text
 
 # 宣告 Flask 物件

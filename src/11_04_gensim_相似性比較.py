@@ -7,10 +7,13 @@
 
 
 # 載入相關套件
-import pprint  # 較美觀的列印函數
-import gensim
 from collections import defaultdict
-from gensim import corpora
+
+from gensim import (
+    corpora,
+    models,
+    similarities,
+)
 
 # ## 測試的語料庫(Corpus)
 
@@ -77,7 +80,6 @@ corpus
 
 
 # 建立 LSI (Latent semantic indexing) 模型
-from gensim import models
 
 # num_topics=2：取二維，即兩個議題
 lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=2)
@@ -104,7 +106,6 @@ print(vec_lsi)
 
 
 # 比較例句與語料庫每一句的相似機率
-from gensim import similarities
 
 # 比較例句與語料庫的相似性索引
 index = similarities.MatrixSimilarity(lsi[corpus])

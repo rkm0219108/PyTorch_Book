@@ -10,9 +10,10 @@
 
 # 安裝套件： pip install face-recognition
 # 載入相關套件
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle
 import face_recognition
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+from PIL import Image, ImageDraw
 
 # ## 載入並顯示圖檔
 
@@ -62,7 +63,6 @@ plt.show()
 
 
 # 偵測臉部特徵點並顯示
-from PIL import Image, ImageDraw
 
 # 載入圖檔
 image = face_recognition.load_image_file(image_file)

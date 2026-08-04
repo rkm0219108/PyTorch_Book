@@ -2,7 +2,6 @@
 # https://www.lfd.uci.edu/~gohlke/pythonlibs/?cm_mc_uid=08085305845514542921829&cm_mc_sid_50200000=1456395916#pycuda
 # pip install "pycuda-2020.1+cuda101-cp38-cp38-win_amd64.whl"
 
-import pycuda
 import pycuda.driver as drv
 
 drv.init()

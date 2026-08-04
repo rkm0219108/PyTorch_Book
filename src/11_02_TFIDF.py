@@ -7,9 +7,12 @@
 
 
 # 載入相關套件
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
+from typing import cast
+
 import numpy as np
+from scipy.sparse import csr_matrix
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # In[9]:
 
@@ -27,7 +30,7 @@ corpus = [
 
 # 將語料轉換為詞頻矩陣，計算各個字詞出現的次數。
 vectorizer = CountVectorizer()
-X = vectorizer.fit_transform(corpus)
+X = cast(csr_matrix, vectorizer.fit_transform(corpus))
 
 # 生字表
 word = vectorizer.get_feature_names_out()
@@ -51,7 +54,6 @@ print("TF-IDF=\n", np.around(tfidf.toarray(), 4))
 
 
 # 最後一句與其他句的相似度比較
-from sklearn.metrics.pairwise import cosine_similarity
 
 print(cosine_similarity(tfidf[-1], tfidf[:-1], dense_output=False))
 

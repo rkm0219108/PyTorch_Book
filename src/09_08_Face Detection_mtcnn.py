@@ -10,28 +10,32 @@
 
 from typing import List, Tuple
 
-from facenet_pytorch import MTCNN, InceptionResnetV1
-import torch
-from torch.utils.data import DataLoader
-from torchvision import datasets
+import cv2
+import matplotlib.pyplot as plt
+import mmcv
 import numpy as np
 import pandas as pd
-import os
+import torch
+from facenet_pytorch import (
+    MTCNN,
+    InceptionResnetV1,
+)
+from IPython import display
+from PIL import Image, ImageDraw
+from torch.utils.data import DataLoader
+from torchvision import datasets
 
 # ## 判斷是否使用 GPU
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 載入並顯示圖檔
 
 # In[3]:
 
-
-from PIL import Image
-import matplotlib.pyplot as plt
 
 image_file = './MTCNN/angelina_jolie/1.jpg'
 image = Image.open(image_file)
@@ -111,7 +115,7 @@ def collate_fn(x: List[Tuple[Image.Image, int]]) -> Tuple[Image.Image, int]:
 
 
 dataset = datasets.ImageFolder('./MTCNN')
-dataset.idx_to_class = {i: c for c, i in dataset.class_to_idx.items()}
+idx_to_class = {i: c for c, i in dataset.class_to_idx.items()}
 loader = DataLoader(dataset, collate_fn=collate_fn)
 
 # ## 使用MTCNN識別臉部，並取得臉部向量
@@ -128,7 +132,7 @@ for x, y in loader:
         # 取得臉部向量
         aligned.append(x_aligned)
         # 取得姓名
-        names.append(dataset.idx_to_class[y])
+        names.append(idx_to_class[y])
 
 # ## 轉換為嵌入向量
 
@@ -153,10 +157,6 @@ pd.DataFrame(dists, columns=names, index=names)
 
 # In[68]:
 
-
-import mmcv, cv2
-from PIL import Image, ImageDraw
-from IPython import display
 
 # ## 建立 MTCNN 物件
 
@@ -186,7 +186,7 @@ for i, frame in enumerate(frames):
     print('\rTracking frame: {}'.format(i + 1), end='')
 
     # 臉部追蹤
-    boxes, _ = mtcnn.detect(frame)
+    boxes = mtcnn.detect(frame)[0]
 
     # 臉部畫框
     frame_draw = frame.copy()
@@ -195,7 +195,7 @@ for i, frame in enumerate(frames):
         draw.rectangle(box.tolist(), outline=(255, 0, 0), width=6)
 
     # 存至 frames_tracked
-    frames_tracked.append(frame_draw.resize((640, 360), Image.BILINEAR))
+    frames_tracked.append(frame_draw.resize((640, 360), Image.Resampling.BILINEAR))
 print('\nDone')
 
 # ## 撥放臉部畫框的視訊
@@ -204,6 +204,7 @@ print('\nDone')
 
 
 d = display.display(frames_tracked[0], display_id=True)
+assert d is not None
 i = 1
 try:
     while True:
@@ -218,8 +219,8 @@ except KeyboardInterrupt:
 
 
 dim = frames_tracked[0].size
-fourcc = cv2.VideoWriter_fourcc(*'FMP4')
-video_tracked = cv2.VideoWriter('video_tracked.mp4', fourcc, 25.0, dim)
+fourcc = cv2.VideoWriter.fourcc(*'mp4v')
+video_tracked = cv2.VideoWriter('MTCNN/video_tracked.mp4', fourcc, 25.0, dim)
 for frame in frames_tracked:
     video_tracked.write(cv2.cvtColor(np.array(frame), cv2.COLOR_RGB2BGR))
 video_tracked.release()

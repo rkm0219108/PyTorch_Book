@@ -8,7 +8,12 @@
 # In[1]:
 
 
+import cv2
+import matplotlib.pyplot as plt
 import numpy as np
+import skimage
+from scipy.signal import convolve2d
+from skimage.exposure import rescale_intensity
 
 # 測試資料
 source_map = np.array(list('1110001110001110011001100')).astype(int)
@@ -40,7 +45,6 @@ print(result)
 
 
 # 使用 scipy 計算卷積
-from scipy.signal import convolve2d
 
 # convolve2d：二維卷積
 convolve2d(source_map, filter1, mode='valid')
@@ -51,7 +55,6 @@ convolve2d(source_map, filter1, mode='valid')
 
 
 # 卷積的影像轉換函數，padding='same'
-from skimage.exposure import rescale_intensity
 
 
 def convolve(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
@@ -72,7 +75,7 @@ def convolve(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
             output[y - pad, x - pad] = k  # 更新計算結果的矩陣
 
     # 調整影像色彩深淺範圍至 (0, 255)
-    output = rescale_intensity(output, in_range=(0, 255))
+    output = rescale_intensity(output, in_range='uint8')
     output = (output * 255).astype("uint8")
 
     return output  # 回傳結果影像
@@ -84,20 +87,24 @@ def convolve(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
 
 
 # pip install opencv-python
-import skimage
-import cv2
 
 # 自 skimage 取得內建的圖像
 image = skimage.data.chelsea()
-cv2.imshow("original", image)
 
 # 灰階化
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-cv2.imshow("gray", gray)
 
-# 按 Enter 關閉視窗
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.figure(figsize=(8, 4))
+plt.subplot(1, 2, 1)
+plt.title("original")
+plt.imshow(image)
+plt.axis("off")
+
+plt.subplot(1, 2, 2)
+plt.title("gray")
+plt.imshow(gray, cmap="gray")
+plt.axis("off")
+plt.show()
 
 # ## 模糊化(Blur)
 
@@ -108,21 +115,25 @@ cv2.destroyAllWindows()
 smallBlur = np.ones((7, 7), dtype="float") * (1.0 / (7 * 7))
 
 # 卷積
-convoleOutput = convolve(gray, smallBlur)
-opencvOutput = cv2.filter2D(gray, -1, smallBlur)
-cv2.imshow("little Blur", convoleOutput)
+littleBlurOutput = convolve(gray, smallBlur)
 
 # 大模糊
 largeBlur = np.ones((21, 21), dtype="float") * (1.0 / (21 * 21))
 
 # 卷積
-convoleOutput = convolve(gray, largeBlur)
-opencvOutput = cv2.filter2D(gray, -1, largeBlur)
-cv2.imshow("large Blur", convoleOutput)
+largeBlurOutput = convolve(gray, largeBlur)
 
-# 按 Enter 關閉視窗
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.figure(figsize=(8, 4))
+plt.subplot(1, 2, 1)
+plt.title("little Blur")
+plt.imshow(littleBlurOutput, cmap="gray")
+plt.axis("off")
+
+plt.subplot(1, 2, 2)
+plt.title("large Blur")
+plt.imshow(largeBlurOutput, cmap="gray")
+plt.axis("off")
+plt.show()
 
 # ## 銳化(sharpen)
 
@@ -134,12 +145,12 @@ sharpen = np.array(([0, -1, 0], [-1, 5, -1], [0, -1, 0]), dtype="int")
 
 # 卷積
 convoleOutput = convolve(gray, sharpen)
-opencvOutput = cv2.filter2D(gray, -1, sharpen)
-cv2.imshow("sharpen", convoleOutput)
 
-# 按 Enter 關閉視窗
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.figure()
+plt.title("sharpen")
+plt.imshow(convoleOutput, cmap="gray")
+plt.axis("off")
+plt.show()
 
 # ## Laplacian 邊緣偵測
 
@@ -151,12 +162,12 @@ laplacian = np.array(([0, 1, 0], [1, -4, 1], [0, 1, 0]), dtype="int")
 
 # 卷積
 convoleOutput = convolve(gray, laplacian)
-opencvOutput = cv2.filter2D(gray, -1, laplacian)
-cv2.imshow("laplacian edge detection", convoleOutput)
 
-# 按 Enter 關閉視窗
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.figure()
+plt.title("laplacian edge detection")
+plt.imshow(convoleOutput, cmap="gray")
+plt.axis("off")
+plt.show()
 
 # ## Sobel X軸邊緣偵測
 
@@ -168,12 +179,12 @@ sobelX = np.array(([-1, 0, 1], [-2, 0, 2], [-1, 0, 1]), dtype="int")
 
 # 卷積
 convoleOutput = convolve(gray, sobelX)
-opencvOutput = cv2.filter2D(gray, -1, sobelX)
-cv2.imshow("x-axis edge detection", convoleOutput)
 
-# 按 Enter 關閉視窗
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.figure()
+plt.title("x-axis edge detection")
+plt.imshow(convoleOutput, cmap="gray")
+plt.axis("off")
+plt.show()
 
 # ## Sobel Y軸邊緣偵測
 
@@ -185,11 +196,11 @@ sobelY = np.array(([-1, -2, -1], [0, 0, 0], [1, 2, 1]), dtype="int")
 
 # 卷積
 convoleOutput = convolve(gray, sobelY)
-opencvOutput = cv2.filter2D(gray, -1, sobelY)
-cv2.imshow("y-axis edge detection", convoleOutput)
 
-# 按 Enter 關閉視窗
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.figure()
+plt.title("y-axis edge detection")
+plt.imshow(convoleOutput, cmap="gray")
+plt.axis("off")
+plt.show()
 
 # In[ ]:

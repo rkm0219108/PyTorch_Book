@@ -10,10 +10,14 @@
 # In[1]:
 
 
-import numpy as np
-import random
-import networkx as nx
+import itertools
+
+import community as community_louvain
 import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+from networkx.algorithms import approximation as aprx
+from networkx.algorithms import community, tree
 
 # ## 建立圖形
 
@@ -340,7 +344,7 @@ nx.shortest_path(G_karate)
 
 
 # 指定起點與終點，可傳回最短路徑
-nx.shortest_path(G_karate)[0][23]
+nx.shortest_path(G_karate, source=0, target=23)
 
 # ## 使用權重代表距離
 
@@ -402,7 +406,6 @@ length
 # In[34]:
 
 
-from networkx.algorithms import tree
 
 # 最小生成樹
 mst = tree.minimum_spanning_edges(G_karate, algorithm='prim', data=False)
@@ -414,7 +417,6 @@ sorted(edgelist)  # 排序
 # In[35]:
 
 
-from networkx.algorithms import approximation as aprx
 
 max_clique = aprx.max_clique(G_karate)
 max_clique
@@ -439,7 +441,6 @@ nx.draw(G, node_color="#ffff8f", with_labels=True)
 # In[38]:
 
 
-from networkx.algorithms import community
 
 # 內建資料，兩個社群，各有 5 個節點，1個相連的節點
 G = nx.barbell_graph(5, 1)
@@ -465,8 +466,6 @@ next_level_communities
 # In[54]:
 
 
-from networkx.algorithms import community
-import itertools
 
 k = 4  # 分成 2 ~ k+1 群
 # Girvan Newman algorithm
@@ -494,7 +493,7 @@ community.louvain_communities(G)
 
 
 for k in range(2, 6):
-    comp = community.asyn_fluid.asyn_fluidc(G, k)
+    comp = community.asyn_fluidc(G, k)
     print(tuple(sorted(comp)))
 
 # ## python-louvain 套件
@@ -507,9 +506,8 @@ for k in range(2, 6):
 # In[53]:
 
 
-import community
 
-partition = community.best_partition(G_karate)
+partition = community_louvain.best_partition(G_karate)
 pos = nx.spring_layout(G_karate)
 plt.figure(figsize=(8, 8))
 plt.axis('off')

@@ -8,24 +8,23 @@
 # In[49]:
 
 
+import math
 from typing import Tuple
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchtext
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import os
-import matplotlib.pyplot as plt
+import torch
+from torch import nn
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
 
 # ## 判斷GPU是否存在
 
 # In[50]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 載入資料
 
@@ -55,8 +54,6 @@ len(df2)
 
 # In[55]:
 
-
-from sklearn.preprocessing import MinMaxScaler
 
 look_back = 1  # 以前N期資料為 X，當期資料為 Y
 
@@ -101,7 +98,7 @@ trainX.shape, trainY.shape, testX.shape, testY.shape
 # In[58]:
 
 
-torch.cat((trainX.reshape(trainX.shape[0], trainX.shape[1]), trainY), axis=1)
+torch.cat((trainX.reshape(trainX.shape[0], trainX.shape[1]), trainY), dim=1)
 
 # ## 建立模型
 
@@ -148,7 +145,7 @@ learning_rate = 0.01
 
 def train(trainX: torch.Tensor, trainY: torch.Tensor) -> None:
     criterion = nn.MSELoss()  # MSE
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
         optimizer.zero_grad()
@@ -181,9 +178,6 @@ trainY.shape, trainPredict.shape
 
 # In[65]:
 
-
-from sklearn.metrics import mean_squared_error
-import math
 
 # 還原常態化的訓練及測試資料
 trainPredict = scaler.inverse_transform(trainPredict)
@@ -235,9 +229,6 @@ train(trainX, trainY)
 
 # In[68]:
 
-
-from sklearn.metrics import mean_squared_error
-import math
 
 model.eval()
 trainPredict = model(trainX).detach().numpy()
@@ -291,9 +282,6 @@ train(trainX, trainY)
 
 # In[71]:
 
-
-from sklearn.metrics import mean_squared_error
-import math
 
 model.eval()
 trainPredict = model(trainX).detach().numpy()

@@ -10,26 +10,19 @@
 
 
 import os
-import numpy as np
-import glob
-import time
-import PIL.Image as Image
-from tqdm.notebook import tqdm
-from itertools import chain
-from collections import OrderedDict
 import random
+import shutil
 from typing import List, Tuple
 
-import torch
-import torch.nn as nn
-import torchvision.utils as vutils
-import torchvision.datasets as dset
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
 import matplotlib.pylab as plt
-import ipywidgets
-from IPython import display
+import numpy as np
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
+from torch.utils.data import DataLoader
+import torchvision
+from torchvision import datasets, transforms
+from google.colab import files
 
 # In[29]:
 
@@ -45,8 +38,6 @@ from IPython import display
 
 # In[31]:
 
-
-from google.colab import files
 
 files.upload()
 
@@ -71,8 +62,6 @@ files.upload()
 # In[44]:
 
 
-import shutil, sys
-
 shutil.move("./horse2zebra/trainA", "./horses_train/A")
 shutil.move("./horse2zebra/trainB", "./zebra_train/B")
 shutil.move("./horse2zebra/testA", "./horses_test/A")
@@ -81,7 +70,7 @@ shutil.move("./horse2zebra/testB", "./zebra_test/B")
 # In[35]:
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.mps.is_available() else 'cpu')
 
 # In[47]:
 
@@ -97,7 +86,7 @@ bs = 5
 workers = 2
 image_size = (256, 256)
 dataroot = './horses_train/'
-dataset_horses_train = dset.ImageFolder(
+dataset_horses_train = datasets.ImageFolder(
     root=dataroot,
     transform=transforms.Compose(
         [
@@ -108,21 +97,21 @@ dataset_horses_train = dset.ImageFolder(
         ]
     ),
 )
-dataloader_train_horses = torch.utils.data.DataLoader(
-    dataset_horses_train, batch_size=bs, shuffle=True, num_workers=workers
-)
+dataloader_train_horses = DataLoader(dataset_horses_train, batch_size=bs, shuffle=True, num_workers=workers)
 real_batch = next(iter(dataloader_train_horses))
 print(real_batch[0].shape)
 plt.figure(figsize=(8, 8))
 plt.axis("off")
 plt.title("Training Images")
-plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:10], padding=2, normalize=True).cpu(), (1, 2, 0)))
+plt.imshow(
+    np.transpose(torchvision.utils.make_grid(real_batch[0].to(device)[:10], padding=2, normalize=True).cpu(), (1, 2, 0))
+)
 
 # In[49]:
 
 
 dataroot = './horses_test/'
-dataset_horses_test = dset.ImageFolder(
+dataset_horses_test = datasets.ImageFolder(
     root=dataroot,
     transform=transforms.Compose(
         [
@@ -133,20 +122,20 @@ dataset_horses_test = dset.ImageFolder(
         ]
     ),
 )
-dataloader_test_horses = torch.utils.data.DataLoader(
-    dataset_horses_test, batch_size=bs, shuffle=True, num_workers=workers
-)
+dataloader_test_horses = DataLoader(dataset_horses_test, batch_size=bs, shuffle=True, num_workers=workers)
 real_batch = next(iter(dataloader_test_horses))
 plt.figure(figsize=(8, 8))
 plt.axis("off")
 plt.title("Training Images")
-plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:10], padding=2, normalize=True).cpu(), (1, 2, 0)))
+plt.imshow(
+    np.transpose(torchvision.utils.make_grid(real_batch[0].to(device)[:10], padding=2, normalize=True).cpu(), (1, 2, 0))
+)
 
 # In[50]:
 
 
 dataroot = './zebra_train'
-dataset_zebra_train = dset.ImageFolder(
+dataset_zebra_train = datasets.ImageFolder(
     root=dataroot,
     transform=transforms.Compose(
         [
@@ -157,20 +146,20 @@ dataset_zebra_train = dset.ImageFolder(
         ]
     ),
 )
-dataloader_zebra_train = torch.utils.data.DataLoader(
-    dataset_zebra_train, batch_size=bs, shuffle=True, num_workers=workers
-)
+dataloader_zebra_train = DataLoader(dataset_zebra_train, batch_size=bs, shuffle=True, num_workers=workers)
 real_batch = next(iter(dataloader_zebra_train))
 plt.figure(figsize=(8, 8))
 plt.axis("off")
 plt.title("Training Images")
-plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:10], padding=2, normalize=True).cpu(), (1, 2, 0)))
+plt.imshow(
+    np.transpose(torchvision.utils.make_grid(real_batch[0].to(device)[:10], padding=2, normalize=True).cpu(), (1, 2, 0))
+)
 
 # In[51]:
 
 
 dataroot = './zebra_test'
-dataset_zebra_test = dset.ImageFolder(
+dataset_zebra_test = datasets.ImageFolder(
     root=dataroot,
     transform=transforms.Compose(
         [
@@ -181,14 +170,14 @@ dataset_zebra_test = dset.ImageFolder(
         ]
     ),
 )
-dataloader_zebra_test = torch.utils.data.DataLoader(
-    dataset_zebra_test, batch_size=bs, shuffle=True, num_workers=workers
-)
+dataloader_zebra_test = DataLoader(dataset_zebra_test, batch_size=bs, shuffle=True, num_workers=workers)
 real_batch = next(iter(dataloader_zebra_test))
 plt.figure(figsize=(8, 8))
 plt.axis("off")
 plt.title("Training Images")
-plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:10], padding=2, normalize=True).cpu(), (1, 2, 0)))
+plt.imshow(
+    np.transpose(torchvision.utils.make_grid(real_batch[0].to(device)[:10], padding=2, normalize=True).cpu(), (1, 2, 0))
+)
 
 # ## 定義繪製4個影像的函數：真實的馬、生成的斑馬、真實的斑馬、生成的馬
 
@@ -202,13 +191,17 @@ def plot_images_test(dataloader_test_horses: DataLoader, dataloader_zebra_test: 
     fake_b_test = G_A2B(batch_a_test).cpu().detach()
 
     plt.figure(figsize=(10, 10))
-    plt.imshow(np.transpose(vutils.make_grid((real_a_test[:4] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0)))
+    plt.imshow(
+        np.transpose(torchvision.utils.make_grid((real_a_test[:4] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0))
+    )
     plt.axis("off")
     plt.title("Real horses")
     plt.show()
 
     plt.figure(figsize=(10, 10))
-    plt.imshow(np.transpose(vutils.make_grid((fake_b_test[:4] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0)))
+    plt.imshow(
+        np.transpose(torchvision.utils.make_grid((fake_b_test[:4] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0))
+    )
     plt.axis("off")
     plt.title("Fake zebras")
     plt.show()
@@ -219,13 +212,17 @@ def plot_images_test(dataloader_test_horses: DataLoader, dataloader_zebra_test: 
     fake_a_test = G_B2A(batch_b_test).cpu().detach()
 
     plt.figure(figsize=(10, 10))
-    plt.imshow(np.transpose(vutils.make_grid((real_b_test[:4] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0)))
+    plt.imshow(
+        np.transpose(torchvision.utils.make_grid((real_b_test[:4] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0))
+    )
     plt.axis("off")
     plt.title("Real zebras")
     plt.show()
 
     plt.figure(figsize=(10, 10))
-    plt.imshow(np.transpose(vutils.make_grid((fake_a_test[:4] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0)))
+    plt.imshow(
+        np.transpose(torchvision.utils.make_grid((fake_a_test[:4] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0))
+    )
     plt.axis("off")
     plt.title("Fake horses")
     plt.show()
@@ -243,14 +240,20 @@ def plot_all_images(image_number: int, dataloader_test_horses: DataLoader, datal
     fake_b_test = G_A2B(batch_a_test).cpu().detach()
     plt.figure(figsize=(10, 10))
     plt.imshow(
-        np.transpose(vutils.make_grid((real_a_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0))
+        np.transpose(
+            torchvision.utils.make_grid((real_a_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(),
+            (1, 2, 0),
+        )
     )
     plt.axis("off")
     plt.title("Real horses")
     plt.show()
     plt.figure(figsize=(10, 10))
     plt.imshow(
-        np.transpose(vutils.make_grid((fake_b_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0))
+        np.transpose(
+            torchvision.utils.make_grid((fake_b_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(),
+            (1, 2, 0),
+        )
     )
     plt.axis("off")
     plt.title("Fake zebras")
@@ -261,14 +264,20 @@ def plot_all_images(image_number: int, dataloader_test_horses: DataLoader, datal
     fake_a_test = G_B2A(batch_b_test).cpu().detach()
     plt.figure(figsize=(10, 10))
     plt.imshow(
-        np.transpose(vutils.make_grid((real_b_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0))
+        np.transpose(
+            torchvision.utils.make_grid((real_b_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(),
+            (1, 2, 0),
+        )
     )
     plt.axis("off")
     plt.title("Real zebras")
     plt.show()
     plt.figure(figsize=(10, 10))
     plt.imshow(
-        np.transpose(vutils.make_grid((fake_a_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0))
+        np.transpose(
+            torchvision.utils.make_grid((fake_a_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(),
+            (1, 2, 0),
+        )
     )
     plt.axis("off")
     plt.title("Fake horses")
@@ -279,7 +288,8 @@ def plot_all_images(image_number: int, dataloader_test_horses: DataLoader, datal
     plt.figure(figsize=(10, 10))
     plt.imshow(
         np.transpose(
-            vutils.make_grid((identity_a_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0)
+            torchvision.utils.make_grid((identity_a_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(),
+            (1, 2, 0),
         )
     )
     plt.axis("off")
@@ -288,7 +298,8 @@ def plot_all_images(image_number: int, dataloader_test_horses: DataLoader, datal
     plt.figure(figsize=(10, 10))
     plt.imshow(
         np.transpose(
-            vutils.make_grid((identity_b_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0)
+            torchvision.utils.make_grid((identity_b_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(),
+            (1, 2, 0),
         )
     )
     plt.axis("off")
@@ -300,7 +311,8 @@ def plot_all_images(image_number: int, dataloader_test_horses: DataLoader, datal
     plt.figure(figsize=(10, 10))
     plt.imshow(
         np.transpose(
-            vutils.make_grid((recover_a_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0)
+            torchvision.utils.make_grid((recover_a_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(),
+            (1, 2, 0),
         )
     )
     plt.axis("off")
@@ -309,7 +321,8 @@ def plot_all_images(image_number: int, dataloader_test_horses: DataLoader, datal
     plt.figure(figsize=(10, 10))
     plt.imshow(
         np.transpose(
-            vutils.make_grid((recover_b_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(), (1, 2, 0)
+            torchvision.utils.make_grid((recover_b_test[:image_number] + 1) / 2, padding=2, normalize=True).cpu(),
+            (1, 2, 0),
         )
     )
     plt.axis("off")
@@ -451,8 +464,6 @@ def LSGAN_G(fake: torch.Tensor) -> torch.Tensor:
 # In[62]:
 
 
-import itertools
-
 G_A2B = Generator().to(device)
 G_B2A = Generator().to(device)
 D_A = Discriminator().to(device)
@@ -465,12 +476,12 @@ criterion_Im = nn.L1Loss()
 lr = 0.0002
 
 # Optimizers
-# optimizer_G = torch.optim.Adam(itertools.chain(G_A2B.parameters(), G_B2A.parameters()),
+# optimizer_G = optim.Adam(itertools.chain(G_A2B.parameters(), G_B2A.parameters()),
 #                                lr=lr, betas=(0.5, 0.999))
-optimizer_G_A2B = torch.optim.Adam(G_A2B.parameters(), lr=lr, betas=(0.5, 0.999))
-optimizer_G_B2A = torch.optim.Adam(G_B2A.parameters(), lr=lr, betas=(0.5, 0.999))
-optimizer_D_A = torch.optim.Adam(D_A.parameters(), lr=lr, betas=(0.5, 0.999))
-optimizer_D_B = torch.optim.Adam(D_B.parameters(), lr=lr, betas=(0.5, 0.999))
+optimizer_G_A2B = optim.Adam(G_A2B.parameters(), lr=lr, betas=(0.5, 0.999))
+optimizer_G_B2A = optim.Adam(G_B2A.parameters(), lr=lr, betas=(0.5, 0.999))
+optimizer_D_A = optim.Adam(D_A.parameters(), lr=lr, betas=(0.5, 0.999))
+optimizer_D_B = optim.Adam(D_B.parameters(), lr=lr, betas=(0.5, 0.999))
 
 # ## 定義訓練模型的函數
 
@@ -512,6 +523,9 @@ def training(
     disc_B_t = []
 
     print("Starting Training Loop...")
+    old_a_fake = torch.empty(0)
+    old_b_fake = torch.empty(0)
+    epoch = 0
     # For each epoch
     for epoch in range(num_epochs):
         # For each batch in the dataloader
@@ -677,7 +691,5 @@ torch.save(D_B.state_dict(), f"./CycleGAN/netD_B.pth")
 
 # In[ ]:
 
-
-from google.colab import files
 
 files.download('./model.zip')

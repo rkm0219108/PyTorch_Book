@@ -9,7 +9,12 @@
 # 載入相關套件
 from typing import List
 
+import matplotlib.pyplot as plt
+import nltk
 import numpy as np
+from scipy.spatial.distance import euclidean
+from sklearn.manifold import TSNE
+from sklearn.metrics.pairwise import cosine_similarity
 
 # 載入GloVe詞向量檔 glove.6B.300d.txt
 embeddings_dict = {}
@@ -38,7 +43,6 @@ len(embeddings_dict.keys())
 
 
 # 以歐基里德(euclidean)距離計算相似性
-from scipy.spatial.distance import euclidean
 
 
 def find_closest_embeddings(embedding: np.ndarray) -> List[str]:
@@ -56,8 +60,6 @@ print(find_closest_embeddings(embeddings_dict["king"])[1:10])
 words = list(embeddings_dict.keys())[100:200]
 # print(words)
 
-from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
 
 # 以 T-SNE 降維至二個特徵
 tsne = TSNE(n_components=2)
@@ -89,7 +91,6 @@ corpus = [
 # In[8]:
 
 
-import nltk
 
 # 參數設定
 MAX_WORDS_A_LINE = 7  # 每行最多字數
@@ -146,7 +147,6 @@ sum__word_embeddings.shape
 
 
 # 字句的相似度比較
-from sklearn.metrics.pairwise import cosine_similarity
 
 print(cosine_similarity(sum__word_embeddings[-1:], sum__word_embeddings[:-1], dense_output=False))
 

@@ -8,24 +8,23 @@
 # In[1]:
 
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.nn import functional as F
-from torch.optim import lr_scheduler
-import torchvision
-from torchvision import datasets, models, transforms
-from torchvision.models import ResNet50_Weights
-import numpy as np
-import time
+from typing import List, Tuple, Union, cast
+
 import cv2
-from typing import List, Tuple, Union
+import cv2.ximgproc
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from PIL import Image
+from torch.nn import functional as F
+from torchvision import models, transforms
+from torchvision.models import ResNet50_Weights
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # In[3]:
 
@@ -51,7 +50,6 @@ model = models.resnet50(weights=ResNet50_Weights.DEFAULT).to(device)
 # In[7]:
 
 
-from PIL import Image
 
 filename = './images_Object_Detection/bike.jpg'
 orig = Image.open(filename)
@@ -88,13 +86,13 @@ def PIL2CV2(orig: Image.Image) -> np.ndarray:
 
 
 # 產生 Selective Search 影像
-import matplotlib.pyplot as plt
 
 plt.figure(figsize=(16, 16))
 
 
 def Selective_Search(img_path: str) -> Tuple[torch.Tensor, List[Tuple[int, int, int, int]]]:
     img = cv2.imread(img_path)
+    assert img is not None
     img = cv2.resize(img, (WIDTH, int(orig.size[1] / orig.size[0] * WIDTH)), interpolation=cv2.INTER_AREA)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -127,7 +125,7 @@ def Selective_Search(img_path: str) -> Tuple[torch.Tensor, List[Tuple[int, int, 
             plt.imshow(crop_img)
         j += 1
 
-        roi = transform(crop_img)
+        roi = cast(torch.Tensor, transform(crop_img))
         roi = roi.unsqueeze(0)  # 增加一維(筆數)
 
         # 加入輸出變數中
@@ -284,6 +282,7 @@ def non_max_suppression_slow(boxes: np.ndarray, overlapThresh: float = 0.5) -> U
 # In[45]:
 
 
+boxes = np.array([])
 # 掃描每一個類別
 for label in labels.keys():
     # if label != categories[671]: continue # bike

@@ -10,8 +10,8 @@
 
 # 載入相關套件
 import matplotlib.pyplot as plt
+from python_speech_features import logfbank, mfcc
 from scipy.io import wavfile
-from python_speech_features import mfcc, logfbank
 
 # ## 載入檔案
 
@@ -43,7 +43,7 @@ mfcc_features[0]
 # 繪圖
 plt.subplot(2, 1, 1)
 mfcc_features = mfcc_features.T
-plt.imshow(mfcc_features, cmap=plt.cm.jet, extent=[0, mfcc_features.shape[1], 0, mfcc_features.shape[0]], aspect='auto')
+plt.imshow(mfcc_features, cmap=plt.cm.jet, extent=(0, mfcc_features.shape[1], 0, mfcc_features.shape[0]), aspect='auto')
 plt.title('MFCC')
 
 plt.subplot(2, 1, 2)
@@ -51,7 +51,7 @@ filterbank_features = filterbank_features.T
 plt.imshow(
     filterbank_features,
     cmap=plt.cm.jet,
-    extent=[0, filterbank_features.shape[1], 0, filterbank_features.shape[0]],
+    extent=(0, filterbank_features.shape[1], 0, filterbank_features.shape[0]),
     aspect='auto',
 )
 plt.title('Filter bank')

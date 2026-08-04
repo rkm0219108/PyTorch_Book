@@ -9,12 +9,10 @@
 
 
 import matplotlib.pyplot as plt
-import torch
 import torchvision.models as models
-from torchvision.models import AlexNet_Weights
-
-from flashtorch.utils import apply_transforms, load_image
 from flashtorch.saliency import Backprop
+from flashtorch.utils import apply_transforms, load_image
+from torchvision.models import AlexNet_Weights
 
 # ## 載入圖檔
 

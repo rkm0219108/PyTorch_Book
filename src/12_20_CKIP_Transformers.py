@@ -8,10 +8,10 @@
 # In[15]:
 
 
-from ckip_transformers import __version__
-from ckip_transformers.nlp import CkipWordSegmenter, CkipPosTagger, CkipNerChunker
-import torch
 from typing import List
+
+import torch
+from ckip_transformers.nlp import CkipNerChunker, CkipPosTagger, CkipWordSegmenter
 
 # ## 載入模型
 

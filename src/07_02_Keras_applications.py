@@ -8,12 +8,28 @@
 # In[2]:
 
 
-import tensorflow as tf
-from tensorflow.keras.applications.vgg16 import VGG16
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.vgg16 import preprocess_input
-from tensorflow.keras.applications.vgg16 import decode_predictions
 import numpy as np
+from tensorflow.keras.applications.resnet50 import (
+    ResNet50,
+)
+from tensorflow.keras.applications.resnet50 import (
+    decode_predictions as resnet50_decode_predictions,
+)
+from tensorflow.keras.applications.resnet50 import (
+    preprocess_input as resnet50_preprocess_input,
+)
+from tensorflow.keras.applications.vgg16 import (
+    VGG16,
+)
+from tensorflow.keras.applications.vgg16 import (
+    decode_predictions as vgg16_decode_predictions,
+)
+from tensorflow.keras.applications.vgg16 import (
+    preprocess_input as vgg16_preprocess_input,
+)
+from tensorflow.keras.preprocessing import (
+    image,
+)
 
 # ## 載入模型
 
@@ -35,12 +51,12 @@ img = image.load_img(img_path, target_size=(224, 224))
 # 加一維，變成 (1, 224, 224)
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
-x = preprocess_input(x)
+x = vgg16_preprocess_input(x)
 
 # 預測
 preds = model.predict(x)
 # decode_predictions： 取得前 3 名的物件，每個物件屬性包括 (類別代碼, 名稱, 機率)
-print('Predicted:', decode_predictions(preds, top=3)[0])
+print('Predicted:', vgg16_decode_predictions(preds, top=3)[0])
 
 # In[11]:
 
@@ -51,23 +67,17 @@ img = image.load_img(img_path, target_size=(224, 224))
 # 加一維，變成 (1, 224, 224, 3)，最後一維是色彩
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
-x = preprocess_input(x)
+x = vgg16_preprocess_input(x)
 
 # 預測
 preds = model.predict(x)
 # decode_predictions： 取得前 3 名的物件，每個物件屬性包括 (類別代碼, 名稱, 機率)
-print('Predicted:', decode_predictions(preds, top=3)[0])
+print('Predicted:', vgg16_decode_predictions(preds, top=3)[0])
 
 # ## 載入 resnet 50 模型
 
 # In[15]:
 
-
-from tensorflow.keras.applications.resnet50 import ResNet50
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.resnet50 import preprocess_input
-from tensorflow.keras.applications.resnet50 import decode_predictions
-import numpy as np
 
 # 預先訓練好的模型 -- ResNet50
 model = ResNet50(weights='imagenet')
@@ -83,12 +93,12 @@ img = image.load_img(img_path, target_size=(224, 224))
 # 加一維，變成 (1, 224, 224)
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
-x = preprocess_input(x)
+x = resnet50_preprocess_input(x)
 
 # 預測
 preds = model.predict(x)
 # decode_predictions： 取得前 3 名的物件，每個物件屬性包括 (類別代碼, 名稱, 機率)
-print('Predicted:', decode_predictions(preds, top=3)[0])
+print('Predicted:', resnet50_decode_predictions(preds, top=3)[0])
 
 # In[17]:
 
@@ -99,11 +109,11 @@ img = image.load_img(img_path, target_size=(224, 224))
 # 加一維，變成 (1, 224, 224, 3)，最後一維是色彩
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
-x = preprocess_input(x)
+x = resnet50_preprocess_input(x)
 
 # 預測
 preds = model.predict(x)
 # decode_predictions： 取得前 3 名的物件，每個物件屬性包括 (類別代碼, 名稱, 機率)
-print('Predicted:', decode_predictions(preds, top=3)[0])
+print('Predicted:', resnet50_decode_predictions(preds, top=3)[0])
 
 # In[ ]:

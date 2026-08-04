@@ -12,6 +12,15 @@
 import os
 import shutil
 
+import torch
+from torch import nn
+from torch.nn import functional as F
+from torch.utils.data import DataLoader
+import torchaudio
+from torchvision import datasets, transforms, utils
+from IPython.display import Audio, display
+from torch.utils.tensorboard import SummaryWriter
+
 dirpath = './runs'
 if os.path.exists(dirpath) and os.path.isdir(dirpath):
     shutil.rmtree(dirpath)
@@ -20,17 +29,6 @@ if os.path.exists(dirpath) and os.path.isdir(dirpath):
 
 # In[2]:
 
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-import torch
-import torchvision
-import torchvision.transforms as transforms
-
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 
 # ## 建立 transform、trainset、trainloader
 
@@ -41,21 +39,19 @@ import torch.optim as optim
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
 # datasets
-trainset = torchvision.datasets.FashionMNIST('.', download=True, train=True, transform=transform)
-testset = torchvision.datasets.FashionMNIST('.', download=True, train=False, transform=transform)
+trainset = datasets.FashionMNIST('.', download=True, train=True, transform=transform)
+testset = datasets.FashionMNIST('.', download=True, train=False, transform=transform)
 
 # dataloaders
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
+trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
 
 
-testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
+testloader = DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
 
 # ## 設定 log 目錄，開啟 log 檔案
 
 # In[4]:
 
-
-from torch.utils.tensorboard import SummaryWriter
 
 # 設定工作記錄檔目錄
 writer = SummaryWriter('runs/fashion_mnist_experiment_1')
@@ -70,7 +66,7 @@ dataiter = iter(trainloader)
 images, labels = next(dataiter)
 
 # 建立圖像方格
-img_grid = torchvision.utils.make_grid(images)
+img_grid = utils.make_grid(images)
 
 # 寫入 tensorboard
 writer.add_image('four_fashion_mnist_images', img_grid)
@@ -79,10 +75,6 @@ writer.add_image('four_fashion_mnist_images', img_grid)
 
 # In[6]:
 
-
-import torchaudio
-import os
-import multiprocessing
 
 # 建立目錄
 _SAMPLE_DIR = "_sample_data"
@@ -97,9 +89,7 @@ def _download_yesno() -> None:
     torchaudio.datasets.YESNO(root=YESNO_DATASET_PATH, download=True)
 
 
-YESNO_DOWNLOAD_PROCESS = multiprocessing.Process(target=_download_yesno)
-YESNO_DOWNLOAD_PROCESS.start()
-YESNO_DOWNLOAD_PROCESS.join()
+_download_yesno()
 
 # ## 語音寫入Log
 
@@ -114,18 +104,15 @@ YESNO_DOWNLOAD_PROCESS.join()
 # In[7]:
 
 
-from IPython.display import Audio, display
-
-
 # 播放語音函數
 def play_audio(waveform: torch.Tensor, sample_rate: int) -> None:
-    waveform = waveform.numpy()
+    waveform_np = waveform.numpy()
 
-    num_channels, num_frames = waveform.shape
+    num_channels, num_frames = waveform_np.shape
     if num_channels == 1:  # 單聲道
-        display(Audio(waveform[0], rate=sample_rate))
+        display(Audio(waveform_np[0], rate=sample_rate))
     elif num_channels == 2:  # 立體聲道
-        display(Audio((waveform[0], waveform[1]), rate=sample_rate))
+        display(Audio((waveform_np[0], waveform_np[1]), rate=sample_rate))
 
 
 # 讀取語音資料集
@@ -148,16 +135,16 @@ for i in [1, 3, 5]:
 
 
 # datasets
-trainset = torchaudio.datasets.YESNO(YESNO_DATASET_PATH, download=True)
+yesno_trainset = torchaudio.datasets.YESNO(YESNO_DATASET_PATH, download=True)
 
 # dataloaders, batch_size必須為1，否則 next 會出錯，因為每筆語音長度不一致
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True)
+yesno_trainloader = DataLoader(yesno_trainset, batch_size=1, shuffle=True)
 
 # In[9]:
 
 
 # 讀取資料
-dataiter = iter(trainloader)
+dataiter = iter(yesno_trainloader)
 # 下一行會出錯，因為每筆語音長度不一致，可能要使用 transform
 waveform, sample_rate, label = next(dataiter)
 
@@ -199,15 +186,6 @@ net = Net()
 writer.add_graph(net, images)
 
 # ## 顯示嵌入向量投影機(Projector)
-
-# In[21]:
-
-
-# 修正 writer.add_embedding 錯誤
-import tensorflow as tf
-import tensorboard as tb
-
-tf.io.gfile = tb.compat.tensorflow_stub.io.gfile
 
 # In[ ]:
 

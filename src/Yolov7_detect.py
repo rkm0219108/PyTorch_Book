@@ -6,31 +6,27 @@
 
 import time
 from pathlib import Path
+
 import cv2
 import torch
-import torch.backends.cudnn as cudnn
-from numpy import random
 from models.experimental import attempt_load
-from utils.datasets import LoadStreams, LoadImages
+from numpy import random
+from utils.datasets import (
+    LoadImages,
+)
 from utils.general import (
-    check_img_size,
-    check_requirements,
-    check_imshow,
     non_max_suppression,
-    apply_classifier,
     scale_coords,
-    xyxy2xywh,
-    strip_optimizer,
-    set_logging,
-    increment_path,
 )
 from utils.plots import plot_one_box
-from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
+from utils.torch_utils import (
+    time_synchronized,
+)
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # In[3]:
 
@@ -51,12 +47,14 @@ def detect(source: str, img_size: int = 640, conf_thres: float = 0.25, save_img:
     colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
 
     # Run inference
-    if device.type != 'cpu':
+    if device != 'cpu':
         model(torch.zeros(1, 3, img_size, img_size).to(device).type_as(next(model.parameters())))  # run once
     old_img_w = old_img_h = img_size
     old_img_b = 1
 
     t0 = time.time()
+    s = ''
+    t1 = t2 = t3 = t0
     for path, img, im0s, vid_cap in dataset:
         img = torch.from_numpy(img).to(device)
         img = img.float()  # uint8 to fp16/32

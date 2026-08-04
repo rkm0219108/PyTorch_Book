@@ -15,10 +15,10 @@
 
 
 # 載入套件
+import time
 from typing import Iterator, Tuple
 
 import cv2
-import time
 import imutils
 import numpy as np
 
@@ -63,6 +63,7 @@ def sliding_window(
 
 # 讀取一個圖檔
 image = cv2.imread('./images_Object_Detection/lena.jpg')
+assert image is not None
 
 # 視窗尺寸
 winW, winH = (128, 128)

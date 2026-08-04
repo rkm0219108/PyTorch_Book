@@ -4,7 +4,8 @@
 # In[3]:
 
 
-from flask import Flask, request, jsonify, make_response
+import sqlalchemy
+from flask import Flask
 from sqlalchemy import create_engine, text
 
 app = Flask(__name__)
@@ -15,7 +16,6 @@ con = engine.connect()
 # In[39]:
 
 
-import sqlalchemy
 
 sqlalchemy.__version__
 

@@ -7,9 +7,12 @@
 
 
 # 載入相關套件
+import collections
+import string
 from typing import List, Tuple
 
 import nltk
+from nltk.stem.porter import PorterStemmer
 
 # In[17]:
 
@@ -40,7 +43,7 @@ nltk.word_tokenize(text)
 
 # 字根詞形還原(Stemming)
 text = 'My system keeps crashing his crashed yesterday, ours crashes daily'
-ps = nltk.porter.PorterStemmer()
+ps = PorterStemmer()
 ' '.join([ps.stem(word) for word in text.split()])
 
 # In[9]:
@@ -57,7 +60,6 @@ lem = nltk.WordNetLemmatizer()
 
 
 # 標點符號(Punctuation)
-import string
 
 print('標點符號:', string.punctuation)
 
@@ -92,7 +94,6 @@ with open('./NLP_data/news.txt', 'r+', encoding='UTF-8') as f:
 
 filtered_text, filtered_tokens = remove_stopwords(text, True)
 
-import collections
 
 # 生字表的集合
 word_freqs = collections.Counter()

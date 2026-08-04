@@ -6,9 +6,12 @@
 # In[2]:
 
 
+from collections import OrderedDict
+
 import torch
 from torch import nn
 from torch.nn import functional as F
+from torchinfo import summary
 
 # # [Sequential model](https://pytorch.org/docs/stable/generated/nn.Sequential.html) 兩種寫法
 
@@ -27,7 +30,6 @@ model = nn.Sequential(
 
 
 # 使用 OrderedDict 可指定名稱
-from collections import OrderedDict
 
 model = nn.Sequential(
     OrderedDict(
@@ -44,7 +46,6 @@ model = nn.Sequential(
 # In[26]:
 
 
-from torchinfo import summary
 
 summary(model, (1, 256))
 
@@ -54,7 +55,6 @@ summary(model, (1, 256))
 
 
 # linear 用法
-from torch.nn import functional as F
 
 inputs = torch.randn(100, 256)
 weight = torch.randn(20, 256)
@@ -73,7 +73,6 @@ x = F.softmax(x, dim=1)
 # In[39]:
 
 
-from torchinfo import summary
 
 summary(model, (1, 256))
 
@@ -103,7 +102,6 @@ class Net(nn.Module):
 # In[53]:
 
 
-from torchinfo import summary
 
 model = Net()
 summary(model, (1, 28, 28))

@@ -14,7 +14,6 @@
 
 # 載入相關套件
 import gymnasium as gym
-from gymnasium import envs
 from stable_baselines3 import A2C
 
 # In[5]:
@@ -29,7 +28,7 @@ model.learn(total_timesteps=10000)
 
 # 訓練 10 週期
 all_rewards = []  # 每回合總報酬
-total_rewards = 0
+total_rewards = 0.0
 obs, info = env.reset()
 no = 0
 while no < 10:
@@ -37,12 +36,12 @@ while no < 10:
     obs, reward, terminated, truncated, info = env.step(action)
     done = terminated or truncated
     # 累計報酬
-    total_rewards += reward
+    total_rewards += float(reward)
     env.render()
     if done:
         obs, info = env.reset()
         all_rewards.append(total_rewards)
-        total_rewards = 0
+        total_rewards = 0.0
         no += 1
 env.close()
 

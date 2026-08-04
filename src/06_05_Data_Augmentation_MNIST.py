@@ -9,16 +9,19 @@
 
 
 import os
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Sized, Tuple, cast
 
+import matplotlib.pyplot as plt
+import numpy as np
+import PIL.Image as Image
 import torch
+from skimage import io
+from skimage.transform import resize
 from torch import nn
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchmetrics import Accuracy
+from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
-import numpy as np
 
 # ## 設定參數
 
@@ -26,10 +29,10 @@ import numpy as np
 
 
 # 設定參數
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 BATCH_SIZE = 1000  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 定義資料增補函數
 
@@ -66,12 +69,12 @@ test_transforms = transforms.Compose(
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
 train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=train_transforms)
 
-train_loader = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
 # 下載測試資料
 test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=test_transforms)
 
-test_loader = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -121,10 +124,10 @@ class Net(nn.Module):
 
 def train(
     model: nn.Module,
-    device: torch.device,
+    device: str,
     train_loader: DataLoader,
     criterion: Callable[..., torch.Tensor],
-    optimizer: torch.optim.Optimizer,
+    optimizer: optim.Optimizer,
     epoch: int,
 ) -> List[float]:
     model.train()
@@ -142,16 +145,16 @@ def train(
         if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(cast(Sized, train_loader.dataset))
             percentage = 100.0 * (batch_idx + 1) / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
     return loss_list
 
 
 # In[7]:
 
 
-def test(model: nn.Module, device: torch.device, test_loader: DataLoader) -> None:
+def test(model: nn.Module, device: str, test_loader: DataLoader) -> None:
     model.eval()
     test_loss = 0
     correct = 0
@@ -171,9 +174,9 @@ def test(model: nn.Module, device: torch.device, test_loader: DataLoader) -> Non
             correct += (predicted == target).sum().item()
 
     # 平均損失
-    test_loss /= len(test_loader.dataset)
+    test_loss /= len(cast(Sized, test_loader.dataset))
     # 顯示測試結果
-    data_count = len(test_loader.dataset)
+    data_count = len(cast(Sized, test_loader.dataset))
     percentage = 100.0 * correct / data_count
     print(f'準確率: {correct}/{data_count} ({percentage:.2f}%)')
 
@@ -191,7 +194,7 @@ model = Net().to(device)
 criterion = F.nll_loss  # nn.CrossEntropyLoss()
 
 # 設定優化器(optimizer)
-optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
+optimizer = optim.Adadelta(model.parameters(), lr=lr)
 
 loss_list = []
 for epoch in range(1, epochs + 1):
@@ -203,7 +206,6 @@ for epoch in range(1, epochs + 1):
 
 
 # 對訓練過程的損失繪圖
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 
@@ -219,11 +221,12 @@ test(model, device, test_loader)
 
 # 實際預測 20 筆資料
 predictions = []
+data = torch.empty(0)
 with torch.no_grad():
     for i in range(20):
         data, target = test_ds[i][0], test_ds[i][1]
         data = data.reshape(1, *data.shape).to(device)
-        output = torch.argmax(model(data), axis=-1)
+        output = torch.argmax(model(data), dim=-1)
         predictions.append(str(output.item()))
 
 # 比對
@@ -242,7 +245,6 @@ print('prediction: ', ' '.join(predictions[0:20]))
 
 
 # 顯示圖像
-import matplotlib.pyplot as plt
 
 
 def imshow(X: np.ndarray) -> None:
@@ -260,7 +262,6 @@ def imshow(X: np.ndarray) -> None:
 
 
 # 使用PIL讀取檔案，像素介於[0, 255]
-import PIL.Image as Image
 
 data_shape = data.shape
 
@@ -269,7 +270,7 @@ for i in range(10):
     image1 = Image.open(uploaded_file).convert('L')
 
     # 縮為 (28, 28) 大小的影像
-    image_resized = image1.resize(tuple(data_shape)[2:])
+    image_resized = image1.resize((int(data_shape[2]), int(data_shape[3])))
     X1 = np.array(image_resized).reshape([1] + list(data_shape)[1:])
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
     X1 = 1.0 - (X1 / 255)
@@ -294,8 +295,6 @@ for i in range(10):
 
 
 # 使用 skimage 讀取檔案，像素介於[0, 1]
-from skimage import io
-from skimage.transform import resize
 
 # 讀取影像並轉為單色
 for i in range(10):
@@ -303,7 +302,7 @@ for i in range(10):
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
-    image_resized = resize(image1, tuple(data_shape)[2:], anti_aliasing=True)
+    image_resized = np.asarray(resize(image1, (int(data_shape[2]), int(data_shape[3])), anti_aliasing=True))
     X1 = image_resized.reshape([1] + list(data_shape)[1:])
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
     X1 = 1.0 - X1
@@ -372,7 +371,7 @@ class CustomImageDataset(torch.utils.data.Dataset):
 
 
 ds = CustomImageDataset('./myDigits', to_gray=True, transform=test_transforms)
-data_loader = torch.utils.data.DataLoader(ds, batch_size=10, shuffle=False)
+data_loader = DataLoader(ds, batch_size=10, shuffle=False)
 
 test(model, device, data_loader)
 

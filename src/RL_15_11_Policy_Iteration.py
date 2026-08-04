@@ -11,6 +11,9 @@ from typing import Any, Callable
 
 import numpy as np
 from lib.envs.gridworld import GridworldEnv
+from lib.envs.windy_gridworld import (
+    WindyGridworldEnv,
+)
 
 # In[21]:
 
@@ -126,8 +129,6 @@ np.testing.assert_array_almost_equal(v, expected_v, decimal=2)
 
 # In[27]:
 
-
-from lib.envs.windy_gridworld import WindyGridworldEnv
 
 # 環境
 env = WindyGridworldEnv()

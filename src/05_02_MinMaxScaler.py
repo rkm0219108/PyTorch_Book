@@ -10,13 +10,16 @@
 
 import os
 from typing import Callable
+
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
-from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchmetrics import Accuracy
+from PIL import Image
+from torch import nn, optim
+from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.datasets import MNIST
+from torchvision.io import read_image
 
 # ## 設定參數
 
@@ -25,8 +28,8 @@ from torchvision.datasets import MNIST
 
 PATH_DATASETS = "std"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 步驟1：載入 MNIST 手寫阿拉伯數字資料
 
@@ -95,7 +98,6 @@ text_image
 
 
 # 顯示第1張圖片圖像
-import matplotlib.pyplot as plt
 
 # 第一筆資料
 X = train_ds.data[0]
@@ -149,7 +151,7 @@ lr = 0.1
 train_loader = DataLoader(train_ds, batch_size=600)
 
 # 設定優化器(optimizer)
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adam(model.parameters(), lr=lr)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -170,15 +172,14 @@ for epoch in range(1, epochs + 1):
         if batch_idx % 10 == 0:
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(train_ds)
             percentage = 100.0 * batch_idx / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[12]:
 
 
 # 對訓練過程的損失繪圖
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 
@@ -209,11 +210,11 @@ with torch.no_grad():
         correct += pred.eq(target.view_as(pred)).sum().item()
 
 # 平均損失
-data_count = len(test_loader.dataset)
+data_count = len(test_ds)
 test_loss /= data_count
 # 顯示測試結果
 percentage = 100.0 * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 
 # In[14]:
 
@@ -224,7 +225,7 @@ with torch.no_grad():
     for i in range(20):
         data, target = test_ds[i][0], test_ds[i][1]
         data = data.reshape(1, *data.shape).to(device)
-        output = torch.argmax(model(data), axis=-1)
+        output = torch.argmax(model(data), dim=-1)
         predictions.append(str(output.item()))
 
 # 比對
@@ -235,7 +236,6 @@ print('prediction: ', ' '.join(predictions[0:20]))
 
 
 # 顯示第 9 筆的機率
-import numpy as np
 
 i = 8
 data = test_ds[i][0]
@@ -264,11 +264,9 @@ plt.show()
 
 
 # 使用小畫家，繪製 0~9，實際測試看看
-from PIL import Image
-from skimage.transform import resize
-import numpy as np
 
 # 讀取影像並轉為單色
+X1 = torch.empty(0)
 for i in range(10):
     uploaded_file = f'./myDigits/{i}.png'
     image1 = Image.open(uploaded_file).convert('L')
@@ -295,15 +293,10 @@ X1
 # In[18]:
 
 
-import os
-import pandas as pd
-from torchvision.io import read_image
-from torch.utils.data import Dataset
-import re
-
-
 class CustomImageDataset(Dataset):
-    def __init__(self, img_dir: str, transform: Callable | None = None, target_transform: Callable | None = None) -> None:
+    def __init__(
+        self, img_dir: str, transform: Callable | None = None, target_transform: Callable | None = None
+    ) -> None:
         self.img_labels = [file_name for file_name in os.listdir(img_dir)]
         self.img_dir = img_dir
         self.transform = transform
@@ -353,7 +346,8 @@ transform = transforms.Compose(
 )
 
 # 建立 DataLoader
-test_loader = DataLoader(CustomImageDataset('./myDigits', transform), shuffle=False, batch_size=10)
+test_image_ds = CustomImageDataset('./myDigits', transform)
+test_loader = DataLoader(test_image_ds, shuffle=False, batch_size=10)
 
 model.eval()
 criterion = nn.CrossEntropyLoss()
@@ -374,10 +368,10 @@ with torch.no_grad():
         correct += pred.eq(target.view_as(pred)).sum().item()
 
 # 平均損失
-test_loss /= len(test_loader.dataset)
+test_loss /= len(test_image_ds)
 # 顯示測試結果
-data_count = len(test_loader.dataset)
+data_count = len(test_image_ds)
 percentage = 100.0 * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 
 # In[ ]:

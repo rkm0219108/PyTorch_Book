@@ -8,12 +8,21 @@
 # In[25]:
 
 
+import time
 from typing import Any, Callable, Iterable, Iterator
 
 import torch
+from torch import nn
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import random_split
+from torchtext.data.functional import (
+    to_map_style_dataset,
+)
+from torchtext.data.utils import get_tokenizer
 from torchtext.datasets import IMDB
+from torchtext.vocab import build_vocab_from_iterator
 
-imdb = IMDB(split='train')
+imdb = IMDB(split='train')  # pyright: ignore[reportCallIssue]
 
 type(imdb)
 
@@ -21,7 +30,7 @@ type(imdb)
 
 
 # 取得下一筆資料
-train_iter = iter(IMDB(split='train'))
+train_iter = iter(IMDB(split='train'))  # pyright: ignore[reportCallIssue]
 
 data = next(train_iter)
 data
@@ -31,15 +40,12 @@ data
 # In[6]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 詞彙表處理
 
 # In[7]:
 
-
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
 
 # 分詞
 tokenizer = get_tokenizer('basic_english')
@@ -48,11 +54,13 @@ tokenizer = get_tokenizer('basic_english')
 # 建立 Generator 函數
 def yield_tokens(data_iter: Iterable[tuple[Any, str]]) -> Iterator[list[str]]:
     for _, text in data_iter:
-        yield tokenizer(text)
+        yield tokenizer(text)  # pyright: ignore[reportReturnType]
 
 
 # 由 train_iter 建立詞彙字典
-vocab = build_vocab_from_iterator(yield_tokens(train_iter), specials=["<unk>"])
+vocab = build_vocab_from_iterator(
+    yield_tokens(train_iter), specials=["<unk>"]
+)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
 # 設定預設的索引值
 vocab.set_default_index(vocab["<unk>"])
@@ -97,9 +105,6 @@ label_pipeline('pos')
 # In[83]:
 
 
-from torch import nn
-
-
 class TextClassificationModel(nn.Module):
     def __init__(self, vocab_size: int, embed_dim: int, num_class: int) -> None:
         super().__init__()
@@ -125,9 +130,6 @@ model = TextClassificationModel(vocab_size, emsize, num_class).to(device)
 # ## 定義訓練及評估函數
 
 # In[84]:
-
-
-import time
 
 
 # 訓練函數
@@ -175,11 +177,6 @@ def evaluate(dataloader: "DataLoader") -> float:
 # In[85]:
 
 
-from torch.utils.data import DataLoader
-from torch.utils.data.dataset import random_split
-from torchtext.data.functional import to_map_style_dataset
-
-
 # 批次處理
 def collate_batch(batch: list[tuple[Any, str]]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     label_list, text_list, offsets = [], [], [0]
@@ -194,7 +191,7 @@ def collate_batch(batch: list[tuple[Any, str]]) -> tuple[torch.Tensor, torch.Ten
     return label_list.to(device), text_list.to(device), offsets.to(device)
 
 
-train_iter, test_iter = IMDB()
+train_iter, test_iter = IMDB()  # pyright: ignore[reportCallIssue]
 # 轉換為 DataSet
 train_dataset = to_map_style_dataset(train_iter)
 test_dataset = to_map_style_dataset(test_iter)
@@ -213,8 +210,8 @@ test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True, 
 
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=LR)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.1)
+optimizer = optim.SGD(model.parameters(), lr=LR)
+scheduler = optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.1)
 
 total_accu = None
 for epoch in range(1, EPOCHS + 1):
@@ -250,8 +247,8 @@ label = {0: '負面', 1: '正面'}
 
 def predict(text: str, text_pipeline: Callable[[str], list[int]]) -> int:
     with torch.no_grad():
-        text = torch.tensor(text_pipeline(text)).to(device)
-        output = model(text, torch.tensor([0]).to(device))
+        text_tensor = torch.tensor(text_pipeline(text)).to(device)
+        output = model(text_tensor, torch.tensor([0]).to(device))
         return output.argmax(1).item()
 
 
@@ -262,7 +259,7 @@ print(label[predict(my_test, text_pipeline)])
 # In[89]:
 
 
-imdb_iterator = iter(IMDB(split='train'))
+imdb_iterator = iter(IMDB(split='train'))  # pyright: ignore[reportCallIssue]
 acc = 0
 for i in range(20000):
     data = next(imdb_iterator)

@@ -11,10 +11,19 @@
 
 from __future__ import annotations
 
+import time
 from typing import Callable, Iterable, Iterator
 
 import torch
+from torch import nn
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import random_split
+from torchtext.data.functional import (
+    to_map_style_dataset,
+)
+from torchtext.data.utils import get_tokenizer
 from torchtext.datasets import AG_NEWS
+from torchtext.vocab import build_vocab_from_iterator
 
 news = AG_NEWS(split='train')
 
@@ -36,15 +45,12 @@ next(train_iter)
 # In[4]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 詞彙表處理
 
 # In[5]:
 
-
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
 
 # 分詞
 tokenizer = get_tokenizer('basic_english')
@@ -53,11 +59,13 @@ tokenizer = get_tokenizer('basic_english')
 # 建立 Generator 函數
 def yield_tokens(data_iter: Iterable[tuple[int, str]]) -> Iterator[list[str]]:
     for _, text in data_iter:
-        yield tokenizer(text)
+        yield tokenizer(text)  # pyright: ignore[reportReturnType]
 
 
 # 由 train_iter 建立詞彙字典
-vocab = build_vocab_from_iterator(yield_tokens(train_iter), specials=["<unk>"])
+vocab = build_vocab_from_iterator(
+    yield_tokens(train_iter), specials=["<unk>"]
+)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
 # 設定預設的索引值
 vocab.set_default_index(vocab["<unk>"])
@@ -101,9 +109,6 @@ label_pipeline('10')
 # In[10]:
 
 
-from torch import nn
-
-
 class TextClassificationModel(nn.Module):
     def __init__(self, vocab_size: int, embed_dim: int, num_class: int) -> None:
         super().__init__()
@@ -129,9 +134,6 @@ model = TextClassificationModel(vocab_size, emsize, num_class).to(device)
 # In[11]:
 
 
-import time
-
-
 # 訓練函數
 def train(dataloader: DataLoader) -> None:
     model.train()
@@ -144,7 +146,7 @@ def train(dataloader: DataLoader) -> None:
         predicted_label = model(text, offsets)
         loss = criterion(predicted_label, label)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.1)
+        nn.utils.clip_grad_norm_(model.parameters(), 0.1)
         optimizer.step()
         total_acc += (predicted_label.argmax(1) == label).sum().item()
         total_count += label.size(0)
@@ -175,11 +177,6 @@ def evaluate(dataloader: DataLoader) -> float:
 # ## 建立DataLoader，逐批訓練
 
 # In[12]:
-
-
-from torch.utils.data import DataLoader
-from torch.utils.data.dataset import random_split
-from torchtext.data.functional import to_map_style_dataset
 
 
 # 批次處理
@@ -214,9 +211,9 @@ test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True, 
 # In[13]:
 
 
-criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=LR)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.1)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=LR)
+scheduler = optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.1)
 
 total_accu = None
 for epoch in range(1, EPOCHS + 1):
@@ -253,8 +250,8 @@ ag_news_label = {1: "World", 2: "Sports", 3: "Business", 4: "Sci/Tec"}
 # 預測
 def predict(text: str, text_pipeline: Callable[[str], list[int]]) -> int:
     with torch.no_grad():
-        text = torch.tensor(text_pipeline(text)).to(device)
-        output = model(text, torch.tensor([0]).to(device))
+        text_tensor = torch.tensor(text_pipeline(text)).to(device)
+        output = model(text_tensor, torch.tensor([0]).to(device))
         return output.argmax(1).item() + 1
 
 

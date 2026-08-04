@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # 修改自 https://medium.com/quick-code/python-audio-spectrum-analyser-6a3c54ad950
-import pyaudio
 import struct
+
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import signal
+import pyaudio
 
 # 宣告麥克風變數
 mic = pyaudio.PyAudio()

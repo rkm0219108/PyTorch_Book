@@ -8,12 +8,15 @@
 # In[1]:
 
 
-import os
-
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
 import torch
-from torch import nn
+from skimage import io
+from skimage.transform import resize
+from torch import nn, optim
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
@@ -23,17 +26,15 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 步驟1：載入 MNIST 手寫阿拉伯數字資料
 
 # In[3]:
 
-
-import tensorflow as tf
 
 mnist = tf.keras.datasets.mnist
 
@@ -92,7 +93,7 @@ lr = 0.1
 train_loader = DataLoader(train_ds, batch_size=600)
 
 # 設定優化器(optimizer)
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adam(model.parameters(), lr=lr)
 
 model.train()
 loss_list = []
@@ -110,15 +111,14 @@ for epoch in range(1, epochs + 1):
         if batch_idx % 10 == 0:
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(train_ds)
             percentage = 100.0 * batch_idx / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[13]:
 
 
 # 對訓練過程的損失繪圖
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 
@@ -148,12 +148,11 @@ with torch.no_grad():
         correct += pred.eq(target.view_as(pred)).sum().item()
 
 # 平均損失
-test_loss /= len(test_loader.dataset)
+test_loss /= len(test_ds)
 # 顯示測試結果
-batch = batch_idx * len(data)
-data_count = len(test_loader.dataset)
+data_count = len(test_ds)
 percentage = 100.0 * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 
 # In[15]:
 
@@ -164,7 +163,7 @@ with torch.no_grad():
     for i in range(20):
         data, target = test_ds[i][0], test_ds[i][1]
         data = data.reshape(1, *data.shape).to(device)
-        output = torch.argmax(model(data), axis=-1)
+        output = torch.argmax(model(data), dim=-1)
         predictions.append(str(output.item()))
 
 # 比對
@@ -181,9 +180,6 @@ print('prediction: ', ' '.join(predictions[0:20]))
 
 
 # 使用小畫家，繪製 0~9，實際測試看看
-from skimage import io
-from skimage.transform import resize
-import numpy as np
 
 # 讀取影像並轉為單色
 for i in range(10):
@@ -192,7 +188,7 @@ for i in range(10):
 
     # 縮為 (28, 28) 大小的影像
     image_resized = resize(image1, (28, 28), anti_aliasing=True)
-    X1 = image_resized.reshape(1, 28, 28)  # / 255.0
+    X1 = np.asarray(image_resized).reshape(1, 28, 28)  # / 255.0
 
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
     X1 = torch.FloatTensor(1 - X1).to(device)

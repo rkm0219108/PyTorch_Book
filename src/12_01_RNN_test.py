@@ -5,7 +5,7 @@
 
 # ## 程式參考來源：
 # - https://pytorch.org/tutorials/beginner/nlp/word_embeddings_tutorial.html
-# - https://pytorch.org/docs/stable/generated/torch.nn.RNN.html#torch.nn.RNN
+# - https://pytorch.org/docs/stable/generated/nn.RNN.html#nn.RNN
 # - https://pytorch.org/text/stable/vocab.html
 # - https://pytorch.org/text/stable/functional.html#to-tensor
 # - https://pytorch.org/tutorials/beginner/text_sentiment_ngrams_tutorial.html
@@ -16,15 +16,18 @@
 # In[5]:
 
 
+import string
+from collections import Counter, OrderedDict
 from typing import List, Tuple
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchtext
-from torchtext.vocab import Vocab
 import numpy as np
+import torch
+from torch import nn
+import torchtext
+from torchtext.data.utils import get_tokenizer
+from torchtext.vocab import (
+    Vocab,
+)
 
 # ## 嵌入層測試
 
@@ -131,8 +134,6 @@ print(output.shape, hn.shape)
 # In[352]:
 
 
-from torchtext.data.utils import get_tokenizer
-
 tokenizer = get_tokenizer('basic_english')
 
 text = 'Could have done better.'
@@ -143,11 +144,8 @@ tokenizer(text)
 # In[353]:
 
 
-from torchtext.vocab import vocab
-from collections import Counter, OrderedDict
-
 # BOW 統計
-counter = Counter(tokenizer(text))
+counter = Counter(tokenizer(text))  # pyright: ignore[reportCallIssue, reportArgumentType]
 # 依出現次數降冪排列
 sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: x[1], reverse=True)
 # 建立詞彙字典
@@ -174,14 +172,9 @@ vocab_object.__len__()
 # In[356]:
 
 
-import string
-
 string.punctuation
 
 # In[357]:
-
-
-import string
 
 
 def create_vocabulary(text_list: List[str]) -> Tuple[Vocab, List[str], List[List[int]]]:
@@ -194,7 +187,7 @@ def create_vocabulary(text_list: List[str]) -> Tuple[Vocab, List[str], List[List
     for text in text_list:
         tokens = tokenizer(text)
         clean_tokens = []
-        for w in tokens:
+        for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
             if w not in stopwords:
                 clean_tokens.append(w)
         clean_tokens_list += clean_tokens
@@ -293,7 +286,7 @@ print(embed_output.shape)
 # In[366]:
 
 
-class RecurrentNet(nn.Module):
+class RecurrentNetLinear(nn.Module):
     def __init__(self, vocab_size: int, embed_dim: int, num_class: int) -> None:
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
@@ -313,14 +306,14 @@ class RecurrentNet(nn.Module):
         return self.fc(out)
 
 
-model = RecurrentNet(vocab_object.__len__(), 10, 1)
+model = RecurrentNetLinear(vocab_object.__len__(), 10, 1)
 
 # ## 另一種寫法，使用EmbeddingBag
 
 # In[363]:
 
 
-class RecurrentNet(nn.Module):
+class RecurrentNetEmbeddingBag(nn.Module):
     def __init__(self, vocab_size: int, embed_dim: int, num_class: int) -> None:
         super().__init__()
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim)
@@ -339,7 +332,7 @@ class RecurrentNet(nn.Module):
         return self.fc(embedded)
 
 
-model = RecurrentNet(vocab_object.__len__(), 10, 1)
+model = RecurrentNetEmbeddingBag(vocab_object.__len__(), 10, 1)
 
 # In[367]:
 
@@ -349,8 +342,8 @@ y = torch.FloatTensor([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
 X = torchtext.functional.to_tensor(clean_index_list, 0)  # 0:不足補0
 
 # 指定優化器、損失函數
-criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters())
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters())
 
 # 模型訓練
 for epoch in range(1000):
@@ -403,12 +396,12 @@ ret
 # In[303]:
 
 
-vec.vectors.size()
+vec.vectors.size()  # pyright: ignore[reportOptionalMemberAccess]
 
 # In[304]:
 
 
-vec.stoi['great']
+vec.stoi['great']  # pyright: ignore[reportOptionalSubscript]
 
 # ## Embedding 不需訓練，直接設定嵌入層權重
 
@@ -453,7 +446,7 @@ clean_tokens_list = []
 for i, text in enumerate(docs):
     tokens = tokenizer(text.lower())
     clean_tokens = []
-    for w in tokens:
+    for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
         if w not in stopwords:
             clean_tokens.append(w)
     clean_tokens_list += clean_tokens
@@ -486,8 +479,8 @@ vocab_list
 model = RecurrentNet(torch.FloatTensor(weights_matrix), len(vocab_list), 50, 1)
 
 # 指定優化器、損失函數
-criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters())
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters())
 
 # 模型訓練
 for epoch in range(1000):
@@ -519,7 +512,7 @@ clean_text_list = []
 for i, text in enumerate(test_docs):
     tokens = tokenizer(text.lower())
     clean_tokens = []
-    for w in tokens:
+    for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
         if w not in stopwords:
             clean_tokens.append(w)
     clean_text_list.append(clean_tokens)
@@ -576,10 +569,10 @@ for i, text in enumerate(docs):
     tokens = tokenizer(text.lower())
     clean_tokens = []
     j = 0
-    for w in tokens:
+    for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
         if w not in stopwords:
             # 轉成詞向量索引值
-            X[i, j] = vec.stoi[w]
+            X[i, j] = vec.stoi[w]  # pyright: ignore[reportOptionalSubscript]
             j += 1
 X
 
@@ -587,8 +580,8 @@ X
 
 
 # 指定優化器、損失函數
-criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters())
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters())
 
 # 模型訓練
 for epoch in range(1000):
@@ -616,9 +609,9 @@ for i, text in enumerate(test_docs):
     tokens = tokenizer(text.lower())
     clean_tokens = []
     j = 0
-    for w in tokens:
+    for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
         if w not in stopwords:
-            X[i, j] = vec.stoi[w]
+            X[i, j] = vec.stoi[w]  # pyright: ignore[reportOptionalSubscript]
             j += 1
 X
 

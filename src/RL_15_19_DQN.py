@@ -13,22 +13,19 @@
 # In[ ]:
 
 
-from typing import Any
-
-import gymnasium as gym
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-import torchvision.transforms as T
 import math
 import random
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from collections import namedtuple, deque
+from collections import deque, namedtuple
 from itertools import count
-from PIL import Image
+from typing import Any, cast
+
+import gymnasium as gym
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
+from torchvision import transforms
 from IPython import display
 
 # ## 設定環境
@@ -43,7 +40,7 @@ from IPython import display
 plt.ion()
 
 # 判斷是否使用 gpu
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 載入木棒台車遊戲
 
@@ -131,7 +128,13 @@ class DQN(nn.Module):
 
 
 # 影像轉換為張量
-resize = T.Compose([T.ToPILImage(), T.Resize(40, interpolation=T.InterpolationMode.BICUBIC), T.ToTensor()])
+resize = transforms.Compose(
+    [
+        transforms.ToPILImage(),
+        transforms.Resize(40, interpolation=transforms.InterpolationMode.BICUBIC),
+        transforms.ToTensor(),
+    ]
+)
 
 
 # 取得台車在螢幕的位置
@@ -144,7 +147,7 @@ def get_cart_location(screen_width: int) -> int:
 # 取得螢幕所有像素，並轉換為張量
 def get_screen() -> torch.Tensor:
     # 將螢幕像素格式轉為三維張量：顏色、高度、寬度(CHW).
-    screen = env.render().transpose((2, 0, 1))
+    screen = np.asarray(env.render()).transpose((2, 0, 1))
 
     # 台車影像只佔螢幕下半部，故只擷取下半部像素
     _, screen_height, screen_width = screen.shape
@@ -196,7 +199,7 @@ init_screen = get_screen()
 _, _, screen_height, screen_width = init_screen.shape
 
 # 取得行動類別的個數
-n_actions = env.action_space.n
+n_actions = int(cast(gym.spaces.Discrete, env.action_space).n)
 
 # 定義2個網路
 policy_net = DQN(screen_height, screen_width, n_actions).to(device)
@@ -286,7 +289,8 @@ def optimize_model() -> None:
     optimizer.zero_grad()
     loss.backward()
     for param in policy_net.parameters():
-        param.grad.data.clamp_(-1, 1)
+        if param.grad is not None:
+            param.grad.data.clamp_(-1, 1)
     optimizer.step()
 
 
@@ -303,6 +307,7 @@ for i_episode in range(num_episodes):
     current_screen = get_screen()
     state = current_screen - last_screen  # 目前畫面像素與上一時間點之差
     for t in count():  # 生成連續的變數值，即 0, 1, 2, ...
+        assert state is not None
         action = select_action(state)
         _, reward, terminated, truncated, _ = env.step(action.item())
         done = terminated or truncated

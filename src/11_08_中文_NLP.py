@@ -9,8 +9,9 @@
 
 
 # 載入相關套件
-import numpy as np
 import jieba
+import jieba.analyse
+import jieba.posseg
 
 # 分詞
 text = "小明硕士毕业于中国科学院计算所，后在日本京都大学深造"
@@ -88,7 +89,6 @@ with open('./jieba/news.txt', encoding='utf8') as f:
     text = f.read()
 
 # 加詞前的分詞
-import jieba.analyse
 
 jieba.analyse.extract_tags(text, topK=10)
 
@@ -101,7 +101,6 @@ jieba.analyse.extract_tags(text, topK=10)
 with open('./jieba/news.txt', encoding='utf8') as f:
     text = f.read()
 
-import jieba.analyse
 
 # 設定停用詞
 jieba.analyse.set_stop_words('./jieba/stop_words.txt')

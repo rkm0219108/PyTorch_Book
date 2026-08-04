@@ -13,27 +13,27 @@
 # In[1]:
 
 
+import matplotlib.pyplot as plt
+from PIL import Image
 import torch
-from torchvision import models
-from torchvision.models import ResNet18_Weights
 from torch import nn
-import numpy as np
 from torchsummary import summary
+from torchvision import models, transforms
 
 # ## 檢查 GPU
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 使用預先訓練的模型
 
 # In[3]:
 
 
-rn18 = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+rn18 = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 
 # ## 顯示神經層名稱
 
@@ -55,8 +55,6 @@ rn18._modules
 # In[8]:
 
 
-from torchsummary import summary
-
 summary(rn18.to(device), input_size=(3, 224, 224))
 
 # ## 移除 layer1 後面的神經層
@@ -68,7 +66,7 @@ class new_model(nn.Module):
     def __init__(self, output_layer: str) -> None:
         super().__init__()
         self.output_layer = output_layer
-        self.pretrained = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+        self.pretrained = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
         self.children_list = []
         # 依序取得每一層
         for n, c in self.pretrained.named_children():
@@ -93,16 +91,10 @@ model = model.to(device)
 # In[10]:
 
 
-from torchsummary import summary
-
 summary(model, input_size=(3, 224, 224))
 
 # In[18]:
 
-
-from PIL import Image
-import matplotlib.pyplot as plt
-import torchvision.transforms as transforms
 
 img = Image.open("./images_test/cat.jpg")
 plt.imshow(img)

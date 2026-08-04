@@ -7,17 +7,18 @@
 
 
 # 載入相關套件
-from typing import Callable, DefaultDict, Tuple
-
-import gymnasium as gym
 import itertools
-import matplotlib
-import numpy as np
-import pandas as pd
 import sys
 from collections import defaultdict
-from lib.envs.windy_gridworld import WindyGridworldEnv
+from typing import Callable, DefaultDict, Tuple
+
+import matplotlib
+import matplotlib.style
+import numpy as np
 from lib import plotting
+from lib.envs.windy_gridworld import (
+    WindyGridworldEnv,
+)
 
 matplotlib.style.use('ggplot')  # 設定繪圖的風格
 
@@ -56,9 +57,7 @@ env.render()  # 更新畫面
 
 
 # 定義 ε-greedy策略
-def make_epsilon_greedy_policy(
-    Q: DefaultDict[int, np.ndarray], epsilon: float, nA: int
-) -> Callable[[int], np.ndarray]:
+def make_epsilon_greedy_policy(Q: DefaultDict[int, np.ndarray], epsilon: float, nA: int) -> Callable[[int], np.ndarray]:
     def policy_fn(observation: int) -> np.ndarray:
         # 每個行動的機率初始化，均為 ε / n
         A = np.ones(nA, dtype=float) * epsilon / nA

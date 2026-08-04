@@ -7,13 +7,14 @@
 
 
 # 載入相關套件
-from transformers import pipeline
+import torch
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 
 # In[2]:
 
 
 # 載入模型
-nlp = pipeline("question-answering")
+nlp = pipeline("question-answering")  # pyright: ignore[reportCallIssue, reportArgumentType]
 
 # In[5]:
 
@@ -50,8 +51,6 @@ print(
 # In[11]:
 
 
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering
-import torch
 
 # 結合分詞器(Tokenizer)
 tokenizer = AutoTokenizer.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad")

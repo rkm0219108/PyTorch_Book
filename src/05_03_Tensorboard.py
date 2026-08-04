@@ -7,21 +7,19 @@
 
 
 # 載入套件
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-
-# Image datasets and image manipulation
-import torchvision
-import torchvision.transforms as transforms
-
-# Image display
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import datasets, transforms, utils
+
+# Image datasets and image manipulation
+
+# Image display
 
 # TensorBoard
-from torch.utils.tensorboard import SummaryWriter
 
 # Showing Images in TensorBoard
 # -----------------------------
@@ -38,13 +36,13 @@ from torch.utils.tensorboard import SummaryWriter
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
 #
-training_set = torchvision.datasets.FashionMNIST('', download=True, train=True, transform=transform)
-validation_set = torchvision.datasets.FashionMNIST('', download=True, train=False, transform=transform)
+training_set = datasets.FashionMNIST("data", download=True, train=True, transform=transform)
+validation_set = datasets.FashionMNIST("data", download=True, train=False, transform=transform)
 
-training_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
+training_loader = DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
 
 
-validation_loader = torch.utils.data.DataLoader(validation_set, batch_size=4, shuffle=False, num_workers=2)
+validation_loader = DataLoader(validation_set, batch_size=4, shuffle=False, num_workers=2)
 
 # Class labels
 classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot')
@@ -67,7 +65,7 @@ dataiter = iter(training_loader)
 images, labels = next(dataiter)
 
 # Create a grid from the images and show them
-img_grid = torchvision.utils.make_grid(images)
+img_grid = utils.make_grid(images)
 matplotlib_imshow(img_grid, one_channel=True)
 
 # Above, we used TorchVision and Matplotlib to create a visual grid of a

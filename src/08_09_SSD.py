@@ -8,23 +8,27 @@
 # In[1]:
 
 
+from typing import Any, cast
+
+import matplotlib.patches as patches
 import torch
+from matplotlib import pyplot as plt
 
 # ## 檢查 GPU
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 載入模型
 
 # In[4]:
 
 
-ssd_model = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_ssd').to(device)
-utils = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_ssd_processing_utils')
+ssd_model = cast(nn.Module, torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_ssd')).to(device)
+utils: Any = torch.hub.load('NVIDIA/DeepLearningExamples:torchhub', 'nvidia_ssd_processing_utils')
 ssd_model.eval()
 
 # ## 取得COCO類別
@@ -66,8 +70,6 @@ best_results_per_input = [utils.pick_best(results, 0.40) for results in results_
 
 
 # 顯示結果
-from matplotlib import pyplot as plt
-import matplotlib.patches as patches
 
 for image_idx in range(len(best_results_per_input)):
     fig, ax = plt.subplots(1)

@@ -7,11 +7,16 @@
 
 
 # 載入套件
+from typing import cast
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn import datasets
 import torch
-from torch import nn
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.utils import Bunch
+from torch import nn, optim
 from torch.nn import functional as F
 
 # ## 載入 IRIS 資料集
@@ -19,7 +24,7 @@ from torch.nn import functional as F
 # In[95]:
 
 
-dataset = datasets.load_iris()
+dataset = cast(Bunch, datasets.load_iris())
 df = pd.DataFrame(dataset.data, columns=dataset.feature_names)
 df.head()
 
@@ -28,9 +33,10 @@ df.head()
 # In[96]:
 
 
-from sklearn.model_selection import train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(df.values, dataset.target, test_size=0.2)
+target = np.asarray(dataset.target)
+X_train, X_test, y_train, y_test = train_test_split(df.values, target, test_size=0.2)
+y_train = np.asarray(y_train)
+y_test = np.asarray(y_test)
 
 # ## 進行 one-hot encoding 轉換
 
@@ -72,7 +78,7 @@ model = nn.Sequential(nn.Linear(4, 3), nn.Softmax(dim=1))
 
 
 loss_function = nn.MSELoss(reduction='sum')
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 # ## 訓練模型
 
@@ -83,8 +89,8 @@ epochs = 1000
 accuracy = []
 losses = []
 for i in range(epochs):
-    y_pred = model(X_train)
-    loss = loss_function(y_pred, y_train_encoding)
+    y_pred: torch.Tensor = model(X_train)
+    loss = loss_function.forward(y_pred, y_train_encoding)
 
     # print(np.argmax(y_pred.detach().numpy(), axis=1))
     accuracy.append((np.argmax(y_pred.detach().numpy(), axis=1) == y_train).sum() / y_train.shape[0] * 100)
@@ -107,12 +113,9 @@ for i in range(epochs):
 # In[103]:
 
 
-import matplotlib.pyplot as plt
-
 # fix 中文亂碼
-from matplotlib.font_manager import FontProperties
 
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 微軟正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 微軟正黑體
 plt.rcParams['axes.unicode_minus'] = False
 
 plt.figure(figsize=(12, 6))

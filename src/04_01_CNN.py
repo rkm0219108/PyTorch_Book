@@ -8,15 +8,16 @@
 # In[1]:
 
 
+import math
+
+import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import accuracy_score
 import torch
 from torch import nn, optim
-import torch.nn.functional as F
-from torchvision import datasets
-import torchvision.transforms as transforms
-from torch.utils.data.sampler import SubsetRandomSampler
-from sklearn.metrics import accuracy_score
-import matplotlib.pyplot as plt
+from torch.nn import functional as F
+from torch.utils.data import DataLoader, SubsetRandomSampler
+from torchvision import datasets, transforms
 
 # ## 載入 CIFAR10 資料集
 
@@ -46,9 +47,9 @@ train_idx, dev_idx = idx[split_size:], idx[:split_size]
 train_sampler = SubsetRandomSampler(train_idx)
 dev_sampler = SubsetRandomSampler(dev_idx)
 
-train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
-dev_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=dev_sampler)
-test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
+train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
+dev_loader = DataLoader(train_data, batch_size=batch_size, sampler=dev_sampler)
+test_loader = DataLoader(test_data, batch_size=batch_size)
 
 # In[19]:
 
@@ -61,15 +62,13 @@ train_data[0][0].shape
 # In[36]:
 
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
 
 # ## 計算Conv2D/Pool2D 轉換後的圖片寬度
 
 # In[1]:
 
-
-import math
 
 # W, F, P, S：image Width, Filter width, Padding, Stride
 # def Conv_Width(W, F, P, S):

@@ -13,19 +13,16 @@
 # In[89]:
 
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import numpy as np
 import urllib.request
 from typing import List
-from nltk.tokenize import RegexpTokenizer
-from nltk.corpus import stopwords
+
+import numpy as np
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
 from nltk import word_tokenize
-import sklearn
-from sklearn.cluster import KMeans
-from sklearn.metrics.pairwise import euclidean_distances
+from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer
 
 # ## 參數設定
 

@@ -7,9 +7,10 @@
 
 
 # 載入相關套件
-import numpy as np
+from typing import Callable, Tuple, cast
+
 import gymnasium as gym
-from typing import Callable, Tuple
+import numpy as np
 
 # In[2]:
 
@@ -20,13 +21,13 @@ env.reset()
 # In[6]:
 
 
-nS = env.observation_space.n
-nA = env.action_space.n
+nS = cast(gym.spaces.Discrete, env.observation_space).n
+nA = cast(gym.spaces.Discrete, env.action_space).n
 
 # In[7]:
 
 
-env.P
+env.unwrapped.P
 
 # ## 策略評估函數
 
@@ -46,7 +47,7 @@ def policy_eval(policy: np.ndarray, env: gym.Env, discount_factor: float = 1.0, 
             # 計算每個行動後的狀態值函數
             for a, action_prob in enumerate(policy[s]):
                 # 取得所有可能的下一狀態值
-                for prob, next_state, reward, done in env.P[s][a]:
+                for prob, next_state, reward, done in env.unwrapped.P[s][a]:
                     # 狀態值函數公式，依照所有可能的下一狀態值函數加總
                     v += action_prob * prob * (reward + discount_factor * V[next_state])
             # 比較更新前後的差值，取最大值
@@ -63,7 +64,7 @@ def policy_eval(policy: np.ndarray, env: gym.Env, discount_factor: float = 1.0, 
 
 
 # 隨機策略，機率均等
-random_policy = np.ones([env.observation_space.n, env.action_space.n]) / env.action_space.n
+random_policy = np.ones([nS, nA]) / nA
 # 評估
 v = policy_eval(random_policy, env)
 print("狀態值函數:")
@@ -83,7 +84,7 @@ def policy_improvement(
     def one_step_lookahead(state: int, V: np.ndarray) -> np.ndarray:
         A = np.zeros(nA)
         for a in range(nA):
-            for prob, next_state, reward, done in env.P[state][a]:
+            for prob, next_state, reward, done in env.unwrapped.P[state][a]:
                 A[a] += prob * (reward + discount_factor * V[next_state])
         return A
 
@@ -109,7 +110,7 @@ def policy_improvement(
             # 貪婪策略：若有新的最佳行動，修改行動策略
             if chosen_a != best_a:
                 policy_stable = False
-            policy[s] = np.eye(nA)[best_a]
+            policy[s] = np.eye(int(nA))[best_a]
 
         # 如果已無較佳行動策略，則回傳策略及狀態值函數
         if policy_stable:

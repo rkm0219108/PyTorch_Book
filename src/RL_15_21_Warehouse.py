@@ -27,6 +27,7 @@
 
 
 import numpy as np
+import pandas as pd
 
 # ## 定義環境(environment)
 
@@ -96,7 +97,6 @@ for i in range(1000):
 # In[6]:
 
 
-import pandas as pd
 
 q_values = pd.DataFrame(Q, columns=[location for location in location_to_state])
 s = q_values.round().style.background_gradient(cmap='GnBu')
@@ -167,7 +167,7 @@ def route(starting_location: str, ending_location: str) -> list[str]:
     next_location = starting_location
     while next_location != ending_location:
         starting_state = location_to_state[starting_location]
-        next_state = np.argmax(Q[starting_state,])
+        next_state = int(np.argmax(Q[starting_state,]))
         next_location = state_to_location[next_state]
         route.append(next_location)
         starting_location = next_location

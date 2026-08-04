@@ -9,7 +9,14 @@
 
 
 # 載入相關套件
-import IPython
+import random
+import struct
+import wave
+
+import IPython.display
+import matplotlib.pyplot as plt
+import numpy as np
+import pyaudio
 
 # ## 播放音檔(wav)
 
@@ -28,7 +35,6 @@ IPython.display.Audio(wav_file, autoplay=False)
 
 
 # 取得音檔的屬性
-import wave
 
 f = wave.open(wav_file)
 print(
@@ -44,7 +50,6 @@ f.close()
 
 
 # 使用 PyAudio 串流播放
-import pyaudio
 
 
 def PlayAudio(filename: str, seconds: int = -1) -> None:
@@ -110,10 +115,6 @@ PlayAudio(wav_file, 3)
 
 
 # 繪製波形
-import numpy as np
-import wave
-import sys
-import matplotlib.pyplot as plt
 
 
 # 單聲道繪製波形
@@ -222,7 +223,6 @@ DrawWavFile(wav_file)
 
 
 # 產生音檔
-import wave, struct, random
 
 sampleRate = 44100.0  # 取樣頻率
 duration = 1.0  # 秒數
@@ -258,7 +258,6 @@ f.close()
 
 
 # 雙聲道音檔轉換為單聲道
-import numpy as np
 
 wav_file = './audio/WAV_1MG.wav'
 # 開啟音檔
@@ -295,7 +294,6 @@ IPython.display.Audio(wav_file_out)
 
 
 # 取得音檔的屬性
-import wave
 
 f = wave.open(wav_file)
 print(

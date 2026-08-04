@@ -8,14 +8,16 @@
 # In[1]:
 
 
-from transformers import pipeline
+import pandas as pd
+import torch
+from transformers import AutoModelForTokenClassification, AutoTokenizer, pipeline
 
 # ## 載入模型
 
 # In[2]:
 
 
-nlp = pipeline("ner")
+nlp = pipeline("ner")  # pyright: ignore[reportCallIssue, reportArgumentType]
 
 # ## 測試
 
@@ -30,7 +32,6 @@ sequence = (
 )
 
 # 推測答案
-import pandas as pd
 
 df = pd.DataFrame(nlp(sequence))
 df
@@ -41,8 +42,6 @@ df
 
 
 # 載入相關套件
-from transformers import AutoModelForTokenClassification, AutoTokenizer
-import torch
 
 # 結合分詞器(Tokenizer)
 model_name = "dbmdz/bert-large-cased-finetuned-conll03-english"

@@ -1,12 +1,9 @@
-import torch
-import torch.nn as nn
-from torch.nn import init
-import functools
-from torch.autograd import Variable
-import numpy as np
-import torch.nn.functional as F
-from spp_layer import spatial_pyramid_pool
 from typing import Any, List
+
+import torch
+from torch import nn
+from torch.nn import functional as F
+from spp_layer import spatial_pyramid_pool
 
 
 class SPP_NET(nn.Module):

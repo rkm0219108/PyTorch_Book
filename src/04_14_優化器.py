@@ -10,6 +10,7 @@
 
 # 載入套件
 import torch
+from torch import nn, optim
 
 # 建立模型
 model = nn.Sequential(
@@ -22,7 +23,7 @@ model = nn.Sequential(
 criterion = nn.CrossEntropyLoss()
 
 # 隨機梯度下降法(SGD)
-optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
+optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
 
 optimizer.zero_grad()
 input = torch.randn(3, 28 * 28, requires_grad=True)

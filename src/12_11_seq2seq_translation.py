@@ -9,24 +9,28 @@
 
 
 # get_ipython().run_line_magic('matplotlib', 'inline')
-from __future__ import unicode_literals, print_function, division
-from io import open
-import unicodedata
-import string
-import re
-import random
+from __future__ import division, print_function, unicode_literals
 
+import math
+import random
+import re
+import time
+import unicodedata
+from io import open
+
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import torch
-import torch.nn as nn
+from torch import nn
+from torch.nn import functional as F
 from torch import optim
-import torch.nn.functional as F
 
 # ## 判斷GPU是否存在
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 文字的前置處理函數
 
@@ -302,7 +306,7 @@ def train(
 
     encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
 
-    loss = 0
+    loss = torch.tensor(0.0, device=device)
 
     for ei in range(input_length):
         encoder_output, encoder_hidden = encoder(input_tensor[ei], encoder_hidden)
@@ -345,10 +349,6 @@ def train(
 # ## 計算執行時間的函數
 
 # In[31]:
-
-
-import time
-import math
 
 
 # 換算為分鐘
@@ -404,7 +404,7 @@ def trainIters(
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            print(f'{timeSince(start, iter / n_iters)}' + f' ({iter} {iter / n_iters * 100}%) {print_loss_avg:.4f}')
+            print(f'{timeSince(start, iter / n_iters)} ({iter} {iter / n_iters * 100}%) {print_loss_avg:.4f}')
 
         if iter % plot_every == 0:
             plot_loss_avg = plot_loss_total / plot_every
@@ -419,11 +419,7 @@ def trainIters(
 # In[33]:
 
 
-import matplotlib.pyplot as plt
-
 plt.switch_backend('agg')
-import matplotlib.ticker as ticker
-import numpy as np
 
 
 def showPlot(points: list[float]) -> None:
@@ -461,6 +457,7 @@ def evaluate(
         decoded_words = []
         decoder_attentions = torch.zeros(max_length, max_length)
 
+        di = 0
         for di in range(max_length):
             decoder_output, decoder_hidden, decoder_attention = decoder(decoder_input, decoder_hidden, encoder_outputs)
             decoder_attentions[di] = decoder_attention.data

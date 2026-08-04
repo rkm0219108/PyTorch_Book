@@ -91,7 +91,7 @@ episode_count = 0
 
 while True:  # Run until solved
     state, _ = env.reset()
-    episode_reward = 0
+    episode_reward = 0.0
     with tf.GradientTape() as tape:
         for timestep in range(1, max_steps_per_episode):
             # env.render(); Adding this line would show the attempts
@@ -113,7 +113,7 @@ while True:  # Run until solved
             state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             rewards_history.append(reward)
-            episode_reward += reward
+            episode_reward += float(reward)
 
             if done:
                 break
@@ -155,7 +155,7 @@ while True:  # Run until solved
 
         # Backpropagation
         loss_value = sum(actor_losses) + sum(critic_losses)
-        grads = tape.gradient(loss_value, model.trainable_variables)
+        grads = tape.gradient(loss_value, model.trainable_variables)  # pyright: ignore[reportCallIssue, reportArgumentType]
         optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
         # Clear the loss and reward history

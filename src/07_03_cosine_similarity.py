@@ -8,20 +8,26 @@
 # In[1]:
 
 
-import torch
-from torchvision import models
-from torchvision.models import VGG16_Weights
-from torch import nn
-from torchsummary import summary
+import os
+from os import listdir
+from os.path import isfile, join
+from typing import cast
+
 import numpy as np
+import torch
+from PIL import Image
+from sklearn.metrics.pairwise import cosine_similarity
+from torch import nn
+from torchvision import models, transforms
+from torchvision.models import VGG16_Weights
 
 # ## 檢查 GPU
 
 # In[3]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 載入VGG 16 模型
 
@@ -68,8 +74,6 @@ model._modules
 
 
 # 任選一張圖片，例如老虎側面照，取得圖檔的特徵向量
-from PIL import Image
-from torchvision import transforms
 
 filename = './images_test/tiger2.jpg'
 input_image = Image.open(filename)
@@ -81,7 +85,7 @@ transform = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
-input_tensor = transform(input_image)
+input_tensor = cast(torch.Tensor, transform(input_image))
 input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
 
 # 預測
@@ -102,8 +106,6 @@ print(output.shape)
 # In[31]:
 
 
-from os import listdir
-from os.path import isfile, join
 
 # 取得 images_test 目錄下所有 .jpg 檔案名稱
 img_path = './images_test/'
@@ -115,14 +117,13 @@ image_files
 # In[34]:
 
 
-import os
 
 # 合併所有圖檔
 model.eval()
 X = torch.tensor([])
 for filename in image_files:
     input_image = Image.open(os.path.join(img_path, filename))
-    input_tensor = transform(input_image)
+    input_tensor = cast(torch.Tensor, transform(input_image))
     input_batch = input_tensor.unsqueeze(0).to(device)  # 增加一維(筆數)
     if len(X.shape) == 1:
         # print(input_batch.shape)
@@ -146,7 +147,6 @@ features.shape
 # In[40]:
 
 
-from sklearn.metrics.pairwise import cosine_similarity
 
 # 比較 Tiger2.jpg 與其他圖檔特徵向量
 no = -2

@@ -8,13 +8,10 @@
 # In[1]:
 
 
+import IPython.display
 import torch
 import torchaudio
-import IPython
-from IPython.display import Audio
-import matplotlib.pyplot as plt
-import os
-import math
+
 import audio_util
 
 # ## 下載 YES/NO 資料集，並建立 Dataset、DataLoader
@@ -23,7 +20,7 @@ import audio_util
 
 
 yesno_data = torchaudio.datasets.YESNO('./audio', download=True)
-data_loader = torch.utils.data.DataLoader(yesno_data, batch_size=1, shuffle=True)
+data_loader = DataLoader(yesno_data, batch_size=1, shuffle=True)
 
 # ## 顯示第一筆資料
 
@@ -65,7 +62,7 @@ IPython.display.Audio(wav_file, autoplay=False)
 
 
 dataset1 = torchaudio.datasets.GTZAN('./audio', download=True)
-data_loader = torch.utils.data.DataLoader(dataset1, batch_size=1, shuffle=True)
+data_loader = DataLoader(dataset1, batch_size=1, shuffle=True)
 
 # ## 顯示第一筆資料
 

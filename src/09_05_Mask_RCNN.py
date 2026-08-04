@@ -10,17 +10,14 @@
 # In[1]:
 
 
-from PIL import Image
-import matplotlib.pyplot as plt
-import torch
-import torchvision.transforms as T
-import torchvision
-import torch
-import numpy as np
-import cv2
 import random
-import time
-import os
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import torchvision
+
+from PIL import Image
 
 #  ## COCO 資料集辨識物件名稱
 
@@ -127,9 +124,7 @@ COCO_INSTANCE_CATEGORY_NAMES = [
 
 
 # Mask RCNN 預先訓練模型
-model = torchvision.models.detection.maskrcnn_resnet50_fpn(
-    weights=torchvision.models.detection.MaskRCNN_ResNet50_FPN_Weights.DEFAULT
-)
+model = models.detection.maskrcnn_resnet50_fpn(weights=models.detection.MaskRCNN_ResNet50_FPN_Weights.DEFAULT)
 model
 
 # ## 定義物件偵測相關函數
@@ -189,6 +184,8 @@ def instance_segmentation_api(
 ) -> None:
     masks, boxes, pred_cls = get_prediction(img_path, threshold)
     img = cv2.imread(img_path)
+    if img is None:
+        raise FileNotFoundError(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     for i in range(len(masks)):
         rgb_mask = random_colour_masks(masks[i])
@@ -327,6 +324,8 @@ def pick_person_mask(
 # 讀取檔案
 img_path = "./Mask_RCNN/blur.jpg"
 img = cv2.imread(img_path)
+if img is None:
+    raise FileNotFoundError(img_path)
 
 # 取得人物遮罩
 person_mask = pick_person_mask(img_path, threshold=0.5, rect_th=3, text_size=3, text_th=3).astype(np.uint8)
@@ -340,9 +339,8 @@ img_blur = cv2.GaussianBlur(img, (21, 21), 0)
 final_img = np.where(person_mask == 1, img, img_blur)
 
 # fix 中文亂碼
-from matplotlib.font_manager import FontProperties
 
-plt.rcParams['font.family'] = ['Zhuque Fangsong (technical preview)']  # 微軟正黑體
+plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']  # 微軟正黑體
 plt.rcParams['axes.unicode_minus'] = False
 
 # 顯示原圖與生成圖，比較背景的處理效果

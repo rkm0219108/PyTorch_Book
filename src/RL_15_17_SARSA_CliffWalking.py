@@ -7,16 +7,18 @@
 
 
 # 載入相關套件
-import gymnasium as gym
 import itertools
-import matplotlib
-import numpy as np
-import pandas as pd
 import sys
 from collections import defaultdict
-from lib.envs.cliff_walking import CliffWalkingEnv
-from lib import plotting
 from typing import Any, Callable, DefaultDict, Tuple
+
+import matplotlib
+import matplotlib.style
+import numpy as np
+from lib import plotting
+from lib.envs.cliff_walking import (
+    CliffWalkingEnv,
+)
 
 matplotlib.style.use('ggplot')  # 設定繪圖的風格
 
@@ -55,9 +57,7 @@ env.render()  # 更新畫面
 
 
 # 定義 ε-greedy策略
-def make_epsilon_greedy_policy(
-    Q: DefaultDict[Any, np.ndarray], epsilon: float, nA: int
-) -> Callable[[Any], np.ndarray]:
+def make_epsilon_greedy_policy(Q: DefaultDict[Any, np.ndarray], epsilon: float, nA: int) -> Callable[[Any], np.ndarray]:
     def policy_fn(observation: Any) -> np.ndarray:
         # 每個行動的機率初始化，均為 ε / n
         A = np.ones(nA, dtype=float) * epsilon / nA

@@ -8,27 +8,27 @@
 # In[1]:
 
 
-import numpy as np
-import matplotlib.pyplot as plt
 import os
+import warnings
+from typing import List, Sized, Tuple, cast
+
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torchaudio.transforms as T
-import torch.optim as optim
+from torch import nn, optim
+from torch.nn import functional as F
 import torchaudio
-from torch.utils.data import Dataset, DataLoader
-import sys
+import torchaudio.transforms as T
+from IPython.display import Audio, display
+from torch.utils.data import DataLoader, Dataset, random_split
+
 import audio_util
-from IPython.display import Audio
-from IPython.core.display import display
-from typing import List, Tuple
 
 # In[2]:
 
 
 # 不顯示警告訊息
-import warnings
 
 warnings.filterwarnings('ignore')
 
@@ -142,7 +142,7 @@ for label in labels:
     no_of_recordings.append(len(waves))
 
 # 繪圖
-plt.rcParams['font.family'] = ['Zhuque Fangsong (technical preview)']
+plt.rcParams['font.sans-serif'] = ['Zhuque Fangsong (technical preview)']
 plt.rcParams['axes.unicode_minus'] = False
 
 plt.figure(figsize=(10, 6))
@@ -159,8 +159,6 @@ plt.show()
 
 # In[16]:
 
-
-import seaborn as sns
 
 length_list = []
 for x in dataset:
@@ -181,8 +179,8 @@ dataset = torchaudio.datasets.SPEECHCOMMANDS('./audio', download=True)
 
 
 BATCH_SIZE = 100  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 步驟2：資料清理，此步驟無需進行
 
@@ -200,7 +198,7 @@ class SPEECH_DS(Dataset):
         self.dataset1 = dataset1
 
     def __len__(self) -> int:
-        return len(self.dataset1)
+        return len(cast(Sized, self.dataset1))
 
     def __getitem__(self, n: int) -> Tuple[torch.Tensor, int]:
         waveform, sample_rate, label, _, _ = self.dataset1[n]
@@ -236,8 +234,6 @@ dataset_new[0][0]
 
 # In[22]:
 
-
-from torch.utils.data import random_split
 
 test_size = int(len(dataset_new) * 0.2)
 train_size = len(dataset_new) - test_size
@@ -318,12 +314,11 @@ def score_model() -> Tuple[List[int], List[int]]:
             target_list.extend(target.cpu().numpy())
 
     # 平均損失
-    test_loss /= len(test_loader.dataset)
+    test_loss /= len(cast(Sized, test_loader.dataset))
     # 顯示測試結果
-    batch = batch_idx * len(data)
-    data_count = len(test_loader.dataset)
+    data_count = len(cast(Sized, test_loader.dataset))
     percentage = 100.0 * correct / data_count
-    print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.2f}%)\n')
+    print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.2f}%)\n')
     return prediction_list, target_list
 
 
@@ -353,9 +348,9 @@ for epoch in range(1, epochs + 1):
         if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(cast(Sized, train_loader.dataset))
             percentage = 100.0 * (batch_idx + 1) / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
     score_model()
     scheduler.step()
 
@@ -368,8 +363,6 @@ score_model()
 
 # In[28]:
 
-
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 
@@ -411,7 +404,7 @@ def predict(wav_file: str) -> int:
     # 預測
     output = model(mfcc.to(device))
     _, predicted = torch.max(output.data, 1)
-    return predicted.cpu().item()
+    return int(predicted.cpu().item())
 
 
 # In[31]:

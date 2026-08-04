@@ -6,17 +6,21 @@
 # In[1]:
 
 
-import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.metrics import precision_score, recall_score, confusion_matrix
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    auc,
+    confusion_matrix,
+    precision_score,
+    recall_score,
+    roc_curve,
+)
 
 # ## 範例1. 混淆矩陣(Confusion Matrix)
 
 # In[2]:
 
-
-from sklearn.metrics import confusion_matrix
 
 y_true = [0, 0, 0, 1, 1, 1, 1, 1]  # 實際值
 y_pred = [0, 1, 0, 1, 0, 1, 0, 1]  # 預測值
@@ -31,7 +35,7 @@ print(f'TP={tp}, FP={fp}, TN={tn}, FN={fn}')
 
 
 # 修正中文問題
-plt.rcParams['font.family'] = ['Microsoft JhengHei']
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 # 顯示矩陣
@@ -86,7 +90,6 @@ print(f'驗算={(tp) / (tp+fn)}')
 
 
 # 讀取資料檔
-import pandas as pd
 
 df = pd.read_csv('./data/auc_data.csv')
 df
@@ -95,8 +98,6 @@ df
 
 # In[8]:
 
-
-from sklearn.metrics import roc_curve, roc_auc_score, auc
 
 # fpr：假陽率，tpr：真陽率, threshold：各種決策門檻
 fpr, tpr, threshold = roc_curve(df['actual'], df['predict'])
@@ -114,8 +115,8 @@ plt.title('ROC/AUC')
 plt.plot(fpr, tpr, color='orange', label='AUC = %0.2f' % auc1)
 plt.legend(loc='lower right')
 plt.plot([0, 1], [0, 1], 'r--')
-plt.xlim([0, 1])
-plt.ylim([0, 1])
+plt.xlim((0, 1))
+plt.ylim((0, 1))
 plt.ylabel('True Positive Rate')
 plt.xlabel('False Positive Rate')
 plt.show()

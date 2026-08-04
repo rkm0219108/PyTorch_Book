@@ -8,23 +8,23 @@
 # In[1]:
 
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchtext
+import math
+from typing import Tuple
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import os
-import matplotlib.pyplot as plt
-from typing import Tuple
+import torch
+from torch import nn
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
 
 # ## 判斷GPU是否存在
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 載入資料
 
@@ -56,13 +56,11 @@ len(df2)
 # In[7]:
 
 
-from sklearn.preprocessing import MinMaxScaler
-
 look_back = 1  # 以前N期資料為 X，當期資料為 Y
 
 
 # 函數：以前N期資料為 X，當前期資料為 Y
-def create_dataset(data1: np.ndarray, look_back: int) -> Tuple[torch.Tensor, torch.Tensor]:
+def create_dataset_single_step(data1: np.ndarray, look_back: int) -> Tuple[torch.Tensor, torch.Tensor]:
     x, y = [], []
     for i in range(len(data1) - look_back - 1):
         _x = data1[i : (i + look_back)]
@@ -84,8 +82,8 @@ train_size = int(len(dataset) * 0.67)
 test_size = len(dataset) - train_size
 train_data, test_data = dataset[0:train_size, :], dataset[train_size : len(dataset), :]
 
-trainX, trainY = create_dataset(train_data, look_back)
-testX, testY = create_dataset(test_data, look_back)
+trainX, trainY = create_dataset_single_step(train_data, look_back)
+testX, testY = create_dataset_single_step(test_data, look_back)
 dataset.shape, trainY.shape
 
 # In[8]:
@@ -101,14 +99,14 @@ trainX.shape, trainY.shape, testX.shape, testY.shape
 # In[10]:
 
 
-torch.cat((trainX.reshape(trainX.shape[0], trainX.shape[1]), trainY), axis=1)
+torch.cat((trainX.reshape(trainX.shape[0], trainX.shape[1]), trainY), dim=1)
 
 # ## 建立模型
 
 # In[17]:
 
 
-class TimeSeriesModel(nn.Module):
+class TimeSeriesModelSingleStep(nn.Module):
     def __init__(self, look_back: int, hidden_size: int = 4, num_layers: int = 1) -> None:
         super().__init__()
         self.hidden_size = hidden_size
@@ -138,7 +136,7 @@ class TimeSeriesModel(nn.Module):
         return self.fc(flatten_output)
 
 
-model = TimeSeriesModel(look_back, hidden_size=4, num_layers=1).to(device)
+model = TimeSeriesModelSingleStep(look_back, hidden_size=4, num_layers=1).to(device)
 
 # ## 模型訓練
 
@@ -149,9 +147,9 @@ num_epochs = 2000
 learning_rate = 0.01
 
 
-def train(trainX: torch.Tensor, trainY: torch.Tensor) -> None:
+def train_single_step(trainX: torch.Tensor, trainY: torch.Tensor) -> None:
     criterion = nn.MSELoss()  # MSE
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
         optimizer.zero_grad()
@@ -165,7 +163,7 @@ def train(trainX: torch.Tensor, trainY: torch.Tensor) -> None:
             print(f"Epoch: {epoch}, loss: {loss.item():.5f}")
 
 
-train(trainX, trainY)
+train_single_step(trainX, trainY)
 
 # ## 模型評估
 
@@ -184,9 +182,6 @@ trainY.shape, trainPredict.shape
 
 # In[21]:
 
-
-from sklearn.metrics import mean_squared_error
-import math
 
 # 還原常態化的訓練及測試資料
 trainPredict = scaler.inverse_transform(trainPredict)
@@ -231,17 +226,14 @@ plt.show()
 
 # 以前期資料為 X，當前期資料為 Y
 look_back = 3
-trainX, trainY = create_dataset(train_data, look_back)
-testX, testY = create_dataset(test_data, look_back)
+trainX, trainY = create_dataset_single_step(train_data, look_back)
+testX, testY = create_dataset_single_step(test_data, look_back)
 
-model = TimeSeriesModel(look_back, hidden_size=4, num_layers=1).to(device)
-train(trainX, trainY)
+model = TimeSeriesModelSingleStep(look_back, hidden_size=4, num_layers=1).to(device)
+train_single_step(trainX, trainY)
 
 # In[24]:
 
-
-from sklearn.metrics import mean_squared_error
-import math
 
 model.eval()
 trainPredict = model(trainX).detach().numpy()
@@ -288,17 +280,14 @@ plt.show()
 
 # 以前期資料為 X，當前期資料為 Y
 look_back = 3
-trainX, trainY = create_dataset(train_data, look_back)
-testX, testY = create_dataset(test_data, look_back)
+trainX, trainY = create_dataset_single_step(train_data, look_back)
+testX, testY = create_dataset_single_step(test_data, look_back)
 
-model = TimeSeriesModel(look_back, hidden_size=4, num_layers=3).to(device)
-train(trainX, trainY)
+model = TimeSeriesModelSingleStep(look_back, hidden_size=4, num_layers=3).to(device)
+train_single_step(trainX, trainY)
 
 # In[27]:
 
-
-from sklearn.metrics import mean_squared_error
-import math
 
 model.eval()
 trainPredict = model(trainX).detach().numpy()
@@ -420,7 +409,7 @@ model = TimeSeriesModel(look_back, forward_days, hidden_size=20, num_layers=1).t
 
 def train(trainX: torch.Tensor, trainY: torch.Tensor) -> None:
     criterion = nn.MSELoss()  # MSE
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
         optimizer.zero_grad()
@@ -438,9 +427,6 @@ train(trainX, trainY)
 
 # In[40]:
 
-
-from sklearn.metrics import mean_squared_error
-import math
 
 model.eval()
 trainPredict = model(trainX).detach().numpy()

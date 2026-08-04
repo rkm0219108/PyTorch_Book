@@ -8,7 +8,10 @@
 # In[2]:
 
 
-from transformers import pipeline
+from pprint import pprint
+
+import torch
+from transformers import AutoModelForMaskedLM, AutoTokenizer, pipeline
 
 # ## 載入模型
 
@@ -22,9 +25,10 @@ nlp = pipeline("fill-mask")
 # In[4]:
 
 
-from pprint import pprint
 
-pprint(nlp(f"HuggingFace is creating a {nlp.tokenizer.mask_token} " + "that the community uses to solve NLP tasks."))
+pprint(
+    nlp(f"HuggingFace is creating a {nlp.tokenizer.mask_token} " + "that the community uses to solve NLP tasks.")  # pyright: ignore[reportOptionalMemberAccess]
+)
 
 # ## 結合Tokenizer
 
@@ -32,8 +36,6 @@ pprint(nlp(f"HuggingFace is creating a {nlp.tokenizer.mask_token} " + "that the 
 
 
 # 載入相關套件
-from transformers import AutoModelForMaskedLM, AutoTokenizer
-import torch
 
 # 結合分詞器(Tokenizer)
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-cased")

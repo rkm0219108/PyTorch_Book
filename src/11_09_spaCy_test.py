@@ -20,6 +20,7 @@
 
 # 載入相關套件
 import spacy
+from spacy import displacy
 
 # In[2]:
 
@@ -46,7 +47,6 @@ for token in doc:
 
 
 # 顯示語意分析圖
-from spacy import displacy
 
 displacy.serve(doc, style="dep")
 
@@ -67,7 +67,6 @@ displacy.serve(doc, style="ent")
 
 
 # 繁體中文分詞
-import spacy
 
 nlp = spacy.load("zh_core_web_sm")
 doc = nlp("清華大學位於新竹")
@@ -78,7 +77,6 @@ for token in doc:
 
 
 # 簡體中文分詞
-import spacy
 
 nlp = spacy.load("zh_core_web_sm")
 doc = nlp("清华大学位于北京")
@@ -89,7 +87,6 @@ for token in doc:
 
 
 # 顯示中文語意分析圖
-from spacy import displacy
 
 displacy.serve(doc, style="dep")
 

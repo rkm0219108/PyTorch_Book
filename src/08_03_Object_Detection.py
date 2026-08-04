@@ -9,26 +9,21 @@
 # In[1]:
 
 
-from typing import Iterator
+from typing import Iterator, cast
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.nn import functional as F
-from torch.optim import lr_scheduler
-import torchvision
-from torchvision import datasets, models, transforms
-from torchvision.models import ResNet50_Weights
-import numpy as np
-import time
 import cv2
+import numpy as np
+import torch
 from PIL import Image
+from torch.nn import functional as F
+from torchvision import models, transforms
+from torchvision.models import ResNet50_Weights
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # In[3]:
 
@@ -57,7 +52,6 @@ model = models.resnet50(weights=ResNet50_Weights.DEFAULT).to(device)
 # In[22]:
 
 
-from PIL import Image
 
 filename = './images_Object_Detection/bike.jpg'
 orig = Image.open(filename)
@@ -146,7 +140,7 @@ for image in pyramid:
         h = int(ROI_SIZE[1] * scale)
 
         # 縮放圖形以符合模型輸入規格
-        roi = transform(roiOrig)
+        roi = cast(torch.Tensor, transform(roiOrig))
         roi = roi.unsqueeze(0)  # 增加一維(筆數)
 
         # 加入輸出變數中
@@ -389,6 +383,7 @@ def non_max_suppression_slow(boxes: np.ndarray, overlapThresh: float = 0.5) -> n
 # In[57]:
 
 
+boxes = np.array([])
 # 掃描每一個類別
 for label in labels.keys():
     # if label != categories[671]: continue # bike

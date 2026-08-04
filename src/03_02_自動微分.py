@@ -6,7 +6,13 @@
 # In[1]:
 
 
+from typing import Callable
+
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
 import torch
+from torch.autograd import Variable
 from torch.nn import functional as F
 
 # In[2]:
@@ -66,7 +72,6 @@ print(b.grad)  # b梯度值
 
 
 # Variable 在 v0.4.0已被棄用，直接使用 tensor 即可
-from torch.autograd import Variable
 
 x = Variable(torch.ones(1), requires_grad=True)
 y = x + 1
@@ -109,6 +114,7 @@ y = x**3  # y = x^3
 
 y.backward(retain_graph=True)  # 梯度下降
 print(f'一次梯度下降={x.grad}')
+assert x.grad is not None
 x.grad.zero_()  # 梯度 reset
 
 y.backward(retain_graph=True)  # 梯度下降
@@ -136,19 +142,15 @@ print(f'x 梯度下降 = {x.grad}')  # 6 * x^5
 
 
 # 載入套件
-from typing import Any, Callable
-
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 # 目標函數(損失函數):y=x^2
-def func(x: float | np.ndarray) -> float | np.ndarray:
+def func_np(x: float | np.ndarray) -> float | np.ndarray:
     return x**2
 
 
 # 目標函數的一階導數:dy/dx=2*x
-def dfunc(x: float | np.ndarray) -> float | np.ndarray:
+def dfunc_np(x: float | np.ndarray) -> float | np.ndarray:
     return 2 * x
 
 
@@ -159,9 +161,9 @@ lr = 0.3  # 學習率
 
 
 # 梯度下降法
-def GD(
+def GD_np(
     x_start: float,
-    df: Callable[[float], Any],
+    df: Callable[[float | np.ndarray], float | np.ndarray],
     epochs: int,
     lr: float,
 ) -> np.ndarray:
@@ -177,15 +179,15 @@ def GD(
 
 
 # *** Function 可以直接當參數傳遞 ***
-w = GD(x_start, dfunc, epochs, lr=lr)
+w = GD_np(x_start, dfunc_np, epochs, lr=lr)
 print(np.around(w, 2))
 
 t = np.arange(-6.0, 6.0, 0.01)
-plt.plot(t, func(t), c='b')
-plt.plot(w, func(w), c='r', marker='o', markersize=5)
+plt.plot(t, func_np(t), c='b')
+plt.plot(w, func_np(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -199,22 +201,20 @@ plt.show()
 
 
 # 載入套件
-import torch
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 # 目標函數(損失函數):y=x^2
-def func(x: float | np.ndarray) -> float | np.ndarray:
+def func_torch(x: float | np.ndarray) -> float | np.ndarray:
     return x**2
 
 
 # 自動微分
-def dfunc(x: float) -> torch.Tensor:
-    x = torch.tensor(float(x), requires_grad=True)
-    y = x**2  # 目標函數(損失函數)
+def dfunc_torch(x: float | np.ndarray | torch.Tensor) -> torch.Tensor:
+    x_t = torch.tensor(float(x), requires_grad=True)
+    y = x_t**2  # 目標函數(損失函數)
     y.backward()
-    return x.grad
+    assert x_t.grad is not None
+    return x_t.grad
 
 
 # 超參數(Hyperparameters)
@@ -224,9 +224,9 @@ lr = 0.3  # 學習率
 
 
 # 梯度下降法
-def GD(
+def GD_torch(
     x_start: float,
-    df: Callable[[float], Any],
+    df: Callable[[float | np.ndarray | torch.Tensor], torch.Tensor],
     epochs: int,
     lr: float,
 ) -> np.ndarray:
@@ -242,15 +242,15 @@ def GD(
 
 
 # *** Function 可以直接當參數傳遞 ***
-w = GD(x_start, dfunc, epochs, lr=lr)
+w = GD_torch(x_start, dfunc_torch, epochs, lr=lr)
 print(np.around(w, 2))
 
 t = np.arange(-6.0, 6.0, 0.01)
-plt.plot(t, func(t), c='b')
-plt.plot(w, func(w), c='r', marker='o', markersize=5)
+plt.plot(t, func_torch(t), c='b')
+plt.plot(w, func_torch(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -264,23 +264,21 @@ plt.show()
 
 
 # 載入套件
-import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 # 目標函數(損失函數):y=x^2
-def func(x: float | np.ndarray) -> float | np.ndarray:
+def func_tf(x: float | np.ndarray) -> float | np.ndarray:
     return x**2
 
 
 # 自動微分
-def dfunc(x_value: float) -> np.ndarray:
-    x = tf.Variable(x_value, dtype=tf.float32)  # 宣告 TensorFlow 變數(Variable)
+def dfunc_tf(x_value: float) -> np.ndarray:
+    x = tf.Variable(tf.constant(x_value, dtype=tf.float32))
     with tf.GradientTape() as g:  # 自動微分
         y = x**2  # y = x^2
     dy_dx = g.gradient(y, x)  # 取得梯度
-    return dy_dx.numpy()  # 轉成 NumPy array
+    assert isinstance(dy_dx, tf.Tensor)
+    return dy_dx.numpy()
 
 
 # 超參數(Hyperparameters)
@@ -290,7 +288,7 @@ lr = 0.3  # 學習率
 
 
 # 梯度下降法
-def GD(
+def GD_tf(
     x_start: float,
     df: Callable[[float], Any],
     epochs: int,
@@ -308,15 +306,15 @@ def GD(
 
 
 # *** Function 可以直接當參數傳遞 ***
-w = GD(x_start, dfunc, epochs, lr=lr)
+w = GD_tf(x_start, dfunc_tf, epochs, lr=lr)
 print(np.around(w, 2))
 
 t = np.arange(-6.0, 6.0, 0.01)
-plt.plot(t, func(t), c='b')
-plt.plot(w, func(w), c='r', marker='o', markersize=5)
+plt.plot(t, func_tf(t), c='b')
+plt.plot(w, func_tf(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)
@@ -328,16 +326,17 @@ plt.show()
 
 
 # 損失函數
-def func(x: float | np.ndarray) -> float | np.ndarray:
+def func_torch2(x: float | np.ndarray) -> float | np.ndarray:
     return 2 * x**4 - 3 * x**2 + 2 * x - 20
 
 
 # 自動微分
-def dfunc(x: float) -> torch.Tensor:
-    x = torch.tensor(float(x), requires_grad=True)
-    y = 2 * x**4 - 3 * x**2 + 2 * x - 20
+def dfunc_torch2(x: float) -> torch.Tensor:
+    x_t = torch.tensor(float(x), requires_grad=True)
+    y = 2 * x_t**4 - 3 * x_t**2 + 2 * x_t - 20
     y.backward()
-    return x.grad
+    assert x_t.grad is not None
+    return x_t.grad
 
 
 # 超參數(Hyperparameters)
@@ -346,15 +345,15 @@ epochs = 15000  # 執行週期數
 lr = 0.001  # 學習率
 
 # *** Function 可以直接當參數傳遞 ***
-w = GD(x_start, dfunc, epochs, lr=lr)
+w = GD_torch(x_start, dfunc_torch2, epochs, lr=lr)
 print(np.around(w, 2))
 
 t = np.arange(-6.0, 6.0, 0.01)
-plt.plot(t, func(t), c='b')
-plt.plot(w, func(w), c='r', marker='o', markersize=5)
+plt.plot(t, func_torch2(t), c='b')
+plt.plot(w, func_torch2(w), c='r', marker='o', markersize=5)
 
 # 設定中文字型
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 正黑體
 plt.rcParams['axes.unicode_minus'] = False  # 矯正負號
 
 plt.title('梯度下降法', fontsize=20)

@@ -9,16 +9,13 @@
 # In[1]:
 
 
-import torch
-import torch.nn as nn
-import pandas as pd
-import numpy as np
-from torchvision import transforms
-from torch.utils.data import Dataset, DataLoader
-from PIL import Image
-from torchvision.utils import make_grid
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from torch import nn
+from torchvision import transforms
 from torchvision.datasets import FashionMNIST
+from torchvision.utils import make_grid
 
 # ## 設定參數
 
@@ -26,7 +23,7 @@ from torchvision.datasets import FashionMNIST
 
 
 BATCH_SIZE = 64  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 載入 FashionMNIST 資料
 
@@ -41,8 +38,8 @@ transform = transforms.Compose(
     ]
 )
 
-dataset = FashionMNIST('', train=True, download=True, transform=transform)
-data_loader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+dataset = FashionMNIST("data", train=True, download=True, transform=transform)
+data_loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 # In[4]:
 
@@ -128,8 +125,8 @@ discriminator = Discriminator().to(device)
 
 
 criterion = nn.BCELoss()
-d_optimizer = torch.optim.Adam(discriminator.parameters(), lr=1e-4)
-g_optimizer = torch.optim.Adam(generator.parameters(), lr=1e-4)
+d_optimizer = optim.Adam(discriminator.parameters(), lr=1e-4)
+g_optimizer = optim.Adam(generator.parameters(), lr=1e-4)
 
 # ## 定義生成網路訓練函數
 
@@ -140,7 +137,7 @@ def generator_train_step(
     batch_size: int,
     discriminator: nn.Module,
     generator: nn.Module,
-    g_optimizer: torch.optim.Optimizer,
+    g_optimizer: optim.Optimizer,
     criterion: nn.Module,
 ) -> float:
     g_optimizer.zero_grad()
@@ -163,7 +160,7 @@ def discriminator_train_step(
     batch_size: int,
     discriminator: nn.Module,
     generator: nn.Module,
-    d_optimizer: torch.optim.Optimizer,
+    d_optimizer: optim.Optimizer,
     criterion: nn.Module,
     real_images: torch.Tensor,
     labels: torch.Tensor,
@@ -197,6 +194,7 @@ n_critic = 5
 display_step = 300
 for epoch in range(num_epochs):
     print('Starting epoch {}...'.format(epoch))
+    g_loss = d_loss = 0.0
     for i, (images, labels) in enumerate(data_loader):
         real_images = images.to(device)
         labels = labels.to(device)

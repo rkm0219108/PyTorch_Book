@@ -8,25 +8,23 @@
 # In[1]:
 
 
-from PIL import Image
+from typing import List, Tuple
+
+import cv2
 import matplotlib.pyplot as plt
 import torch
-import torchvision.transforms as T
 import torchvision
-from torchvision.models.detection import FasterRCNN_ResNet50_FPN_Weights
-import torch
-import numpy as np
-import cv2
-import os
-from typing import List, Tuple
+
+from PIL import Image
+from models.detection import FasterRCNN_ResNet50_FPN_Weights
 
 # ## 檢查 GPU
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # In[3]:
 
@@ -38,7 +36,7 @@ device = "cpu"
 # In[4]:
 
 
-model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT).to(device)
+model = models.detection.fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT).to(device)
 model.eval()
 
 # ## COCO 資料集類別
@@ -179,6 +177,7 @@ def object_detection_api(
 
     # 畫框
     img = cv2.imread(img_path)
+    assert img is not None
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     for i in range(len(boxes)):
         cv2.rectangle(img, boxes[i][0], boxes[i][1], color=(0, 255, 0), thickness=rect_th)

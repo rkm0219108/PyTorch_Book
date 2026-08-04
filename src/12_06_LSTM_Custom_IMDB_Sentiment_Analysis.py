@@ -8,21 +8,24 @@
 # In[18]:
 
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchtext
-import numpy as np
 import os
+import time
 from typing import Callable, Iterator, List, Tuple
+
+import joblib
+import torch
+from torch import nn
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import random_split
+from torchtext.data.utils import get_tokenizer
+from torchtext.vocab import build_vocab_from_iterator
 
 # ## 判斷GPU是否存在
 
 # In[19]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 自訂資料集
 
@@ -74,9 +77,6 @@ print(dataset[0])
 # In[80]:
 
 
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
-
 # 分詞
 tokenizer = get_tokenizer('basic_english')
 
@@ -84,11 +84,11 @@ tokenizer = get_tokenizer('basic_english')
 # 建立 Generator 函數
 def yield_tokens(data_iter: ImdbDataset) -> Iterator[List[str]]:
     for _, text in data_iter:
-        yield tokenizer(text)
+        yield tokenizer(text)  # pyright: ignore[reportReturnType]
 
 
 # 由 train_iter 建立詞彙字典
-vocab = build_vocab_from_iterator(yield_tokens(dataset), specials=["<unk>"])
+vocab = build_vocab_from_iterator(yield_tokens(dataset), specials=["<unk>"])  # pyright: ignore[reportCallIssue]
 
 # 設定預設的索引值
 vocab.set_default_index(vocab["<unk>"])
@@ -101,8 +101,6 @@ vocab(['here', 'is', 'an', 'example'])
 
 # In[82]:
 
-
-import joblib
 
 joblib.dump(vocab, os.path.join(data_base_path, 'vocab.joblib'))
 
@@ -167,9 +165,6 @@ model = TextClassificationModel(vocab_size, emsize, num_class).to(device)
 # In[87]:
 
 
-import time
-
-
 # 訓練函數
 def train(dataloader: "DataLoader") -> None:
     model.train()
@@ -215,9 +210,6 @@ def evaluate(dataloader: "DataLoader") -> float:
 # In[88]:
 
 
-from torch.utils.data import DataLoader
-
-
 # 批次處理
 def collate_batch(batch: List[Tuple[int, str]]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     label_list, text_list, offsets = [], [], [0]
@@ -251,8 +243,6 @@ for idx, (label, text, offset) in enumerate(dataloader):
 # In[90]:
 
 
-from torch.utils.data.dataset import random_split
-
 train_dataset = ImdbDataset(mode="train")
 test_dataset = ImdbDataset(mode="test")
 
@@ -271,8 +261,8 @@ test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True, 
 
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=LR)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.1)
+optimizer = optim.SGD(model.parameters(), lr=LR)
+scheduler = optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.1)
 
 total_accu = None
 for epoch in range(1, EPOCHS + 1):
@@ -308,8 +298,8 @@ label = {0: '負面', 1: '正面'}
 
 def predict(text: str, text_pipeline: Callable[[str], List[int]]) -> int:
     with torch.no_grad():
-        text = torch.tensor(text_pipeline(text)).to(device)
-        output = model(text, torch.tensor([0]).to(device))
+        text_tensor = torch.tensor(text_pipeline(text)).to(device)
+        output = model(text_tensor, torch.tensor([0]).to(device))
         return output.argmax(1).item()
 
 

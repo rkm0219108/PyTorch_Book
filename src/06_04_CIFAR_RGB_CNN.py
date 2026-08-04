@@ -9,23 +9,24 @@
 # In[1]:
 
 
-from typing import List
+from typing import List, Sized, cast
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
-import torchvision
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision.transforms as transforms
-from torch.optim import Optimizer
+from torch import nn, optim
+from torch.nn import functional as F
 from torch.utils.data import DataLoader
+import torchvision
+from torchvision import datasets, transforms
 
 # ## 判斷是否使用GPU
 
 # In[2]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 載入資料集
 
@@ -47,13 +48,13 @@ transform = transforms.Compose(
 batch_size = 1000
 
 # 載入資料集，如果出現 BrokenPipeError 錯誤，將 num_workers 改為 0
-train_ds = torchvision.datasets.CIFAR10(root='./CIFAR10', train=True, download=True, transform=transform)
+train_ds = datasets.CIFAR10(root='./CIFAR10', train=True, download=True, transform=transform)
 
-train_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=2)
 
-test_ds = torchvision.datasets.CIFAR10(root='./CIFAR10', train=False, download=True, transform=transform)
+test_ds = datasets.CIFAR10(root='./CIFAR10', train=False, download=True, transform=transform)
 
-test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=2)
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -70,10 +71,6 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 # In[50]:
 
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-
 # 圖像顯示函數
 def imshow(img: torch.Tensor) -> None:
     img = img * 0.5 + 0.5  # 還原圖像
@@ -86,7 +83,7 @@ def imshow(img: torch.Tensor) -> None:
 
 # 取一筆資料
 batch_size_tmp = 8
-train_loader_tmp = torch.utils.data.DataLoader(train_ds, batch_size=batch_size_tmp)
+train_loader_tmp = DataLoader(train_ds, batch_size=batch_size_tmp)
 dataiter = iter(train_loader_tmp)
 images, labels = next(dataiter)
 print(images.shape)
@@ -131,10 +128,10 @@ class Net(nn.Module):
 
 def train(
     model: nn.Module,
-    device: torch.device,
+    device: str,
     train_loader: DataLoader,
     criterion: nn.Module,
-    optimizer: Optimizer,
+    optimizer: optim.Optimizer,
     epoch: int,
 ) -> List[float]:
     model.train()
@@ -151,16 +148,16 @@ def train(
         if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(cast(Sized, train_loader.dataset))
             percentage = 100.0 * (batch_idx + 1) / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ' + f'({percentage:.0f} %)  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
     return loss_list
 
 
 # In[21]:
 
 
-def test(model: nn.Module, device: torch.device, test_loader: DataLoader) -> None:
+def test(model: nn.Module, device: str, test_loader: DataLoader) -> None:
     model.eval()
     test_loss = 0
     correct = 0
@@ -172,9 +169,9 @@ def test(model: nn.Module, device: torch.device, test_loader: DataLoader) -> Non
             correct += (predicted == target).sum().item()
 
     # 平均損失
-    test_loss /= len(test_loader.dataset)
+    test_loss /= len(cast(Sized, test_loader.dataset))
     # 顯示測試結果
-    data_count = len(test_loader.dataset)
+    data_count = len(cast(Sized, test_loader.dataset))
     percentage = 100.0 * correct / data_count
     print(f'準確率: {correct}/{data_count} ({percentage:.2f}%)')
 
@@ -193,8 +190,8 @@ model = Net().to(device)
 criterion = nn.CrossEntropyLoss()  # F.nll_loss
 
 # 設定優化器(optimizer)
-# optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
-optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
+# optimizer = optim.Adadelta(model.parameters(), lr=lr)
+optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
 loss_list = []
 for epoch in range(1, epochs + 1):
@@ -206,7 +203,6 @@ for epoch in range(1, epochs + 1):
 
 
 # 對訓練過程的損失繪圖
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 
@@ -238,7 +234,7 @@ test(model, device, test_loader)
 
 
 batch_size = 8
-test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size)
+test_loader = DataLoader(test_ds, batch_size=batch_size)
 dataiter = iter(test_loader)
 images, labels = next(dataiter)
 
@@ -266,7 +262,7 @@ total_pred = {classname: 0 for classname in classes}
 
 # 預測
 batch_size = 1000
-test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size)
+test_loader = DataLoader(test_ds, batch_size=batch_size)
 model.eval()
 with torch.no_grad():
     for data, target in test_loader:

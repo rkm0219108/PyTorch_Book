@@ -1,17 +1,19 @@
 # streamlit run 05_07_web.py
 # 載入套件
+import numpy as np
 import streamlit as st
+import torch
+from torch import nn
 from skimage import io
 from skimage.transform import resize
-import numpy as np
-import torch
 
 # 模型載入
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 
 @st.cache_resource
-def load_model() -> torch.nn.Module:
+def load_model() -> nn.Module:
     return torch.load('./model.pt').to(device)
 
 
@@ -27,7 +29,7 @@ if uploaded_file is not None:
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
-    image_resized = resize(image1, (28, 28), anti_aliasing=True)
+    image_resized = np.asarray(resize(image1, (28, 28), anti_aliasing=True))
     X1 = image_resized.reshape(1, 28, 28)  # / 255.0
 
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色

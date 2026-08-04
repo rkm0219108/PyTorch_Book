@@ -6,9 +6,10 @@ from typing import Any, Dict, List, Tuple, Union
 import numpy as np
 import pycocotools.mask as mask_util
 import torch
-import utils
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
+
+import utils
 
 
 class CocoEvaluator:
@@ -23,7 +24,7 @@ class CocoEvaluator:
             self.coco_eval[iou_type] = COCOeval(coco_gt, iouType=iou_type)
 
         self.img_ids = []
-        self.eval_imgs = {k: [] for k in iou_types}
+        self.eval_imgs: Dict[str, Any] = {k: [] for k in iou_types}
 
     def update(self, predictions: Dict[int, Dict[str, Any]]) -> None:
         img_ids = list(np.unique(list(predictions.keys())))
@@ -104,7 +105,10 @@ class CocoEvaluator:
             labels = prediction["labels"].tolist()
 
             rles = [
-                mask_util.encode(np.array(mask[0, :, :, np.newaxis], dtype=np.uint8, order="F"))[0] for mask in masks
+                mask_util.encode(np.array(mask[0, :, :, np.newaxis], dtype=np.uint8, order="F"))[
+                    0
+                ]  # pyright: ignore[reportGeneralTypeIssues]
+                for mask in masks
             ]
             for rle in rles:
                 rle["counts"] = rle["counts"].decode("utf-8")
@@ -177,12 +181,12 @@ def merge(img_ids: List[int], eval_imgs: np.ndarray) -> Tuple[np.ndarray, np.nda
 
 
 def create_common_coco_eval(coco_eval: COCOeval, img_ids: List[int], eval_imgs: np.ndarray) -> None:
-    img_ids, eval_imgs = merge(img_ids, eval_imgs)
-    img_ids = list(img_ids)
-    eval_imgs = list(eval_imgs.flatten())
+    merged_img_ids, merged_eval_imgs = merge(img_ids, eval_imgs)
+    merged_img_ids_list = list(merged_img_ids)
+    merged_eval_imgs_list = list(merged_eval_imgs.flatten())
 
-    coco_eval.evalImgs = eval_imgs
-    coco_eval.params.imgIds = img_ids
+    coco_eval.evalImgs = merged_eval_imgs_list
+    coco_eval.params.imgIds = merged_img_ids_list
     coco_eval._paramsEval = copy.deepcopy(coco_eval.params)
 
 

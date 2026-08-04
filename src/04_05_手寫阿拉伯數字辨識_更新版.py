@@ -8,11 +8,16 @@
 # In[1]:
 
 
-import os
+from typing import cast
+
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
-from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
+import torchmetrics
+from PIL import Image
+from torch import nn, optim
+from torch.utils.data import DataLoader
+from torchinfo import summary
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
@@ -21,10 +26,10 @@ from torchvision.datasets import MNIST
 # In[2]:
 
 
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 步驟1：載入 MNIST 手寫阿拉伯數字資料
 
@@ -91,7 +96,6 @@ text_image
 
 
 # 顯示第1張圖片圖像
-import matplotlib.pyplot as plt
 
 # 第一筆資料
 X = train_ds.data[0]
@@ -142,8 +146,8 @@ lr = 0.1
 train_loader = DataLoader(train_ds, batch_size=600)
 
 # 設定優化器(optimizer)
-# optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
+# optimizer = optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adadelta(model.parameters(), lr=lr)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -173,7 +177,7 @@ for epoch in range(epochs):
             acc = correct / y_count
             correct = y_count = 0
             batch = (batch_idx + 1) * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(train_ds)
             print(
                 f'Epoch {epoch + 1}: [{batch:5d} / {data_count}]'
                 + f'  Accuracy: {acc*100:.2f}%,  Loss: {loss.item():.6f}'
@@ -185,8 +189,6 @@ for epoch in range(epochs):
 
 # In[13]:
 
-
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 
@@ -201,6 +203,7 @@ test_loader = DataLoader(test_ds, shuffle=False, batch_size=test_ds.targets.shap
 model.eval()
 test_loss = 0
 correct = 0
+pred = None
 for data, target in test_loader:
     data, target = data.to(device), target.to(device)
     output = model(data)
@@ -215,10 +218,9 @@ for data, target in test_loader:
     correct += pred.eq(target.view_as(pred)).sum().item()
 
 # 顯示測試結果
-batch = batch_idx * len(data)
-data_count = len(test_loader.dataset)
+data_count = len(test_ds)
 percentage = 100.0 * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 
 # ## 使用 torchmetrics
 
@@ -230,8 +232,7 @@ print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' (
 # In[16]:
 
 
-import torchmetrics
-
+assert pred is not None
 torchmetrics.functional.accuracy(pred.reshape(-1), test_ds.targets.to(device), task="multiclass", num_classes=10)
 
 # ## 實際比對測試資料的前20筆
@@ -241,12 +242,11 @@ torchmetrics.functional.accuracy(pred.reshape(-1), test_ds.targets.to(device), t
 
 # 實際預測 20 筆資料
 test_loader = DataLoader(test_ds, shuffle=False, batch_size=20)
-for data, target in test_loader:
-    data = data.to(device)
-    pred = model(data)
-    output = pred.argmax(dim=1, keepdim=True)
-    predictions = output.cpu().numpy()
-    break
+data, target = next(iter(test_loader))
+data = data.to(device)
+pred = model(data)
+output = pred.argmax(dim=1, keepdim=True)
+predictions = output.cpu().numpy()
 
 # 比對
 print('實際值:', ' '.join(target.numpy().astype(str)))
@@ -256,7 +256,6 @@ print('預測值:', ' '.join(predictions.astype(str).reshape(-1)))
 
 
 # 顯示第 9 筆的機率
-import numpy as np
 
 i = 8
 data = test_ds[i][0]
@@ -311,7 +310,7 @@ for param_tensor in model.state_dict():
 
 
 # 使用小畫家，繪製 0~9，實際測試看看
-from PIL import Image
+
 
 # 讀取影像並轉為單色
 # image to a Torch tensor
@@ -321,7 +320,7 @@ transform = transforms.Compose(
 for i in range(10):
     uploaded_file = f'./myDigits/{i}.png'
     image = Image.open(uploaded_file)
-    X1 = transform(image)
+    X1 = cast(torch.Tensor, transform(image))
     X1 = torch.FloatTensor(255.0 - X1).to(device)
     print(f'actual/prediction: {i} {model(X1).argmax(dim=1).item()}')
 
@@ -346,8 +345,6 @@ for name, module in model.named_children():
 
 # In[ ]:
 
-
-from torchinfo import summary
 
 summary(model, (60000, 28, 28))  # input dimension size
 

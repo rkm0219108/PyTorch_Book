@@ -9,28 +9,27 @@
 # In[22]:
 
 
-import os
-import torch
-from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchmetrics import Accuracy
-from torchvision import transforms
-from torchvision import datasets
-from torchvision import utils as vutils
+import glob
+from typing import cast
+
+import imageio
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from torch import nn
+from torchvision import datasets, transforms
+from torchvision import utils as vutils
 
 # ## 設定參數
 
 # In[23]:
 
 
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 BATCH_SIZE = 128  # 批量
 image_size = 64
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 定義神經網路參數
 
@@ -59,7 +58,7 @@ transform = transforms.Compose(
 
 # 訓練資料
 dataset = datasets.ImageFolder(root='celeba_gan', transform=transform)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 # 顯示圖檔
 real_batch = next(iter(dataloader))
@@ -76,10 +75,10 @@ plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=
 def weights_init(m: nn.Module) -> None:
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
-        m.weight.data.normal_(0.0, 0.02)  # 卷積層權重初始值
+        cast(torch.Tensor, m.weight).data.normal_(0.0, 0.02)  # 卷積層權重初始值
     elif classname.find('BatchNorm') != -1:
-        m.weight.data.normal_(1.0, 0.02)  # Batch Normalization 層權重初始值
-        m.bias.data.fill_(0)
+        cast(torch.Tensor, m.weight).data.normal_(1.0, 0.02)  # Batch Normalization 層權重初始值
+        cast(torch.Tensor, m.bias).data.fill_(0)
 
 
 # ## 定義生成神經網路
@@ -166,8 +165,8 @@ netD.apply(weights_init)
 criterion = nn.BCELoss()
 
 # 設定優化器(optimizer)
-optimizerD = torch.optim.Adam(netD.parameters(), lr=0.0002, betas=(0.5, 0.999))
-optimizerG = torch.optim.Adam(netG.parameters(), lr=0.0002, betas=(0.5, 0.999))
+optimizerD = optim.Adam(netD.parameters(), lr=0.0002, betas=(0.5, 0.999))
+optimizerG = optim.Adam(netG.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
 # ## 進行模型訓練
 
@@ -254,9 +253,6 @@ plt.show()
 
 # In[74]:
 
-
-import imageio
-import glob
 
 # 產生 GIF 檔
 anim_file = './gan_face_output/dcgan.gif'

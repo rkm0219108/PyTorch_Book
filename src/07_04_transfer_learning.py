@@ -11,18 +11,17 @@
 # In[1]:
 
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.optim import lr_scheduler
+import copy
+import os
+import time
+
+import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from torch import nn, optim
+from torch.optim import lr_scheduler
 import torchvision
 from torchvision import datasets, models, transforms
-from torchvision.models import ResNet18_Weights
-import matplotlib.pyplot as plt
-import time
-import os
-import copy
 
 # ## 載入資料
 
@@ -52,10 +51,7 @@ data_transforms = {
 # 使用 ImageFolder 可方便轉換為 dataset
 data_dir = './hymenoptera_data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
-dataloaders = {
-    x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4, shuffle=True, num_workers=4)
-    for x in ['train', 'val']
-}
+dataloaders = {x: DataLoader(image_datasets[x], batch_size=4, shuffle=True, num_workers=4) for x in ['train', 'val']}
 
 # 取得資料筆數
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -74,23 +70,23 @@ dataset_sizes
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+"cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 # ## 顯示資料增補的圖像
 
 # In[20]:
 
 
-def imshow(inp: torch.Tensor, title: str | None = None) -> None:
-    inp = inp.numpy().transpose((1, 2, 0))
+def imshow(inp: torch.Tensor, title: list[str] | str | None = None) -> None:
+    inp_np = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
+    inp_np = std * inp_np + mean
+    inp_np = np.clip(inp_np, 0, 1)
     plt.axis('off')
-    plt.imshow(inp)
+    plt.imshow(inp_np)
     if title is not None:
-        plt.title(title)
+        plt.title(str(title))
     plt.pause(0.001)  # pause a bit so that plots are updated
 
 
@@ -131,7 +127,7 @@ def train_model(
                 model.eval()  # Set model to evaluate mode
 
             running_loss = 0.0
-            running_corrects = 0
+            running_corrects = torch.tensor(0)
 
             # 逐批訓練或驗證
             for inputs, labels in dataloaders[phase]:
@@ -184,12 +180,12 @@ def train_model(
 
 
 def imshow2(inp: torch.Tensor, title: str | None = None) -> None:
-    inp = inp.numpy().transpose((1, 2, 0))
+    inp_np = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
-    plt.imshow(inp)
+    inp_np = std * inp_np + mean
+    inp_np = np.clip(inp_np, 0, 1)
+    plt.imshow(inp_np)
 
 
 # In[44]:
@@ -229,7 +225,7 @@ def visualize_model(model: nn.Module, num_images: int = 6) -> None:
 # In[6]:
 
 
-model_ft = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+model_ft = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 num_ftrs = model_ft.fc.in_features
 # 改為自訂辨識層
 model_ft.fc = nn.Linear(num_ftrs, 2)
@@ -269,7 +265,7 @@ visualize_model(model_ft)
 # In[47]:
 
 
-model_conv = torchvision.models.resnet18(weights=ResNet18_Weights.DEFAULT)
+model_conv = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 for param in model_conv.parameters():
     # 不用重新訓練
     param.requires_grad = False

@@ -9,11 +9,12 @@
 
 
 # 載入相關套件
+import json
+from typing import cast
+
+import pandas as pd
 import spacy
 from spacy.tokens import Doc
-import json
-import random
-import pandas as pd
 
 # ## 載入訓練資料
 
@@ -59,7 +60,6 @@ nlp = spacy.load("en_core_web_md")
 # In[4]:
 
 
-from spacy.lang.en.stop_words import STOP_WORDS
 
 
 # 去除停用詞函數
@@ -75,7 +75,7 @@ def remove_stopwords(text1: str) -> Doc:
 # 結束用語
 def say_goodbye() -> str:
     tag = 1  # goodbye 項次
-    response_filter = responses_df[responses_df['no'] == tag][['response']]
+    response_filter = cast(pd.DataFrame, responses_df[responses_df['no'] == tag][['response']])
     selected_response = response_filter.sample().iloc[0, 0]
     return selected_response
 
@@ -83,7 +83,7 @@ def say_goodbye() -> str:
 # 結束用語
 def say_not_understand() -> str:
     tag = 3  # 不理解的項次
-    response_filter = responses_df[responses_df['no'] == tag][['response']]
+    response_filter = cast(pd.DataFrame, responses_df[responses_df['no'] == tag][['response']])
     selected_response = response_filter.sample().iloc[0, 0]
     return selected_response
 
@@ -105,6 +105,7 @@ while True:
     doc1 = remove_stopwords(question)
 
     # 比對：相似度比較
+    score = 0.0
     for utterance in documents:
         # 兩語句的相似度比較
         doc2 = remove_stopwords(utterance[0])
@@ -124,7 +125,7 @@ while True:
         print(say_not_understand())
     else:
         print(f'你問的是：{similar_question}')
-        response_filter = responses_df[responses_df['no'] == intent_no][['response']]
+        response_filter = cast(pd.DataFrame, responses_df[responses_df['no'] == intent_no][['response']])
         # print(response_filter)
         selected_response = response_filter.sample().iloc[0, 0]
         # print(type(selected_response))

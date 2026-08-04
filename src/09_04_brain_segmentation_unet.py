@@ -13,10 +13,25 @@
 # In[1]:
 
 
-import torch
+import urllib.request
+from typing import cast
 
-model = torch.hub.load(
-    'mateuszbuda/brain-segmentation-pytorch', 'unet', in_channels=3, out_channels=1, init_features=32, pretrained=True
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from PIL import Image
+from torchvision import transforms
+
+model = cast(
+    nn.Module,
+    torch.hub.load(
+        'mateuszbuda/brain-segmentation-pytorch',
+        'unet',
+        in_channels=3,
+        out_channels=1,
+        init_features=32,
+        pretrained=True,
+    ),
 )
 
 # ## 模型結構
@@ -48,8 +63,6 @@ model
 # In[3]:
 
 
-import urllib.request
-
 url = "https://github.com/mateuszbuda/brain-segmentation-pytorch/" + "raw/master/assets/TCGA_CS_4944.png"
 filename = "U_Net/TCGA_CS_4944.png"
 urllib.request.urlretrieve(url, filename)
@@ -59,15 +72,12 @@ urllib.request.urlretrieve(url, filename)
 # In[11]:
 
 
-import numpy as np
-from PIL import Image
-from torchvision import transforms
-
 # 開啟檔案
 input_image = Image.open(filename)
 
 # 計算圖像的平均值及標準差
-m, s = np.mean(input_image, axis=(0, 1)), np.std(input_image, axis=(0, 1))
+image_array = np.array(input_image)
+m, s = np.mean(image_array, axis=(0, 1)), np.std(image_array, axis=(0, 1))
 
 # 轉換
 preprocess = transforms.Compose(
@@ -76,7 +86,7 @@ preprocess = transforms.Compose(
         #     transforms.Normalize(mean=m, std=s),
     ]
 )
-input_tensor = preprocess(input_image)
+input_tensor = cast(torch.Tensor, preprocess(input_image))
 input_batch = input_tensor.unsqueeze(0)
 
 # 如果有GPU，將資料、模型轉至 GPU
@@ -95,8 +105,6 @@ print(torch.round(output[0]))
 
 # In[20]:
 
-
-import matplotlib.pyplot as plt
 
 # 原圖
 plt.subplot(1, 2, 1)

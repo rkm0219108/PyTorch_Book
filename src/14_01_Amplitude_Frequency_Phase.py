@@ -9,8 +9,8 @@
 
 
 # 載入相關套件
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 # ## 振幅(Amplitude)及頻率(Frequency)
 
@@ -25,7 +25,7 @@ t = np.linspace(0, audio_length, sample_rate * audio_length)
 y = np.sin(2 * np.pi * frequency * t)
 plt.plot(t, y, 'g')
 
-plt.rcParams['font.family'] = ['Microsoft JhengHei']
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 plt.axhline(0, color='blue')

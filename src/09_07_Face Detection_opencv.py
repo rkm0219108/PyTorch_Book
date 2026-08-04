@@ -10,10 +10,8 @@
 
 # 載入相關套件
 import cv2
-from cv2 import CascadeClassifier
-from cv2 import rectangle
 import matplotlib.pyplot as plt
-from cv2 import imread
+from cv2 import imread, rectangle
 
 # ## 載入級聯分類器(face cascade file)
 
@@ -32,6 +30,8 @@ classifier = cv2.CascadeClassifier(face_cascade)
 # 載入圖檔
 image_file = "./images_face/teammates.jpg"
 image = imread(image_file)
+if image is None:
+    raise FileNotFoundError(image_file)
 
 # OpenCV 預設為 BGR 色系，轉為 RGB 色系
 im_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -69,6 +69,8 @@ plt.show()
 # 載入圖檔
 image_file = "./images_face/classmates.jpg"
 image = imread(image_file)
+if image is None:
+    raise FileNotFoundError(image_file)
 
 # OpenCV 預設為 BGR 色系，轉為 RGB 色系
 im_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -118,6 +120,8 @@ smile_classifier = cv2.CascadeClassifier(smile_cascade)
 
 image_file = "./images_face/classmates.jpg"
 image = imread(image_file)
+if image is None:
+    raise FileNotFoundError(image_file)
 # OpenCV 預設為 BGR 色系，轉為 RGB 色系
 im_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -163,6 +167,8 @@ plt.show()
 
 image_file = "./images_face/classmates.jpg"
 image = imread(image_file)
+if image is None:
+    raise FileNotFoundError(image_file)
 # OpenCV 預設為 BGR 色系，轉為 RGB 色系
 im_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 

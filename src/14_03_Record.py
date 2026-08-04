@@ -9,8 +9,12 @@
 
 
 # 載入相關套件
-import speech_recognition as sr
+import wave
+from typing import cast
+
+import IPython.display
 import pyttsx3
+import speech_recognition as sr
 
 # ## 列出電腦中的說話者(Speaker)
 
@@ -19,7 +23,7 @@ import pyttsx3
 
 # 列出電腦中的說話者(Speaker)
 speak = pyttsx3.init()
-voices = speak.getProperty('voices')
+voices = cast(list, speak.getProperty('voices'))
 for voice in voices:
     print("Voice:")
     print(" - ID: %s" % voice.id)
@@ -101,8 +105,6 @@ with open(wav_file, "wb") as f:
 # In[34]:
 
 
-import IPython
-
 # autoplay=True：自動播放，不須按 PLAY 鍵
 IPython.display.Audio(wav_file, autoplay=True)
 
@@ -113,7 +115,6 @@ IPython.display.Audio(wav_file, autoplay=True)
 
 # 取得音檔的屬性
 # https://docs.python.org/3/library/wave.html
-import wave
 
 f = wave.open(wav_file)
 print(
@@ -125,8 +126,6 @@ f.close()
 
 # In[36]:
 
-
-import speech_recognition as sr
 
 # 讀取音檔，轉為音訊
 r = sr.Recognizer()

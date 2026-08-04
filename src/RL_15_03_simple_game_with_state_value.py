@@ -7,9 +7,11 @@
 
 
 # 載入相關套件
-import numpy as np
 import random
 from typing import List, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 # In[164]:
 
@@ -156,7 +158,6 @@ print(f"累計報酬: {total_reward_list}")
 
 
 # 繪圖
-import matplotlib.pyplot as plt
 
 plt.figure(figsize=(10, 6))
 plt.plot(total_reward_list)

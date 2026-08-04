@@ -8,14 +8,14 @@
 # In[1]:
 
 
-from transformers import pipeline
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 # ## 載入模型
 
 # In[2]:
 
 
-translator = pipeline("translation_en_to_de")
+translator = pipeline("translation_en_to_de")  # pyright: ignore[reportCallIssue, reportArgumentType]
 
 # ## 測試
 
@@ -31,7 +31,6 @@ print(translator(text, max_length=40))
 
 
 # 載入相關套件
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 model = AutoModelForSeq2SeqLM.from_pretrained("t5-base")
 

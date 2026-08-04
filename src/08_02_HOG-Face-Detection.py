@@ -8,12 +8,25 @@
 
 # Scikit-Image 的範例
 # 載入套件
-from typing import Iterator
+from itertools import chain
+from typing import Iterator, cast
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Rectangle
+from skimage import (
+    color,
+    data,
+    exposure,
+    feature,  # To use skimage.feature.hog()
+    transform,
+)
 from skimage.feature import hog
-from skimage import data, exposure
+from sklearn.datasets import fetch_lfw_people
+from sklearn.feature_extraction.image import PatchExtractor
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import LinearSVC
+from sklearn.utils import Bunch
 
 # In[4]:
 
@@ -46,9 +59,8 @@ plt.show()
 
 # 收集正樣本 (positive set)
 # 使用 scikit-learn 的人臉資料集
-from sklearn.datasets import fetch_lfw_people
 
-faces = fetch_lfw_people()
+faces = cast(Bunch, fetch_lfw_people())
 positive_patches = faces.images
 positive_patches.shape
 
@@ -66,7 +78,6 @@ for i, axi in enumerate(ax.flat):
 
 # 收集負樣本 (negative set)
 # 使用 Scikit-Image 的非人臉資料
-from skimage import data, transform, color
 
 imgs_to_use = ['hubble_deep_field', 'text', 'coins', 'moon', 'page', 'clock', 'coffee', 'chelsea', 'horse']
 images = [color.rgb2gray(getattr(data, name)()) for name in imgs_to_use]
@@ -76,7 +87,6 @@ len(images)
 
 
 # 將負樣本轉換為不同的尺寸
-from sklearn.feature_extraction.image import PatchExtractor
 
 
 # 轉換為不同的尺寸
@@ -109,8 +119,6 @@ for i, axi in enumerate(ax.flat):
 
 
 # 合併正樣本與負樣本
-from skimage import feature  # To use skimage.feature.hog()
-from itertools import chain
 
 X_train = np.array([feature.hog(im) for im in chain(positive_patches, negative_patches)])
 y_train = np.zeros(X_train.shape[0])
@@ -120,8 +128,6 @@ y_train[: positive_patches.shape[0]] = 1
 
 
 # 使用 SVM 作二分類的訓練
-from sklearn.svm import LinearSVC
-from sklearn.model_selection import GridSearchCV
 
 # C為矯正過度擬合強度的倒數，使用 GridSearchCV 尋求最佳參數值
 grid = GridSearchCV(LinearSVC(dual=False), {'C': [1.0, 2.0, 4.0, 8.0]}, cv=3)
@@ -170,7 +176,7 @@ def sliding_window(
         for j in range(0, img.shape[1] - Ni, jstep):
             patch = img[i : i + Ni, j : j + Nj]
             if scale != 1:
-                patch = transform.resize(patch, patch_size)
+                patch = np.asarray(transform.resize(patch, patch_size))
             yield (i, j), patch
 
 
@@ -199,7 +205,7 @@ indices = np.array(indices)
 
 # 顯示
 for i, j in indices[labels == 1]:
-    ax.add_patch(plt.Rectangle((j, i), Nj, Ni, edgecolor='red', alpha=0.3, lw=2, facecolor='none'))
+    ax.add_patch(Rectangle((j, i), Nj, Ni, edgecolor='red', alpha=0.3, lw=2, facecolor='none'))
 
 # In[29]:
 
@@ -284,6 +290,6 @@ ax.axis('off')
 
 # 顯示
 for i, j, Ni, Nj in final_boxes:
-    ax.add_patch(plt.Rectangle((i, j), Ni, Nj, edgecolor='red', alpha=0.3, lw=2, facecolor='none'))
+    ax.add_patch(Rectangle((i, j), Ni, Nj, edgecolor='red', alpha=0.3, lw=2, facecolor='none'))
 
 # In[ ]:

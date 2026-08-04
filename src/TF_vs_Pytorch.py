@@ -6,7 +6,14 @@
 # In[1]:
 
 
+from typing import Sized, cast
+
 import tensorflow as tf
+import torch
+from torch import nn, optim
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from torchvision.datasets import MNIST
 
 mnist = tf.keras.datasets.mnist
 
@@ -69,19 +76,10 @@ for i, x in enumerate(score):
 # In[6]:
 
 
-import os
-import torch
-from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchmetrics import Accuracy
-from torchvision import transforms
-from torchvision.datasets import MNIST
-
 # In[8]:
 
 
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
 train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
 
@@ -91,8 +89,8 @@ test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=transforms.
 # In[7]:
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # In[9]:
 
@@ -120,8 +118,8 @@ BATCH_SIZE = 1024  # 批量
 train_loader = DataLoader(train_ds, batch_size=600)
 
 # 設定優化器(optimizer)
-# optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
+# optimizer = optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adadelta(model.parameters(), lr=lr)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -144,9 +142,9 @@ for epoch in range(1, epochs + 1):
         if batch_idx % 10 == 0:
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(cast(Sized, train_loader.dataset))
             percentage = 100.0 * batch_idx / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[11]:
 
@@ -172,11 +170,10 @@ with torch.no_grad():
         correct += pred.eq(target.view_as(pred)).sum().item()
 
 # 平均損失
-test_loss /= len(test_loader.dataset)
+test_loss /= len(cast(Sized, test_loader.dataset))
 # 顯示測試結果
-batch = batch_idx * len(data)
-data_count = len(test_loader.dataset)
+data_count = len(cast(Sized, test_loader.dataset))
 percentage = 100.0 * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.0f}%)\n')
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 
 # In[ ]:

@@ -9,21 +9,22 @@
 # In[1]:
 
 
-import numpy as np
-import matplotlib.pyplot as plt
-import os, time, pickle, json
+import os
+import pickle
 from glob import glob
-from PIL import Image
-import cv2
-from typing import List, Tuple, Dict, Optional, Union, Any
 from statistics import mean
-from tqdm import tqdm
+from typing import Dict, List, Optional, Tuple, Union, cast
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
+from PIL import Image
+from torch.utils.data import DataLoader
+from torch.utils.data import Dataset as TorchDataset
 from torchvision import transforms
 from torchvision.utils import save_image
-from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 # ## 載入資料
 
@@ -64,19 +65,19 @@ class Transform:
         )
 
     def __call__(self, img: Image.Image) -> torch.Tensor:
-        return self.data_transform(img)
+        return cast(torch.Tensor, self.data_transform(img))
 
 
-class Dataset(object):
+class Dataset(TorchDataset[Tuple[torch.Tensor, torch.Tensor]]):
     def __init__(self, files: List[str]) -> None:
         self.files = files
         self.trasformer = Transform()
 
     def _separate(self, img: Image.Image) -> Tuple[Image.Image, Image.Image]:
-        img = np.array(img, dtype=np.uint8)
-        h, w, _ = img.shape
+        arr = np.array(img, dtype=np.uint8)
+        h, w, _ = arr.shape
         w = int(w / 2)
-        return Image.fromarray(img[:, w:, :]), Image.fromarray(img[:, :w, :])
+        return Image.fromarray(arr[:, w:, :]), Image.fromarray(arr[:, :w, :])
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         img = Image.open(self.files[idx])
@@ -134,7 +135,7 @@ show_img_sample(train_ds.__getitem__(1)[0], train_ds.__getitem__(1)[1])
 
 
 BATCH_SIZE = 16
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 torch.manual_seed(0)
 np.random.seed(0)
 
@@ -159,9 +160,7 @@ class Generator(nn.Module):
         self.dec3 = self.deconv2Relu(64 + 64, 32, pool_size=4)
         self.dec4 = nn.Sequential(nn.Conv2d(32 + 32, 3, 5, padding=2), nn.Tanh())
 
-    def conv2Relu(
-        self, in_c: int, out_c: int, kernel_size: int = 3, pool_size: Optional[int] = None
-    ) -> nn.Sequential:
+    def conv2Relu(self, in_c: int, out_c: int, kernel_size: int = 3, pool_size: Optional[int] = None) -> nn.Sequential:
         layer = []
         if pool_size:
             # Down width and height
@@ -256,13 +255,14 @@ def train_fn(
     D: nn.Module,
     criterion_bce: nn.Module,
     criterion_mae: nn.Module,
-    optimizer_g: torch.optim.Optimizer,
-    optimizer_d: torch.optim.Optimizer,
+    optimizer_g: optim.Optimizer,
+    optimizer_d: optim.Optimizer,
 ) -> Tuple[float, float, torch.Tensor]:
     G.train()
     D.train()
     LAMBDA = 100.0
     total_loss_g, total_loss_d = [], []
+    fake_img = torch.empty(0)
     for i, (input_img, real_img) in enumerate(tqdm(train_dl)):
         input_img = input_img.to(device)
         real_img = real_img.to(device)
@@ -339,13 +339,14 @@ def train_loop(
 ) -> Tuple[nn.Module, nn.Module]:
     G.to(device)
     D.to(device)
-    optimizer_g = torch.optim.Adam(G.parameters(), lr=lr, betas=betas)
-    optimizer_d = torch.optim.Adam(D.parameters(), lr=lr, betas=betas)
+    optimizer_g = optim.Adam(G.parameters(), lr=lr, betas=betas)
+    optimizer_d = optim.Adam(D.parameters(), lr=lr, betas=betas)
     criterion_mae = nn.L1Loss()
     criterion_bce = nn.BCEWithLogitsLoss()
     total_loss_d, total_loss_g = [], []
     result = {}
 
+    e = -1
     for e in range(num_epoch):
         loss_g, loss_d, fake_img = train_fn(train_dl, G, D, criterion_bce, criterion_mae, optimizer_g, optimizer_d)
         total_loss_d.append(loss_d)
@@ -361,8 +362,9 @@ def train_loop(
         show_losses(total_loss_g, total_loss_d)
         saving_model(D, G, e)
         print("successfully save model")
-    finally:
-        return G, D
+    except Exception as ex:
+        print(f"failed to save model: {ex}")
+    return G, D
 
 
 G = Generator()

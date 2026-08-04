@@ -7,7 +7,6 @@
 
 
 # 載入相關套件
-import gymnasium as gym
 import numpy as np
 from lib.envs.gridworld import GridworldEnv
 
@@ -38,7 +37,9 @@ env.P
 # In[78]:
 
 
-def policy_eval(policy: np.ndarray, env: GridworldEnv, epoch: int = 1, discount_factor: float = 1.0) -> np.ndarray:
+def policy_eval_by_epoch(
+    policy: np.ndarray, env: GridworldEnv, epoch: int = 1, discount_factor: float = 1.0
+) -> np.ndarray:
     # 狀態值函數初始化
     V = np.zeros(env.nS)
     V1 = np.copy(V)
@@ -67,7 +68,7 @@ def policy_eval(policy: np.ndarray, env: GridworldEnv, epoch: int = 1, discount_
 # 隨機策略，機率均等
 random_policy = np.ones([env.nS, env.nA]) / env.nA
 # 評估
-v = policy_eval(random_policy, env, 1)
+v = policy_eval_by_epoch(random_policy, env, 1)
 print("4x4 狀態值函數:")
 print(v.reshape(env.shape))
 
@@ -76,7 +77,7 @@ print(v.reshape(env.shape))
 # In[80]:
 
 
-v = policy_eval(random_policy, env, 2)
+v = policy_eval_by_epoch(random_policy, env, 2)
 print("4x4 狀態值函數:")
 print(v.reshape(env.shape))
 
@@ -85,7 +86,7 @@ print(v.reshape(env.shape))
 # In[81]:
 
 
-v = policy_eval(random_policy, env, 3)
+v = policy_eval_by_epoch(random_policy, env, 3)
 print("4x4 狀態值函數:")
 print(v.reshape(env.shape))
 

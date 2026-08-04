@@ -8,15 +8,28 @@
 
 # 載入相關套件
 import gzip
-import gensim
+import string
 from typing import Iterator, List, Set
+
+import gensim
+import gensim.downloader as api
+import nltk
+import numpy as np
+from gensim.models import (
+    KeyedVectors,
+)
+from gensim.models.doc2vec import (
+    Doc2Vec,
+    TaggedDocument,
+)
+from gensim.summarization import keywords
+from gensim.test.utils import common_texts
+from sklearn.metrics.pairwise import cosine_similarity
 
 # ## Gensim簡單測試
 
 # In[95]:
 
-
-from gensim.test.utils import common_texts
 
 # size：詞向量的大小，window：考慮上下文各自的長度
 # min_count：單字至少出現的次數，workers：執行緒個數
@@ -151,7 +164,6 @@ model.wv.doesnt_match(["cat", "dog", "france"])
 
 # 關鍵詞萃取(Keyword Extraction)
 # https://radimrehurek.com/gensim_3.8.3/summarization/keywords.html
-from gensim.summarization import keywords
 
 # 測試語料
 text = '''Challenges in natural language processing frequently involve
@@ -169,7 +181,6 @@ print(''.join(keywords(text)))
 
 
 # 下載預先訓練的模型
-import gensim.downloader as api
 
 wv = api.load('word2vec-google-news-300')
 
@@ -177,7 +188,6 @@ wv = api.load('word2vec-google-news-300')
 
 
 # 載入本機的預先訓練模型
-from gensim.models import KeyedVectors
 
 # 每個詞向量有 300 個元素
 model = KeyedVectors.load_word2vec_format('./Word2Vec/GoogleNews-vectors-negative300.bin', binary=True)
@@ -217,13 +227,6 @@ model.similarity('woman', 'man')
 # In[ ]:
 
 
-import numpy as np
-import nltk
-import gensim
-from gensim.models import Word2Vec
-from gensim.models.doc2vec import Doc2Vec, TaggedDocument
-from sklearn.metrics.pairwise import cosine_similarity
-
 # 測試語料
 f = open('./FAQ/starbucks_faq.txt', 'r', encoding='utf8')
 corpus = f.readlines()
@@ -233,7 +236,6 @@ corpus = f.readlines()
 MAX_WORDS_A_LINE = 30  # 每行最多字數
 
 # 標點符號(Punctuation)
-import string
 
 print('標點符號:', string.punctuation)
 

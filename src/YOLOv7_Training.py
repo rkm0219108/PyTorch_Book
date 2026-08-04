@@ -8,7 +8,12 @@
 # from google.colab import files
 # files.upload()
 
-from google.colab import drive
+import datetime
+
+from google.colab import (
+    drive,
+    files,
+)
 
 drive.mount('/content/drive')
 
@@ -20,7 +25,6 @@ drive.mount('/content/drive')
 # %cd /content/yolov7
 # !gdown "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt"
 
-import datetime
 
 start = datetime.datetime.now()
 start
@@ -37,7 +41,6 @@ print((datetime.datetime.now() - start).total_seconds() / 60)
 
 # ls ./runs/train/yolov7/weights/
 
-from google.colab import files
 
 files.download('./runs/train/yolov73/weights/best.pt')
 

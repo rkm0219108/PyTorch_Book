@@ -1,11 +1,14 @@
-import cv2
 import sys
+
+import cv2
+import cv2.ximgproc
 
 # 讀取影像
 img_path = './images_Object_Detection/bike2.jpg'
 if len(sys.argv) > 1:
     img_path = sys.argv[1]
 img = cv2.imread(img_path)
+assert img is not None
 
 # 執行 Selective Search
 cv2.setUseOptimized(True)

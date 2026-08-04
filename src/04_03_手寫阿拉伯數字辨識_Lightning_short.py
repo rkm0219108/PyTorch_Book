@@ -14,10 +14,10 @@
 
 # 載入套件
 import torch
+from lightning.pytorch import LightningModule, Trainer
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
-from lightning.pytorch import LightningModule, Trainer
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
@@ -27,7 +27,7 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 AVAIL_GPUS = min(1, torch.cuda.device_count())  # 使用GPU或CPU
 BATCH_SIZE = 256 if AVAIL_GPUS else 64  # 批量
 
@@ -51,8 +51,8 @@ class MNISTModel(LightningModule):
         loss = F.cross_entropy(self(x), y)  # 交叉熵
         return loss
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        return torch.optim.Adam(self.parameters(), lr=0.02)  # Adam 優化器
+    def configure_optimizers(self) -> optim.Optimizer:
+        return optim.Adam(self.parameters(), lr=0.02)  # Adam 優化器
 
 
 # ## 模型訓練

@@ -10,8 +10,8 @@
 
 # 載入相關套件
 import cv2
-import pytesseract
 import matplotlib.pyplot as plt
+import pytesseract
 
 # ## 載入並顯示圖檔
 
@@ -20,6 +20,8 @@ import matplotlib.pyplot as plt
 
 # 載入圖檔
 image = cv2.imread('./images_ocr/receipt.png')
+if image is None:
+    raise FileNotFoundError('./images_ocr/receipt.png')
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -77,6 +79,8 @@ print(pytesseract.image_to_string(image, config=custom_config))
 
 # 載入圖檔
 image = cv2.imread('./images_ocr/chinese.png')
+if image is None:
+    raise FileNotFoundError('./images_ocr/chinese.png')
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -102,6 +106,8 @@ print(pytesseract.image_to_string(image, config=custom_config))
 
 # 載入圖檔
 image = cv2.imread('./images_ocr/chinese_2.png')
+if image is None:
+    raise FileNotFoundError('./images_ocr/chinese_2.png')
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

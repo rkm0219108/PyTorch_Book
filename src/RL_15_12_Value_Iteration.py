@@ -8,6 +8,9 @@
 
 # 載入相關套件
 import numpy as np
+from lib.envs.cliff_walking import (
+    CliffWalkingEnv,
+)
 from lib.envs.gridworld import GridworldEnv
 
 # In[9]:
@@ -93,8 +96,6 @@ np.testing.assert_array_almost_equal(v, expected_v, decimal=2)
 
 # In[7]:
 
-
-from lib.envs.cliff_walking import CliffWalkingEnv
 
 # 環境
 env = CliffWalkingEnv()

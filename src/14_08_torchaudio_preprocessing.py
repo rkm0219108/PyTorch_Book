@@ -8,20 +8,24 @@
 # In[1]:
 
 
+import os
+from typing import Literal, cast
+
+import IPython.display
+import librosa
+import matplotlib.pyplot as plt
+import requests
+import sox
 import torch
 import torchaudio
-import IPython
+import torchaudio.functional as F
+import torchaudio.transforms as T
 from IPython.display import Audio
-import matplotlib.pyplot as plt
-import os
-import math
 
 # ## 取得音檔
 
 # In[2]:
 
-
-import requests
 
 path = "./audio/steam-train-whistle-daniel_simon.wav"
 url = "https://pytorch-tutorial-assets.s3.amazonaws.com/steam-train-whistle-daniel_simon.wav"
@@ -75,16 +79,15 @@ def plot_waveform(
     xlim: tuple[float, float] | None = None,
     ylim: tuple[float, float] | None = None,
 ) -> None:
-    waveform = waveform.numpy()
+    waveform_np = waveform.numpy()
 
-    num_channels, num_frames = waveform.shape
+    num_channels, num_frames = waveform_np.shape
     time_axis = torch.arange(0, num_frames) / sample_rate
 
-    figure, axes = plt.subplots(num_channels, 1)
-    if num_channels == 1:
-        axes = [axes]
+    figure, axes_ = plt.subplots(num_channels, 1)
+    axes = cast(list, [axes_] if num_channels == 1 else axes_)
     for c in range(num_channels):
-        axes[c].plot(time_axis, waveform[c], linewidth=1)
+        axes[c].plot(time_axis, waveform_np[c], linewidth=1)
         axes[c].grid(True)
         if num_channels > 1:
             axes[c].set_ylabel(f'Channel {c+1}')
@@ -103,16 +106,15 @@ def plot_specgram(
     title: str = "Spectrogram",
     xlim: tuple[float, float] | None = None,
 ) -> None:
-    waveform = waveform.numpy()
+    waveform_np = waveform.numpy()
 
-    num_channels, num_frames = waveform.shape
+    num_channels, num_frames = waveform_np.shape
     time_axis = torch.arange(0, num_frames) / sample_rate
 
-    figure, axes = plt.subplots(num_channels, 1)
-    if num_channels == 1:
-        axes = [axes]
+    figure, axes_ = plt.subplots(num_channels, 1)
+    axes = cast(list, [axes_] if num_channels == 1 else axes_)
     for c in range(num_channels):
-        axes[c].specgram(waveform[c], Fs=sample_rate)
+        axes[c].specgram(waveform_np[c], Fs=sample_rate)
         if num_channels > 1:
             axes[c].set_ylabel(f'Channel {c+1}')
         if xlim:
@@ -123,13 +125,13 @@ def plot_specgram(
 
 # 播放語音
 def play_audio(waveform: torch.Tensor, sample_rate: int) -> None:
-    waveform = waveform.numpy()
+    waveform_np = waveform.numpy()
 
-    num_channels, num_frames = waveform.shape
+    num_channels, num_frames = waveform_np.shape
     if num_channels == 1:
-        IPython.display.display(Audio(waveform[0], rate=sample_rate))
+        IPython.display.display(Audio(waveform_np[0], rate=sample_rate))
     elif num_channels == 2:
-        IPython.display.display(Audio((waveform[0], waveform[1]), rate=sample_rate))
+        IPython.display.display(Audio((waveform_np[0], waveform_np[1]), rate=sample_rate))
     else:
         raise ValueError("不支援超過雙聲道的音檔.")
 
@@ -186,8 +188,6 @@ inspect_file(path)
 # In[11]:
 
 
-import torchaudio.functional as F
-
 # 重抽樣率
 resample_rate = 4000
 resampled_waveform = F.resample(waveform, sample_rate, resample_rate)
@@ -213,8 +213,6 @@ IPython.display.Audio(wav_file, autoplay=False)
 
 # In[14]:
 
-
-import sox
 
 # create transformer
 tfm = sox.Transformer()
@@ -254,10 +252,6 @@ IPython.display.Audio(out_path, autoplay=False)
 # In[23]:
 
 
-import torchaudio.functional as F
-import torchaudio.transforms as T
-import librosa
-
 wav_file = './audio/speech.wav'
 waveform, sample_rate = torchaudio.load(wav_file)
 
@@ -268,14 +262,14 @@ def plot_spectrogram(
     spec: torch.Tensor,
     title: str | None = None,
     ylabel: str = 'freq_bin',
-    aspect: str = 'auto',
+    aspect: Literal['equal', 'auto'] = 'auto',
     xmax: int | None = None,
 ) -> None:
     fig, axs = plt.subplots(1, 1)
     axs.set_title(title or 'Spectrogram (db)')
     axs.set_ylabel(ylabel)
     axs.set_xlabel('frame')
-    im = axs.imshow(librosa.power_to_db(spec), origin='lower', aspect=aspect)
+    im = axs.imshow(librosa.power_to_db(spec.numpy()), origin='lower', aspect=aspect)
     if xmax:
         axs.set_xlim((0, xmax))
     fig.colorbar(im, ax=axs)

@@ -69,7 +69,6 @@ output.shape
 
 
 # 載入套件
-import torch
 
 m = nn.Dropout(p=0.2)
 input = torch.randn(20, 16)

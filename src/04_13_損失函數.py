@@ -10,6 +10,7 @@
 
 # 載入套件
 import torch
+from torch import nn
 
 loss = nn.MSELoss()  # 產生MSE物件
 input = torch.randn(3, 5, requires_grad=True)

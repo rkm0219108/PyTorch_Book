@@ -6,38 +6,37 @@
 # In[1]:
 
 
+import random
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import random
-import os
-
+import plotly.express as px
+import plotly.graph_objects as go
 import torch
 import torchvision
-from torchvision import transforms
-from torch.utils.data import DataLoader, random_split
-from torch import nn
-import torch.nn.functional as F
-import torch.optim as optim
 from sklearn.manifold import TSNE
+from torch import nn
+from torch.utils.data import DataLoader, random_split
+from torchvision import transforms
 
 # ## 參數設定
 
 # In[2]:
 
 
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 BATCH_SIZE = 256  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 載入 MNIST 手寫阿拉伯數字資料
 
 # In[3]:
 
 
-train_ds = torchvision.datasets.MNIST(PATH_DATASETS, train=True, download=True)
-test_ds = torchvision.datasets.MNIST(PATH_DATASETS, train=False, download=True)
+train_ds = datasets.MNIST(PATH_DATASETS, train=True, download=True)
+test_ds = datasets.MNIST(PATH_DATASETS, train=False, download=True)
 
 # ## 顯示 MNIST 圖像
 
@@ -67,9 +66,9 @@ test_ds.transform = transforms.ToTensor()
 m = len(train_ds)  # 總筆數
 train_data, val_data = random_split(train_ds, [int(m - m * 0.2), int(m * 0.2)])
 
-train_loader = torch.utils.data.DataLoader(train_data, batch_size=BATCH_SIZE)
-valid_loader = torch.utils.data.DataLoader(val_data, batch_size=BATCH_SIZE)
-test_loader = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=True)
+train_loader = DataLoader(train_data, batch_size=BATCH_SIZE)
+valid_loader = DataLoader(val_data, batch_size=BATCH_SIZE)
+test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=True)
 
 # ## 定義模型，含 Encoder and Decoder
 
@@ -157,7 +156,7 @@ lr = 0.001  # Learning rate
 
 params_to_optimize = [{'params': encoder.parameters()}, {'params': decoder.parameters()}]
 
-optim = torch.optim.Adam(params_to_optimize, lr=lr)
+optim = optim.Adam(params_to_optimize, lr=lr)
 
 # ## 定義加雜訊(Noise)的函數
 
@@ -178,10 +177,10 @@ def add_noise(inputs: torch.Tensor, noise_factor: float = 0.3) -> torch.Tensor:
 def train_epoch_den(
     encoder: nn.Module,
     decoder: nn.Module,
-    device: torch.device,
+    device: str,
     dataloader: DataLoader,
     loss_fn: nn.Module,
-    optimizer: torch.optim.Optimizer,
+    optimizer: optim.Optimizer,
     noise_factor: float = 0.3,
 ) -> float:
     # 指定為訓練階段
@@ -206,7 +205,7 @@ def train_epoch_den(
         # print(f'損失：{loss.data}')
         train_loss.append(loss.detach().cpu().numpy())
 
-    return np.mean(train_loss)
+    return float(np.mean(train_loss))
 
 
 # ## 定義測試函數
@@ -217,7 +216,7 @@ def train_epoch_den(
 def test_epoch_den(
     encoder: nn.Module,
     decoder: nn.Module,
-    device: torch.device,
+    device: str,
     dataloader: DataLoader,
     loss_fn: nn.Module,
     noise_factor: float = 0.3,
@@ -253,9 +252,8 @@ def test_epoch_den(
 
 
 # fix 中文亂碼
-from matplotlib.font_manager import FontProperties
 
-plt.rcParams['font.family'] = ['Microsoft JhengHei']  # 微軟正黑體
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']  # 微軟正黑體
 plt.rcParams['axes.unicode_minus'] = False
 
 
@@ -334,7 +332,7 @@ for epoch in range(num_epochs):
     # Print Validation loss
     history_da['train_loss'].append(train_loss)
     history_da['val_loss'].append(val_loss)
-    print(f'EPOCH {epoch + 1}/{num_epochs} \t 訓練損失：{train_loss:.3f}' + f' \t 驗證損失： {val_loss:.3f}')
+    print(f'EPOCH {epoch + 1}/{num_epochs} \t 訓練損失：{train_loss:.3f} \t 驗證損失： {val_loss:.3f}')
     plot_ae_outputs_den(epoch, encoder, decoder, noise_factor=noise_factor)
 
 # In[15]:
@@ -361,7 +359,7 @@ def plot_reconstructed(
             x_hat = decoder(z)
             x_hat = x_hat.reshape(28, 28).to('cpu').detach().numpy()
             img[(n - 1 - i) * w : (n - 1 - i + 1) * w, j * w : (j + 1) * w] = x_hat
-    plt.imshow(img, extent=[*r0, *r1], cmap='gist_gray')
+    plt.imshow(img, extent=(*r0, *r1), cmap='gist_gray')
 
 
 plot_reconstructed(decoder, r0=(-1, 1), r1=(-1, 1))
@@ -390,9 +388,6 @@ encoded_samples
 
 # In[20]:
 
-
-import plotly.express as px
-import plotly.graph_objects as go
 
 fig = px.scatter(encoded_samples, x='變數 0', y='變數 1', color=encoded_samples.label.astype(str), opacity=0.7)
 fig_widget = go.FigureWidget(fig)

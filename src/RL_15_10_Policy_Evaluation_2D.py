@@ -6,6 +6,9 @@
 # In[18]:
 
 
+from typing import List, Tuple, Union
+
+import numpy as np
 from IPython.display import Image
 
 Image('./images/grid_world.png')
@@ -14,10 +17,7 @@ Image('./images/grid_world.png')
 
 
 # 載入相關套件
-from typing import List, Tuple, Union
 
-import numpy as np
-import random
 
 # In[37]:
 

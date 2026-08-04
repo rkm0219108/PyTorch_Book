@@ -10,8 +10,24 @@
 # In[1]:
 
 
-import os
+import time
+from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional
+
+import helper
+import matplotlib.pyplot as plt
+import numpy as np
+import simulation  # simulation.py
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
+import torchvision.models
+import torchvision.utils
+from loss import dice_loss
+from torch.optim import Optimizer, lr_scheduler
+from torch.utils.data import DataLoader, Dataset
+from torchsummary import summary
+from torchvision import transforms
 
 # if not os.path.exists("pytorch_unet"):
 #     get_ipython().system('git clone https://github.com/usuyama/pytorch-unet.git')
@@ -34,8 +50,6 @@ from typing import Any, Callable, Dict, List, Optional
 # In[3]:
 
 
-import torch
-
 if not torch.cuda.is_available():
     raise Exception("GPU not availalbe. CPU training will be too slow.")
 
@@ -45,11 +59,6 @@ print("device name", torch.cuda.get_device_name(0))
 
 # In[1]:
 
-
-import matplotlib.pyplot as plt
-import numpy as np
-import helper
-import simulation  # simulation.py
 
 # ## 測試 simulation.py 生成的圖像
 
@@ -75,11 +84,6 @@ helper.plot_side_by_side([input_images_rgb, target_masks_rgb])
 # ## 建立 Dataset
 
 # In[4]:
-
-
-from torch.utils.data import Dataset, DataLoader
-from torch.optim import Optimizer
-from torchvision import transforms, datasets, models
 
 
 # 自訂資料集，一次傳回原圖、遮罩圖像各一個
@@ -128,19 +132,16 @@ dataloaders = {
 # In[7]:
 
 
-import torchvision.utils
-
-
 # 還原轉換
 def reverse_transform(inp: torch.Tensor) -> np.ndarray:
-    inp = inp.numpy().transpose((1, 2, 0))
+    arr = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
-    inp = (inp * 255).astype(np.uint8)
+    arr = std * arr + mean
+    arr = np.clip(arr, 0, 1)
+    arr = (arr * 255).astype(np.uint8)
 
-    return inp
+    return arr
 
 
 # 取得一批資料測試
@@ -151,10 +152,6 @@ plt.imshow(reverse_transform(inputs[3]))
 # # 建立 U-Net 模型
 
 # In[8]:
-
-
-import torch.nn as nn
-import torchvision.models
 
 
 def convrelu(in_channels: int, out_channels: int, kernel: int, padding: int) -> nn.Sequential:
@@ -169,7 +166,7 @@ class ResNetUNet(nn.Module):
         super().__init__()
 
         # 載入 resnet18 模型
-        self.base_model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
+        self.base_model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
         self.base_layers = list(self.base_model.children())
 
         self.layer0 = nn.Sequential(*self.base_layers[:3])  # size=(N, 64, x.H/2, x.W/2)
@@ -247,11 +244,7 @@ class ResNetUNet(nn.Module):
 # In[9]:
 
 
-import torch
-import torch.nn as nn
-import pytorch_unet
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.mps.is_available() else 'cpu')
 print('device', device)
 
 model = ResNetUNet(6)
@@ -265,8 +258,6 @@ model
 # In[11]:
 
 
-from torchsummary import summary
-
 summary(model, input_size=(3, 224, 224))
 
 # ## 定義損失函數
@@ -274,15 +265,13 @@ summary(model, input_size=(3, 224, 224))
 # In[ ]:
 
 
-from collections import defaultdict
-import torch.nn.functional as F
-from loss import dice_loss
-
 checkpoint_path = "checkpoint.pth"
 
 
 # 損失採 binary cross entropy + dice loss
-def calc_loss(pred: torch.Tensor, target: torch.Tensor, metrics: Dict[str, float], bce_weight: float = 0.5) -> torch.Tensor:
+def calc_loss(
+    pred: torch.Tensor, target: torch.Tensor, metrics: Dict[str, float], bce_weight: float = 0.5
+) -> torch.Tensor:
     bce = F.binary_cross_entropy_with_logits(pred, target)
 
     pred = torch.sigmoid(pred)
@@ -290,9 +279,9 @@ def calc_loss(pred: torch.Tensor, target: torch.Tensor, metrics: Dict[str, float
 
     loss = bce * bce_weight + dice * (1 - bce_weight)
 
-    metrics['bce'] += bce.data.cpu().numpy() * target.size(0)
-    metrics['dice'] += dice.data.cpu().numpy() * target.size(0)
-    metrics['loss'] += loss.data.cpu().numpy() * target.size(0)
+    metrics['bce'] += bce.data.item() * target.size(0)
+    metrics['dice'] += dice.data.item() * target.size(0)
+    metrics['loss'] += loss.data.item() * target.size(0)
 
     return loss
 
@@ -380,11 +369,6 @@ def train_model(model: nn.Module, optimizer: Optimizer, scheduler: Any, num_epoc
 # In[13]:
 
 
-import torch
-import torch.optim as optim
-from torch.optim import lr_scheduler
-import time
-
 num_class = 6
 model = ResNetUNet(num_class).to(device)
 
@@ -403,8 +387,6 @@ model = train_model(model, optimizer_ft, exp_lr_scheduler, num_epochs=10)
 
 # In[14]:
 
-
-import math
 
 # 建立新資料
 test_dataset = SimDataset(3, transform=trans)

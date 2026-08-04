@@ -9,11 +9,14 @@
 
 
 import os
+import shutil
+
+import matplotlib.pyplot as plt
 import torch
-from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchmetrics import Accuracy
+import torchvision
+from torch import nn, optim
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
@@ -22,10 +25,10 @@ from torchvision.datasets import MNIST
 # In[61]:
 
 
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 步驟1：載入 MNIST 手寫阿拉伯數字資料
 
@@ -45,8 +48,6 @@ print(train_ds.data.shape, test_ds.data.shape)
 
 
 # 刪除 log 目錄
-import os
-import shutil
 
 dirpath = './runs_2'
 if os.path.exists(dirpath) and os.path.isdir(dirpath):
@@ -56,7 +57,6 @@ if os.path.exists(dirpath) and os.path.isdir(dirpath):
 
 
 # 顯示第1張圖片圖像
-import matplotlib.pyplot as plt
 
 # 第一筆資料
 X = train_ds.data[0]
@@ -73,8 +73,6 @@ plt.show()
 # In[65]:
 
 
-from torch.utils.tensorboard import SummaryWriter
-
 # 設定工作記錄檔目錄
 writer = SummaryWriter('runs_2/mnist_experiment_1')
 
@@ -82,7 +80,6 @@ writer = SummaryWriter('runs_2/mnist_experiment_1')
 
 
 # create grid of images
-import torchvision
 
 img_grid = torchvision.utils.make_grid(X.reshape(28, 28))
 writer.add_image('First image', img_grid)
@@ -120,8 +117,8 @@ lr = 0.1
 train_loader = DataLoader(train_ds, batch_size=600)
 
 # 設定優化器(optimizer)
-# optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-optimizer = torch.optim.Adadelta(model.parameters(), lr=lr)
+# optimizer = optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adadelta(model.parameters(), lr=lr)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -147,16 +144,14 @@ for epoch in range(1, epochs + 1):
         if batch_idx % 10 == 0:
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(train_ds)
             percentage = 100.0 * batch_idx / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # ## 對訓練過程的損失繪圖
 
 # In[69]:
 
-
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 

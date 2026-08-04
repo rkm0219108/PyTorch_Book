@@ -5,7 +5,11 @@
 
 
 # 載入相關套件
+import warnings
+from typing import cast
+
 import gymnasium as gym
+import pandas as pd
 from gymnasium import envs
 
 # In[9]:
@@ -24,15 +28,12 @@ len(env_ids)
 # In[15]:
 
 
-import warnings
-
 warnings.filterwarnings('ignore')
 
 # In[16]:
 
 
 # 列出環境資訊
-import pandas as pd
 
 space_names = ['觀測空間', '動作空間', '獎勵範圍', '最大步數']
 df = pd.DataFrame(columns=space_names)
@@ -74,8 +75,8 @@ env = gym.make("CartPole-v1")
 print(env.action_space)
 print(env.observation_space)
 print('observation_space 範圍：')
-print(env.observation_space.high)
-print(env.observation_space.low)
+print(cast(gym.spaces.Box, env.observation_space).high)
+print(cast(gym.spaces.Box, env.observation_space).low)
 
 # In[5]:
 
@@ -87,8 +88,8 @@ env = gym.make("Breakout-v0")
 print(env.action_space)
 print(env.observation_space)
 print('observation_space 範圍：')
-print(env.observation_space.high)
-print(env.observation_space.low)
+print(cast(gym.spaces.Box, env.observation_space).high)
+print(cast(gym.spaces.Box, env.observation_space).low)
 
 # In[7]:
 

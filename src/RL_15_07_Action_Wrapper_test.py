@@ -1,6 +1,7 @@
 # 載入相關套件
-import gymnasium as gym
 import random
+
+import gymnasium as gym
 
 
 # 繼承 gym.ActionWrapper 基礎類別
@@ -29,7 +30,7 @@ if __name__ == "__main__":
             print("往左走!")
             obs, reward, terminated, truncated, _ = env.step(0)
             done = terminated or truncated
-            total_reward += reward
+            total_reward += float(reward)
             if done:
                 break
 

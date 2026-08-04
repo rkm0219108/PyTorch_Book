@@ -8,12 +8,16 @@
 # In[1]:
 
 
-import os
+import math
+
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
-from torch import nn
+from skimage import io
+from skimage.transform import resize
+from torch import nn, optim
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchmetrics import Accuracy
+from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
@@ -23,10 +27,10 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = ""  # 預設路徑
+PATH_DATASETS = "data"  # 預設路徑
 BATCH_SIZE = 1000  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 步驟1：載入 MNIST 手寫阿拉伯數字資料
 
@@ -54,7 +58,6 @@ print(train_ds.data.shape, test_ds.data.shape)
 
 
 # 卷積/池化層公式計算
-import math
 
 
 # W, F, P, S：image Width, Filter width, Padding, Stride
@@ -169,7 +172,7 @@ lr = 0.1
 train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE)
 
 # 設定優化器(optimizer)
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adam(model.parameters(), lr=lr)
 
 model.train()
 loss_list = []
@@ -187,15 +190,14 @@ for epoch in range(1, epochs + 1):
         if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(train_ds)
             percentage = 100.0 * (batch_idx + 1) / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[11]:
 
 
 # 對訓練過程的損失繪圖
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 
@@ -226,12 +228,11 @@ with torch.no_grad():
         correct += (predicted == target).sum().item()
 
 # 平均損失
-test_loss /= len(test_loader.dataset)
+test_loss /= len(test_ds)
 # 顯示測試結果
-batch = batch_idx * len(data)
-data_count = len(test_loader.dataset)
+data_count = len(test_ds)
 percentage = 100.0 * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.2f}%)\n')
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.2f}%)\n')
 
 # In[13]:
 
@@ -242,7 +243,7 @@ with torch.no_grad():
     for i in range(20):
         data, target = test_ds[i][0], test_ds[i][1]
         data = data.reshape(1, *data.shape).to(device)
-        output = torch.argmax(model(data), axis=-1)
+        output = torch.argmax(model(data), dim=-1)
         predictions.append(str(output.item()))
 
 # 比對
@@ -253,7 +254,6 @@ print('prediction: ', ' '.join(predictions[0:20]))
 
 
 # 顯示第 9 筆的機率
-import numpy as np
 
 i = 18
 data = test_ds[i][0]
@@ -296,8 +296,6 @@ model = torch.load('cnn_model.pth')
 
 
 # 使用小畫家，繪製 0~9，實際測試看看
-from skimage import io
-from skimage.transform import resize
 
 no = 9
 uploaded_file = f'./myDigits/{no}.png'
@@ -305,7 +303,7 @@ image1 = io.imread(uploaded_file, as_gray=True)
 
 # 縮為 (28, 28) 大小的影像
 data_shape = data.shape
-image_resized = resize(image1, data_shape[2:], anti_aliasing=True)
+image_resized = np.asarray(resize(image1, data_shape[2:], anti_aliasing=True))
 X1 = image_resized.reshape(*data_shape)  # / 255.0
 # print(X1[0])
 # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色
@@ -320,7 +318,6 @@ for i in range(X1[0][0].shape[0]):
 
 
 # 顯示第10張圖片圖像
-import matplotlib.pyplot as plt
 
 # 繪製點陣圖，cmap='gray':灰階
 plt.imshow(X1.reshape(28, 28), cmap='gray')
@@ -374,7 +371,7 @@ for i in range(10):
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
-    image_resized = resize(image1, tuple(data_shape)[2:], anti_aliasing=True)
+    image_resized = np.asarray(resize(image1, tuple(data_shape)[2:], anti_aliasing=True))
     X1 = image_resized.reshape(*data_shape)
 
     # 反轉顏色，顏色0為白色，與 RGB 色碼不同，它的 0 為黑色

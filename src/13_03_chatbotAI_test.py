@@ -9,7 +9,15 @@
 
 
 # 載入相關套件
-from chatbot import demo
+import warnings
+from typing import Any
+
+import wikipedia
+from chatbot import (
+    Chat,
+    demo,
+    register_call,
+)
 
 # ## 功能展示
 
@@ -28,10 +36,6 @@ demo()
 
 
 # 載入相關套件
-from typing import Any
-
-from chatbot import Chat, register_call
-import wikipedia
 
 
 # 註冊可接收的關鍵字及負責回應的模組
@@ -52,8 +56,6 @@ def who_is(session: Any, query: str) -> str:
 
 # In[5]:
 
-
-import warnings
 
 warnings.filterwarnings('ignore')
 

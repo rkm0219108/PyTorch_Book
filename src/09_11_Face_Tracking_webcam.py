@@ -11,10 +11,9 @@
 
 # 安裝套件： pip install face-recognition
 # 載入相關套件
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle
-import face_recognition
 import cv2
+import face_recognition
+import matplotlib.pyplot as plt
 
 # ## 載入並顯示圖檔
 
@@ -34,7 +33,7 @@ plt.show()
 
 
 # 指定輸出檔名
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
+fourcc = cv2.VideoWriter.fourcc(*'XVID')
 # 每秒幀數(fps):29.97，影片解析度(Frame Size)：(640, 360)
 output_movie = cv2.VideoWriter('./images_face/output2.avi', fourcc, 29.97, (640, 360))
 
@@ -88,7 +87,7 @@ while True:
     frame_number += 1
 
     # 將 BGR 色系轉為 RGB 色系
-    rgb_frame = frame[:, :, ::-1]
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     # 找出臉部位置
     face_locations = face_recognition.face_locations(rgb_frame)

@@ -7,8 +7,10 @@
 
 
 # 載入相關套件
-import numpy as np
+from typing import cast
+
 import gymnasium as gym
+import numpy as np
 
 # In[2]:
 
@@ -20,21 +22,19 @@ env.reset()
 # In[3]:
 
 
-nS = env.observation_space.n
-nA = env.action_space.n
+nS = cast(gym.spaces.Discrete, env.observation_space).n
+nA = cast(gym.spaces.Discrete, env.action_space).n
 
 # In[4]:
 
 
 # 值循環函數
-def value_iteration(
-    env: gym.Env, theta: float = 0.0001, discount_factor: float = 1.0
-) -> tuple[np.ndarray, np.ndarray]:
+def value_iteration(env: gym.Env, theta: float = 0.0001, discount_factor: float = 1.0) -> tuple[np.ndarray, np.ndarray]:
     # 計算行動值函數
     def one_step_lookahead(state: int, V: np.ndarray) -> np.ndarray:
         A = np.zeros(nA)
         for a in range(nA):
-            for prob, next_state, reward, done in env.P[state][a]:
+            for prob, next_state, reward, done in env.unwrapped.P[state][a]:
                 A[a] += prob * (reward + discount_factor * V[next_state])
         return A
 

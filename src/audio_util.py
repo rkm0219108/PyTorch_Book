@@ -1,11 +1,11 @@
+import os
+from typing import Optional, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torchaudio
-import matplotlib.pyplot as plt
-import os
-import math
-import IPython
 from IPython.display import Audio, display
-from typing import Optional, Tuple
 
 
 # 取得一段語音的描述統計量
@@ -31,16 +31,15 @@ def plot_waveform(
     xlim: Optional[Tuple[float, float]] = None,
     ylim: Optional[Tuple[float, float]] = None,
 ) -> None:
-    waveform = waveform.numpy()
+    waveform_np = waveform.numpy()
 
-    num_channels, num_frames = waveform.shape
+    num_channels, num_frames = waveform_np.shape
     time_axis = torch.arange(0, num_frames) / sample_rate
 
     figure, axes = plt.subplots(num_channels, 1)
-    if num_channels == 1:
-        axes = [axes]
+    axes = list(axes) if isinstance(axes, np.ndarray) else [axes]
     for c in range(num_channels):
-        axes[c].plot(time_axis, waveform[c], linewidth=1)
+        axes[c].plot(time_axis, waveform_np[c], linewidth=1)
         axes[c].grid(True)
         if num_channels > 1:
             axes[c].set_ylabel(f'Channel {c+1}')
@@ -56,16 +55,15 @@ def plot_waveform(
 def plot_specgram(
     waveform: torch.Tensor, sample_rate: int, title: str = "Spectrogram", xlim: Optional[Tuple[float, float]] = None
 ) -> None:
-    waveform = waveform.numpy()
+    waveform_np = waveform.numpy()
 
-    num_channels, num_frames = waveform.shape
+    num_channels, num_frames = waveform_np.shape
     time_axis = torch.arange(0, num_frames) / sample_rate
 
     figure, axes = plt.subplots(num_channels, 1)
-    if num_channels == 1:
-        axes = [axes]
+    axes = list(axes) if isinstance(axes, np.ndarray) else [axes]
     for c in range(num_channels):
-        axes[c].specgram(waveform[c], Fs=sample_rate)
+        axes[c].specgram(waveform_np[c], Fs=sample_rate)
         if num_channels > 1:
             axes[c].set_ylabel(f'Channel {c+1}')
         if xlim:
@@ -76,13 +74,13 @@ def plot_specgram(
 
 # 播放語音
 def play_audio(waveform: torch.Tensor, sample_rate: int) -> None:
-    waveform = waveform.numpy()
+    waveform_np = waveform.numpy()
 
-    num_channels, num_frames = waveform.shape
+    num_channels, num_frames = waveform_np.shape
     if num_channels == 1:
-        display(Audio(waveform[0], rate=sample_rate))
+        display(Audio(waveform_np[0], rate=sample_rate))
     elif num_channels == 2:
-        display(Audio((waveform[0], waveform[1]), rate=sample_rate))
+        display(Audio((waveform_np[0], waveform_np[1]), rate=sample_rate))
     else:
         raise ValueError("不支援超過雙聲道的音檔.")
 

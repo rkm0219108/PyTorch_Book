@@ -1,9 +1,10 @@
 # 載入相關套件
 from __future__ import annotations
 
-import numpy as np
-import pickle
 import os
+import pickle
+
+import numpy as np
 
 # 參數設定
 BOARD_ROWS = 3  # 列數
@@ -188,6 +189,7 @@ class Environment:
             print('-------------')
             out = '| '
             for j in range(0, BOARD_COLS):
+                token = ' '
                 if self.board[i, j] == 1:
                     token = 'x'
                 if self.board[i, j] == -1:
@@ -221,11 +223,12 @@ class Player:
             action = positions[idx]
         else:
             value_max = -999
+            action = positions[0]
             for p in positions:
                 next_board = current_board.copy()
                 next_board[p] = symbol
                 next_boardHash = self.getHash(next_board)
-                value = 0 if self.states_value.get(next_boardHash) is None else self.states_value.get(next_boardHash)
+                value = self.states_value.get(next_boardHash, 0)
 
                 # 依最大值函數行動
                 if value >= value_max:

@@ -9,10 +9,11 @@
 # 載入相關套件
 from __future__ import annotations
 
+import math
 from typing import List, Tuple
 
 import gymnasium as gym
-from gymnasium import envs
+import numpy as np
 
 # ## 隨機行動
 
@@ -29,7 +30,7 @@ env = gym.make("CartPole-v1")
 observation, info = env.reset()
 all_rewards = []  # 每回合總報酬
 all_steps = []  # 每回合總步數
-total_rewards = 0
+total_rewards = 0.0
 total_steps = 0
 
 while no > 0:  # 執行 50 比賽回合數
@@ -41,14 +42,14 @@ while no > 0:  # 執行 50 比賽回合數
     observation, reward, terminated, truncated, info = env.step(action)
     done = terminated or truncated
     # 累計報酬
-    total_rewards += reward
+    total_rewards += float(reward)
 
     # 比賽回合結束，重置
     if done:
         observation, info = env.reset()
         all_rewards.append(total_rewards)
         all_steps.append(total_steps)
-        total_rewards = 0
+        total_rewards = 0.0
         total_steps = 0
         no -= 1
 
@@ -68,7 +69,6 @@ for i, (rewards, steps) in enumerate(zip(all_rewards, all_steps)):
 # In[5]:
 
 
-import math
 
 # 參數設定
 left, right = 0, 1  # 台車行進方向
@@ -118,7 +118,7 @@ env = gym.make("CartPole-v1")
 observation, info = env.reset()
 all_rewards = []  # 每回合總報酬
 all_steps = []  # 每回合總步數
-total_rewards = 0
+total_rewards = 0.0
 total_steps = 0
 
 agent = Agent()
@@ -131,13 +131,13 @@ while no > 0:  # 執行 50 比賽回合數
     observation, reward, terminated, truncated, info = env.step(action)
     done = terminated or truncated
     # 累計報酬
-    total_rewards += reward
+    total_rewards += float(reward)
 
     # 比賽回合結束，重置
     if done:
         observation, info = env.reset()
         all_rewards.append(total_rewards)
-        total_rewards = 0
+        total_rewards = 0.0
         all_steps.append(total_steps)
         total_steps = 0
         no -= 1
@@ -158,7 +158,6 @@ for i, (rewards, steps) in enumerate(zip(all_rewards, all_steps)):
 # In[3]:
 
 
-import numpy as np
 
 env = gym.make('CartPole-v1')
 
@@ -167,7 +166,7 @@ def play(env: gym.Env, policy: np.ndarray) -> Tuple[float, List[List[float]]]:
     observation, info = env.reset()
 
     done = False
-    score = 0
+    score = 0.0
     observations = []
 
     # 訓練5000步
@@ -184,7 +183,7 @@ def play(env: gym.Env, policy: np.ndarray) -> Tuple[float, List[List[float]]]:
         # 觸發下一步
         observation, reward, terminated, truncated, info = env.step(action)
         done = terminated or truncated
-        score += reward
+        score += float(reward)
 
     return score, observations
 
@@ -198,7 +197,7 @@ np.random.rand(1, 4)
 
 
 # 訓練 10 回合
-max = (0, [], [])
+max = (0.0, [], np.empty((1, 4)))
 for _ in range(10):
     policy = np.random.rand(1, 4)  # 產生4個隨機變數 [0, 1)
     score, observations = play(env, policy)  # 開始玩
@@ -212,7 +211,7 @@ print('Max Score', max[0])
 
 
 # 最終版本
-max = (0, [], [])
+max = (0.0, [], np.empty((1, 4)))
 
 for _ in range(100):  # 訓練 100 回合
     policy = np.random.rand(1, 4) - 0.5  # 改為 [-0.5, 0.5]

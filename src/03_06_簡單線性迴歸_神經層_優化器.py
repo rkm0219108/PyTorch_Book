@@ -7,8 +7,12 @@
 
 
 # 載入套件
+from typing import cast
+
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from sklearn.linear_model import LinearRegression
 from torch import nn
 
 # ## 產生隨機資料
@@ -31,7 +35,7 @@ y += np.random.uniform(-10, 10, n)
 
 
 # 定義模型
-def create_model(input_feature: int, output_feature: int) -> nn.Module:
+def create_model(input_feature: int, output_feature: int) -> nn.Sequential:
     model = nn.Sequential(nn.Linear(input_feature, output_feature), nn.Flatten(0, -1))  # 所有維度轉成一維
     return model
 
@@ -53,7 +57,7 @@ def train(
     loss_fn = nn.MSELoss(reduction='sum')
 
     # 定義優化器
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
     loss_list, w_list, b_list = [], [], []
     for epoch in range(epochs):  # 執行訓練週期
@@ -74,8 +78,9 @@ def train(
 
         # 記錄訓練結果
         if (epoch + 1) % 1000 == 0 or epochs < 1000:
-            w_list.append(model[0].weight[:, 0].item())  # w.item()：轉成常數
-            b_list.append(model[0].bias.item())
+            linear_layer = cast(nn.Linear, model[0])
+            w_list.append(linear_layer.weight[:, 0].item())  # w.item()：轉成常數
+            b_list.append(linear_layer.bias.item())
             loss_list.append(MSE.item())
 
     return w_list, b_list, loss_list
@@ -105,8 +110,6 @@ print(f'w={coef[0]}, b={coef[1]}')
 # In[7]:
 
 
-from sklearn.linear_model import LinearRegression
-
 X2 = X.reshape(X.shape[0], 1)
 
 lr = LinearRegression()
@@ -119,8 +122,6 @@ lr.coef_[0], lr.intercept_
 # In[8]:
 
 
-import matplotlib.pyplot as plt
-
 plt.scatter(X, y, label='data')
 plt.plot(X, w_list[-1] * X + b_list[-1], 'r-', label='predicted')
 plt.legend()
@@ -129,7 +130,6 @@ plt.legend()
 
 
 # NumPy 求得的迴歸線
-import matplotlib.pyplot as plt
 
 plt.scatter(X, y, label='data')
 plt.plot(X, coef[0] * X + coef[1], 'r-', label='predicted')

@@ -8,20 +8,16 @@
 # In[1]:
 
 
-from typing import Tuple
+from typing import Sized, Tuple, cast
 
+import matplotlib.pyplot as plt
 import torch
-from torch import nn
 import torchaudio
 import torchaudio.transforms as T
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from torch import nn
 from torch.nn import functional as F
-from torch.utils.data import Dataset, DataLoader
-import IPython
-from IPython.display import Audio
-import matplotlib.pyplot as plt
-import os
-import math
-import audio_util
+from torch.utils.data import DataLoader, Dataset, random_split
 
 # ## 設定參數
 
@@ -30,8 +26,8 @@ import audio_util
 
 PATH_DATASETS = "./audio"  # 預設路徑
 BATCH_SIZE = 5  # 批量
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-"cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+device
 
 # ## 步驟1：下載 GTZAN資料集，並建立 Dataset
 
@@ -122,8 +118,6 @@ dataset = GTZAN_DS(dataset_GTZAN)
 # In[9]:
 
 
-from torch.utils.data import random_split
-
 test_size = int(len(dataset) * 0.2)
 train_size = len(dataset) - test_size
 
@@ -184,7 +178,7 @@ epochs = 10
 lr = 0.01
 
 # 設定優化器(optimizer)
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adam(model.parameters(), lr=lr)
 
 model.train()
 loss_list = []
@@ -203,15 +197,14 @@ for epoch in range(1, epochs + 1):
         if (batch_idx + 1) % 10 == 0:
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
-            data_count = len(train_loader.dataset)
+            data_count = len(cast(Sized, train_loader.dataset))
             percentage = 100.0 * (batch_idx + 1) / len(train_loader)
-            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)' + f'  Loss: {loss.item():.6f}')
+            print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[13]:
 
 
 # 對訓練過程的損失繪圖
-import matplotlib.pyplot as plt
 
 plt.plot(loss_list, 'r')
 
@@ -243,12 +236,11 @@ with torch.no_grad():
         correct += (predicted == target).sum().item()
 
 # 平均損失
-test_loss /= len(test_loader.dataset)
+test_loss /= len(cast(Sized, test_loader.dataset))
 # 顯示測試結果
-batch = batch_idx * len(data)
-data_count = len(test_loader.dataset)
+data_count = len(cast(Sized, test_loader.dataset))
 percentage = 100.0 * correct / data_count
-print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' ({percentage:.2f}%)\n')
+print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.2f}%)\n')
 
 # ## 步驟8：評估
 
@@ -256,8 +248,6 @@ print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count}' + f' (
 
 # In[33]:
 
-
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 cm = confusion_matrix(target_list, predictions)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=gtzan_genres)
@@ -272,9 +262,9 @@ predictions = []
 target_list = []
 with torch.no_grad():
     for i in range(20):
-        data, target = test_ds[i]
+        data, target = cast(Tuple[torch.Tensor, int], test_ds[i])
         data = data.reshape(1, *data.shape).to(device)
-        output = torch.argmax(model(data), axis=-1)
+        output = torch.argmax(model(data), dim=-1)
         predictions.append(str(output.item()))
         target_list.append(str(target))
 

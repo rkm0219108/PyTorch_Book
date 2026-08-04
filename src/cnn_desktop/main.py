@@ -1,13 +1,8 @@
-from tkinter import *
-from tkinter import filedialog
-from PIL import ImageDraw, Image, ImageGrab
+from tkinter import END, ROUND, TRUE, Button, Canvas, Text, Tk, filedialog
+
 import numpy as np
-from skimage import color
-from skimage import io
-import os
-import io
 import torch
-import torch
+from PIL import Image, ImageDraw
 from torch import nn
 from torch.nn import functional as F
 
@@ -33,12 +28,12 @@ class Paint(object):
         self.classify_button.grid(row=0, column=0, columnspan=2, sticky='EWNS')
 
         # 建立【清畫面】按鈕
-        self.clear = Button(self.root, text='清畫面', command=self.clear)
-        self.clear.grid(row=0, column=2, columnspan=2, sticky='EWNS')
+        self.clear_button = Button(self.root, text='清畫面', command=self.clear)
+        self.clear_button.grid(row=0, column=2, columnspan=2, sticky='EWNS')
 
         # 建立【存檔】按鈕
-        self.savefile = Button(self.root, text='存檔', command=self.savefile)
-        self.savefile.grid(row=0, column=4, columnspan=2, sticky='EWNS')
+        self.savefile_button = Button(self.root, text='存檔', command=self.savefile)
+        self.savefile_button.grid(row=0, column=4, columnspan=2, sticky='EWNS')
 
         # 建立【預測】文字框
         self.prediction_text = Text(self.root, height=2, width=10)
@@ -122,12 +117,12 @@ class Paint(object):
         data = torch.FloatTensor(img).to(device)
 
         # 預測
-        output = model(data)
+        output: torch.Tensor = model(data)
         # Get index with highest probability
         _, predicted = torch.max(output.data, 1)
         # print(pred)
         self.prediction_text.delete("1.0", END)
-        self.prediction_text.insert(END, predicted.item())
+        self.prediction_text.insert(END, str(predicted.item()))
 
 
 class Net(nn.Module):
@@ -163,8 +158,8 @@ def loadModel():
 
 
 if __name__ == '__main__':
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("cuda" if torch.cuda.is_available() else "cpu")
+    device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
+    print(device)
 
     # 載入既有的模型
     print('load model ...')

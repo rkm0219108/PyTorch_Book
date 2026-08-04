@@ -9,20 +9,18 @@
 
 import os
 
+import lightning.pytorch as pl
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
+from torch.utils.data import DataLoader, random_split
+from torchmetrics import Accuracy
+from torchvision import transforms
+from torchvision.datasets import MNIST
+
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 # In[5]:
-
-
-import torch
-from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader
-from torch.utils.data import random_split
-from torchvision.datasets import MNIST
-from torchvision import transforms
-import lightning.pytorch as pl
-from torchmetrics import Accuracy
 
 
 # 建立模型
@@ -40,8 +38,8 @@ class LitAutoEncoder(pl.LightningModule):
         embedding = self.encoder(x)
         return embedding
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+    def configure_optimizers(self) -> optim.Optimizer:
+        optimizer = optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
 
     def training_step(self, train_batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
@@ -67,8 +65,8 @@ class LitAutoEncoder(pl.LightningModule):
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-dataset = MNIST('', train=True, download=True, transform=transforms.ToTensor())
-test_data = MNIST('', train=False, download=True, transform=transforms.ToTensor())
+dataset = MNIST("data", train=True, download=True, transform=transforms.ToTensor())
+test_data = MNIST("data", train=False, download=True, transform=transforms.ToTensor())
 
 mnist_train, mnist_val = random_split(dataset, [55000, 5000])
 

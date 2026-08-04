@@ -7,13 +7,15 @@
 
 
 # 載入相關套件
-import numpy as np
-from lib.envs.blackjack import BlackjackEnv
-from lib import plotting
 import sys
 from collections import defaultdict
-import matplotlib
 from typing import Any, Callable, Dict, Tuple
+
+import matplotlib
+import matplotlib.style
+import numpy as np
+from lib import plotting
+from lib.envs.blackjack import BlackjackEnv
 
 matplotlib.style.use('ggplot')  # 設定繪圖的風格
 

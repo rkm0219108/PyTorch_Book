@@ -9,16 +9,21 @@
 # In[1]:
 
 
+from typing import cast
+
+import matplotlib.pyplot as plt
 import torch
+from torch.nn import functional as F
+from sklearn.manifold import TSNE
+from sklearn.metrics import confusion_matrix
 from torch_geometric.data import Data
-import networkx as nx
+from torch_geometric.datasets import Planetoid
+from torch_geometric.nn import GCNConv
 
 # ## 載入內建資料集
 
 # In[2]:
 
-
-from torch_geometric.datasets import Planetoid
 
 # 載入內建資料
 dataset = Planetoid(root='./graph/Cora', name='Cora')
@@ -29,14 +34,14 @@ len(dataset)
 # In[3]:
 
 
-dataset[0].num_nodes, dataset[0].num_edges
+cast(Data, dataset[0]).num_nodes, cast(Data, dataset[0]).num_edges
 
 # ## 資料集已切割訓練、驗證及測試資料
 
 # In[4]:
 
 
-data = dataset[0]
+data = cast(Data, dataset[0])
 # 遮罩的節點個數
 data.train_mask.sum().item(), data.val_mask.sum().item(), data.test_mask.sum().item()
 
@@ -48,27 +53,23 @@ data.train_mask.shape, data.val_mask.shape, data.test_mask.shape
 # In[6]:
 
 
-len(data.y.numpy())
+len(cast(torch.Tensor, data.y).numpy())
 
 # In[7]:
 
 
-set(data.y.numpy())
+set(cast(torch.Tensor, data.y).numpy())
 
 # ## 判斷是否使用GPU
 
 # In[8]:
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.mps.is_available() else 'cpu')
 
 # ## 定義模型
 
 # In[9]:
-
-
-import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
 
 
 class GCN(torch.nn.Module):
@@ -94,14 +95,14 @@ class GCN(torch.nn.Module):
 
 
 model = GCN().to(device)
-data = dataset[0].to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+data = cast(Data, dataset[0]).to(device)
+optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
 model.train()
 for epoch in range(200):
     optimizer.zero_grad()
     out = model(data)
-    loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+    loss = F.nll_loss(out[data.train_mask], cast(torch.Tensor, data.y)[data.train_mask])
     loss.backward()
     optimizer.step()
     print(f'Epoch: {epoch+1:03d}, Loss: {loss:.4f}')
@@ -113,7 +114,7 @@ for epoch in range(200):
 
 model.eval()
 pred = model(data).argmax(dim=1)
-correct = (pred[data.test_mask] == data.y[data.test_mask]).sum()
+correct = (pred[data.test_mask] == cast(torch.Tensor, data.y)[data.test_mask]).sum()
 acc = int(correct) / int(data.test_mask.sum())
 print(f'Accuracy: {acc:.4f}')
 
@@ -122,17 +123,11 @@ print(f'Accuracy: {acc:.4f}')
 # In[12]:
 
 
-from sklearn.metrics import confusion_matrix
-
-confusion_matrix(data.y[data.test_mask].cpu().numpy(), pred[data.test_mask].cpu().numpy())
+confusion_matrix(cast(torch.Tensor, data.y)[data.test_mask].cpu().numpy(), pred[data.test_mask].cpu().numpy())
 
 # ## 降維、視覺化
 
 # In[21]:
-
-
-import matplotlib.pyplot as plt
-from sklearn.manifold import TSNE
 
 
 def visualize(h: torch.Tensor, color: torch.Tensor) -> None:
@@ -151,6 +146,6 @@ def visualize(h: torch.Tensor, color: torch.Tensor) -> None:
 model.eval()
 out = model(data)
 # 繪圖
-visualize(out.cpu(), color=data.cpu().y)
+visualize(out.cpu(), color=cast(torch.Tensor, data.cpu().y))
 
 # In[ ]:
