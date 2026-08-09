@@ -7,6 +7,9 @@
 
 # In[11]:
 
+import sys
+from pathlib import Path
+from typing import cast, Sized
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +26,10 @@ from torchvision.datasets import MNIST
 # In[12]:
 
 
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -95,7 +101,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_ds)
-            percentage = 100.0 * batch_idx / len(train_loader)
+            percentage = 100.0 * batch_idx / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # ## 對訓練過程的損失繪圖
@@ -168,7 +174,7 @@ print('prediction: ', ' '.join(predictions[0:20]))
 
 # 讀取影像並轉為單色
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像

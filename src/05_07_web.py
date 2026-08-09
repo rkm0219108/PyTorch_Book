@@ -14,7 +14,7 @@ device
 
 @st.cache_resource
 def load_model() -> nn.Module:
-    return torch.load('./model.pt').to(device)
+    return torch.load('model.pt').to(device)
 
 
 model = load_model()

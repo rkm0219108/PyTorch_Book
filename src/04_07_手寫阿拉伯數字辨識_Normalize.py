@@ -8,12 +8,14 @@
 # In[1]:
 
 
+from typing import cast, Sized
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from skimage import io
 from skimage.transform import resize
-from torch import nn
+from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
@@ -179,7 +181,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_ds)
-            percentage = 100.0 * batch_idx / len(train_loader)
+            percentage = 100.0 * batch_idx / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[24]:
@@ -281,7 +283,7 @@ model = torch.load('model.pt')
 
 # 讀取影像並轉為單色
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像

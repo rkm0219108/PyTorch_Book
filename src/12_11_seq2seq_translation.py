@@ -89,7 +89,7 @@ def readLangs(lang1: str, lang2: str, reverse: bool = False) -> tuple[Lang, Lang
     print("Reading lines...")
 
     # 讀取檔案、分行
-    lines = open(f'./nlp_data/{lang1}-{lang2}.txt', encoding='utf-8').read().strip().split('\n')
+    lines = open(f'nlp_data/{lang1}-{lang2}.txt', encoding='utf-8').read().strip().split('\n')
 
     # 每行分欄
     pairs = [[normalizeString(s) for s in l.split('\t')] for l in lines]

@@ -169,7 +169,7 @@ nx.draw(
 
 
 # save as PNG
-plt.savefig("./graph/1.png")
+plt.savefig("graph/1.png")
 
 # ## 以屬性為邊的寬度
 
@@ -231,7 +231,7 @@ nx.draw(DG, with_labels=True, cmap=plt.get_cmap('rainbow'))
 # In[22]:
 
 
-clothing_graph = nx.read_graphml("./graph/clothing_graph.graphml")
+clothing_graph = nx.read_graphml("graph/clothing_graph.graphml")
 nx.draw_planar(
     clothing_graph,
     arrowsize=12,
@@ -406,7 +406,6 @@ length
 # In[34]:
 
 
-
 # 最小生成樹
 mst = tree.minimum_spanning_edges(G_karate, algorithm='prim', data=False)
 edgelist = list(mst)
@@ -415,7 +414,6 @@ sorted(edgelist)  # 排序
 # ## 極大團(Maximal Clique)偵測
 
 # In[35]:
-
 
 
 max_clique = aprx.max_clique(G_karate)
@@ -441,7 +439,6 @@ nx.draw(G, node_color="#ffff8f", with_labels=True)
 # In[38]:
 
 
-
 # 內建資料，兩個社群，各有 5 個節點，1個相連的節點
 G = nx.barbell_graph(5, 1)
 nx.draw_kamada_kawai(G, node_color="#ffff8f", with_labels=True)
@@ -464,7 +461,6 @@ next_level_communities
 # ## 使用迴圈產生不同個社群，並顯示分群的衡量指標Modularity
 
 # In[54]:
-
 
 
 k = 4  # 分成 2 ~ k+1 群
@@ -504,7 +500,6 @@ for k in range(2, 6):
 # !pip install python-louvain
 
 # In[53]:
-
 
 
 partition = community_louvain.best_partition(G_karate)

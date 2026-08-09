@@ -7,11 +7,15 @@
 
 
 # 載入套件
+import sys
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torch import nn, optim
 from torch.nn import functional as F
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms, utils
 
@@ -31,18 +35,20 @@ from torchvision import datasets, transforms, utils
 
 # In[ ]:
 
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
+
 
 # Gather datasets and prepare them for consumption
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
-#
-training_set = datasets.FashionMNIST("data", download=True, train=True, transform=transform)
-validation_set = datasets.FashionMNIST("data", download=True, train=False, transform=transform)
+train_ds = datasets.FashionMNIST(PATH_DATASETS, download=True, train=True, transform=transform)
+test_ds = datasets.FashionMNIST(PATH_DATASETS, download=True, train=False, transform=transform)
 
-training_loader = DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
-
-
-validation_loader = DataLoader(validation_set, batch_size=4, shuffle=False, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=4, shuffle=False, num_workers=2)
 
 # Class labels
 classes = ('T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot')
@@ -61,7 +67,7 @@ def matplotlib_imshow(img: torch.Tensor, one_channel: bool = False) -> None:
 
 
 # Extract a batch of 4 images
-dataiter = iter(training_loader)
+dataiter = iter(train_loader)
 images, labels = next(dataiter)
 
 # Create a grid from the images and show them
@@ -144,11 +150,11 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 # In[ ]:
 
 
-print(len(validation_loader))
+print(len(test_loader))
 for epoch in range(1):  # loop over the dataset multiple times
     running_loss = 0.0
 
-    for i, data in enumerate(training_loader, 0):
+    for i, data in enumerate(train_loader, 0):
         # basic training loop
         inputs, labels = data
         optimizer.zero_grad()
@@ -164,7 +170,7 @@ for epoch in range(1):  # loop over the dataset multiple times
             running_vloss = 0.0
 
             net.train(False)  # Don't need to track gradents for validation
-            for j, vdata in enumerate(validation_loader, 0):
+            for j, vdata in enumerate(test_loader, 0):
                 vinputs, vlabels = vdata
                 voutputs = net(vinputs)
                 vloss = criterion(voutputs, vlabels)
@@ -172,13 +178,13 @@ for epoch in range(1):  # loop over the dataset multiple times
             net.train(True)  # Turn gradients back on for training
 
             avg_loss = running_loss / 1000
-            avg_vloss = running_vloss / len(validation_loader)
+            avg_vloss = running_vloss / len(test_loader)
 
             # Log the running loss averaged per batch
             writer.add_scalars(
                 'Training vs. Validation Loss',
                 {'Training': avg_loss, 'Validation': avg_vloss},
-                epoch * len(training_loader) + i,
+                epoch * len(train_loader) + i,
             )
 
             running_loss = 0.0
@@ -202,7 +208,7 @@ writer.flush()
 
 
 # Again, grab a single mini-batch of images
-dataiter = iter(training_loader)
+dataiter = iter(train_loader)
 images, labels = next(dataiter)
 
 # add_graph() will trace the sample input through your model,
@@ -242,7 +248,7 @@ def select_n_random(data: torch.Tensor, labels: torch.Tensor, n: int = 100) -> t
 
 
 # Extract a random subset of data
-images, labels = select_n_random(training_set.data, training_set.targets)
+images, labels = select_n_random(train_ds.data, train_ds.targets)
 
 # get the class labels for each image
 class_labels = [classes[label] for label in labels]

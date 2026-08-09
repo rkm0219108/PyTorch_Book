@@ -33,7 +33,7 @@ print('搜索引擎模式: ', ', '.join(seg_list))
 
 
 # 設定繁體字典
-jieba.set_dictionary('./jieba/dict.txt')
+jieba.set_dictionary('jieba/dict.txt')
 
 # 分詞
 text = "新竹的交通大學在新竹的大學路上"
@@ -85,7 +85,7 @@ print("加詞後的分詞: " + "/ ".join(seg_list))
 
 
 # 測試語句來自新聞 https://news.ltn.com.tw/news/life/breakingnews/3497315
-with open('./jieba/news.txt', encoding='utf8') as f:
+with open('jieba/news.txt', encoding='utf8') as f:
     text = f.read()
 
 # 加詞前的分詞
@@ -98,12 +98,12 @@ jieba.analyse.extract_tags(text, topK=10)
 
 
 # 測試語句來自新聞 https://news.ltn.com.tw/news/life/breakingnews/3497315
-with open('./jieba/news.txt', encoding='utf8') as f:
+with open('jieba/news.txt', encoding='utf8') as f:
     text = f.read()
 
 
 # 設定停用詞
-jieba.analyse.set_stop_words('./jieba/stop_words.txt')
+jieba.analyse.set_stop_words('jieba/stop_words.txt')
 
 # 加詞前的分詞
 jieba.analyse.extract_tags(text, topK=10)

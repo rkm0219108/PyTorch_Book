@@ -14,7 +14,7 @@ from typing import Any, Callable, Iterable, Iterator, List, Tuple
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from torch.utils.data.dataset import random_split
+from Dataset import random_split
 from torchtext.data.functional import (
     to_map_style_dataset,
 )
@@ -261,7 +261,7 @@ def predict(text: str, text_pipeline: Callable[[str], List[int]]) -> int:
 
 
 # 測試資料
-my_test = open('./nlp_data/imdb_1.txt', encoding='utf8').read()
+my_test = open('nlp_data/imdb_1.txt', encoding='utf8').read()
 print(label[predict(data[1], text_pipeline)])
 
 # In[ ]:

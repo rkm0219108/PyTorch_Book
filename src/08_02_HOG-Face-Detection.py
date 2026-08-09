@@ -47,7 +47,7 @@ ax1.imshow(image, cmap=plt.cm.gray)
 ax1.set_title('Input image')
 
 # 調整對比，讓顯示比較清楚
-hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 10))
+hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 10))  # type: ignore[reportArgumentType]
 
 ax2.axis('off')
 ax2.imshow(hog_image_rescaled, cmap=plt.cm.gray)
@@ -261,7 +261,7 @@ def non_max_suppression_slow(boxes: np.ndarray, overlapThresh: float = 0.5) -> n
             h = max(0, yy2 - yy1 + 1)
 
             # 計算重疊比例
-            overlap = float(w * h) / area[j]
+            overlap = float(w * h) / float(area[j])
 
             # 如果大於門檻值，則儲存起來
             if overlap > overlapThresh:

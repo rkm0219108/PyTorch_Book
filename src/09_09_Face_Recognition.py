@@ -21,7 +21,7 @@ from PIL import Image, ImageDraw
 
 
 # 載入圖檔
-image_file = "./images_face/classmates.jpg"
+image_file = "images_face/classmates.jpg"
 image = plt.imread(image_file)
 
 # 顯示圖像

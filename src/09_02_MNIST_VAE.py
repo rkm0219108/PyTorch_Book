@@ -6,7 +6,8 @@
 # In[4]:
 
 
-import random
+import random, sys
+from pathlib import Path
 from typing import Callable
 
 import matplotlib.pyplot as plt
@@ -18,16 +19,19 @@ import torch
 from torch.nn import functional as F
 import torchvision
 from sklearn.manifold import TSNE
-from torch import nn
+from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
+from torchvision import datasets, transforms
 
 # ## 參數設定
 
 # In[5]:
 
 
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 256  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -183,7 +187,7 @@ lr = 0.001  # Learning rate
 
 params_to_optimize = [{'params': encoder.parameters()}, {'params': decoder.parameters()}]
 
-optim = optim.Adam(params_to_optimize, lr=lr)
+optimizer = optim.Adam(params_to_optimize, lr=lr)
 
 # ## 定義加雜訊(Noise)的函數
 
@@ -346,7 +350,7 @@ for epoch in range(num_epochs):
         device=device,
         dataloader=train_loader,
         loss_fn=loss_fn,
-        optimizer=optim,
+        optimizer=optimizer,
         noise_factor=noise_factor,
     )
     # 驗證

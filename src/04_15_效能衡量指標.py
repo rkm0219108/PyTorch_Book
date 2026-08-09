@@ -91,7 +91,7 @@ print(f'驗算={(tp) / (tp+fn)}')
 
 # 讀取資料檔
 
-df = pd.read_csv('./data/auc_data.csv')
+df = pd.read_csv('data/auc_data.csv')
 df
 
 # ## 以Scikit-learn函數計算AUC

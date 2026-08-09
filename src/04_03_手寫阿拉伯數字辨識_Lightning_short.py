@@ -13,9 +13,11 @@
 
 
 # 載入套件
-import torch
+import sys
+from pathlib import Path
 from lightning.pytorch import LightningModule, Trainer
-from torch import nn
+import torch
+from torch import nn, optim
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -27,7 +29,10 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 AVAIL_GPUS = min(1, torch.cuda.device_count())  # 使用GPU或CPU
 BATCH_SIZE = 256 if AVAIL_GPUS else 64  # 批量
 

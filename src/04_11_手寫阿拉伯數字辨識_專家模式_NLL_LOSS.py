@@ -7,10 +7,12 @@
 
 # In[1]:
 
+import sys
+from pathlib import Path
+from typing import Sized, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
 import torch
 from skimage import io
 from skimage.transform import resize
@@ -26,7 +28,10 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -35,8 +40,6 @@ device
 
 # In[3]:
 
-
-mnist = tf.keras.datasets.mnist
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
 train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
@@ -112,7 +115,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_ds)
-            percentage = 100.0 * batch_idx / len(train_loader)
+            percentage = 100.0 * batch_idx / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[13]:
@@ -183,7 +186,7 @@ print('prediction: ', ' '.join(predictions[0:20]))
 
 # 讀取影像並轉為單色
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像

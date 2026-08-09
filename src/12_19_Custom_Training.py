@@ -76,8 +76,6 @@ dataset["train"][0]
 # In[7]:
 
 
-
-
 # 隨機抽取資料函數
 def show_random_elements(dataset: datasets.Dataset, num_examples: int = 10) -> None:
     picks = []
@@ -123,7 +121,6 @@ metric
 # In[10]:
 
 
-
 fake_preds = np.random.randint(0, 2, size=(64,))
 fake_labels = np.random.randint(0, 2, size=(64,))
 metric.compute(predictions=fake_preds, references=fake_labels)
@@ -145,7 +142,6 @@ metric.compute(predictions=fake_preds, references=fake_labels)
 # ## 分詞
 
 # In[11]:
-
 
 
 # 分詞
@@ -214,7 +210,6 @@ encoded_dataset = dataset.map(preprocess_function, batched=True)
 # ## 效能微調(Fine tuning)，先加載預先訓練的模型
 
 # In[18]:
-
 
 
 # 載入預先訓練的模型
@@ -294,7 +289,7 @@ trainer.evaluate()
 # In[27]:
 
 
-trainer.save_model('./cola')
+trainer.save_model('cola')
 
 # ## 預測
 

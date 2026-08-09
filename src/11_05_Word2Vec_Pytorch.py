@@ -6,7 +6,7 @@
 
 # ## CBOW
 
-# <img src='./nlp_data/Cbow.png' width=500 align='left'>
+# <img src='nlp_data/Cbow.png' width=500 align='left'>
 
 # ## 載入相關套件
 
@@ -69,7 +69,7 @@ def read_data(file_path: str, remove_stopwords: bool = False) -> List[str]:
 # In[92]:
 
 
-test_sentence = read_data('./nlp_data/word2vec_test.txt')
+test_sentence = read_data('nlp_data/word2vec_test.txt')
 
 # 或讀取其他檔案
 # test_sentence = 'https://www.gutenberg.org/files/57884/57884-0.txt')
@@ -164,7 +164,7 @@ model.predict(['of', 'all', 'human'])
 
 # ## Skip-gram
 
-# <img src='./nlp_data/Skip-gram.png' width=500 align='left'>
+# <img src='nlp_data/Skip-gram.png' width=500 align='left'>
 
 # ## N-grams 處理
 

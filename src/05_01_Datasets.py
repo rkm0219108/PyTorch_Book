@@ -37,10 +37,10 @@ device
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST("data", train=True, download=True, transform=transforms.ToTensor())
+train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST("data", train=False, download=True, transform=transforms.ToTensor())
+test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -67,9 +67,9 @@ plt.show()
 # In[8]:
 
 
-training_data = FashionMNIST(root="data", train=True, download=True, transform=transforms.ToTensor())
+training_data = FashionMNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
 
-test_data = FashionMNIST(root="data", train=False, download=True, transform=transforms.ToTensor())
+test_data = FashionMNIST(PATH_DATASETS, train=False, download=True, transform=transforms.ToTensor())
 
 # ## 任意抽樣9筆資料顯示
 
@@ -227,7 +227,7 @@ class CustomImageDataset(Dataset):
 
 
 # 模型載入
-model = torch.load('./FashionMNIST.pt')
+model = torch.load('FashionMNIST.pt')
 
 # In[97]:
 
@@ -244,7 +244,7 @@ transform = transforms.Compose(
 )
 
 # 建立 DataLoader
-test_image_ds = CustomImageDataset('./fashion_test_data', transform)
+test_image_ds = CustomImageDataset('fashion_test_data', transform)
 test_loader = DataLoader(test_image_ds, shuffle=False, batch_size=10)
 
 model.eval()

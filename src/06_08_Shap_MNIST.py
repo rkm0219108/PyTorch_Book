@@ -40,10 +40,10 @@ batch_size = 128
 num_epochs = 2
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-train_ds = MNIST('.', train=True, download=True, transform=transforms.ToTensor())
+train_ds = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
 
 # 下載測試資料
-test_ds = MNIST('.', train=False, download=True, transform=transforms.ToTensor())
+test_ds = MNIST(PATH_DATASETS, train=False, download=True, transform=transforms.ToTensor())
 
 # 訓練/測試資料的維度
 print(train_ds.data.shape, test_ds.data.shape)
@@ -118,7 +118,7 @@ def train(
                     epoch,
                     batch_idx * len(data),
                     len(cast(Sized, train_loader.dataset)),
-                    100.0 * batch_idx / len(train_loader),
+                    100.0 * batch_idx / len(cast(Sized, train_loader.dataset)),
                     loss.item(),
                 )
             )

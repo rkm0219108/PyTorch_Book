@@ -27,7 +27,7 @@ from google.colab import files
 # In[29]:
 
 
-# !rm ./horse2zebra.zip
+# !rm horse2zebra.zip
 
 # In[30]:
 
@@ -57,15 +57,15 @@ files.upload()
 # In[ ]:
 
 
-# !unzip ./horse2zebra.zip
+# !unzip horse2zebra.zip
 
 # In[44]:
 
 
-shutil.move("./horse2zebra/trainA", "./horses_train/A")
-shutil.move("./horse2zebra/trainB", "./zebra_train/B")
-shutil.move("./horse2zebra/testA", "./horses_test/A")
-shutil.move("./horse2zebra/testB", "./zebra_test/B")
+shutil.move("horse2zebra/trainA", "horses_train/A")
+shutil.move("horse2zebra/trainB", "zebra_train/B")
+shutil.move("horse2zebra/testA", "horses_test/A")
+shutil.move("horse2zebra/testB", "zebra_test/B")
 
 # In[35]:
 
@@ -75,7 +75,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.mp
 # In[47]:
 
 
-# ls ./horses_train
+# ls horses_train
 
 # ## 建立 dataset、data loader
 
@@ -85,7 +85,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.mp
 bs = 5
 workers = 2
 image_size = (256, 256)
-dataroot = './horses_train/'
+dataroot = 'horses_train/'
 dataset_horses_train = datasets.ImageFolder(
     root=dataroot,
     transform=transforms.Compose(
@@ -110,7 +110,7 @@ plt.imshow(
 # In[49]:
 
 
-dataroot = './horses_test/'
+dataroot = 'horses_test/'
 dataset_horses_test = datasets.ImageFolder(
     root=dataroot,
     transform=transforms.Compose(
@@ -134,7 +134,7 @@ plt.imshow(
 # In[50]:
 
 
-dataroot = './zebra_train'
+dataroot = 'zebra_train'
 dataset_zebra_train = datasets.ImageFolder(
     root=dataroot,
     transform=transforms.Compose(
@@ -158,7 +158,7 @@ plt.imshow(
 # In[51]:
 
 
-dataroot = './zebra_test'
+dataroot = 'zebra_test'
 dataset_zebra_test = datasets.ImageFolder(
     root=dataroot,
     transform=transforms.Compose(
@@ -675,21 +675,21 @@ losses = training(G_A2B, G_B2A, D_A, D_B, epochs, name)
 # In[ ]:
 
 
-if not os.path.exists('./CycleGAN'):
-    os.makedirs('./CycleGAN')
+if not os.path.exists('CycleGAN'):
+    os.makedirs('CycleGAN')
 # save last check pointing
-torch.save(G_A2B.state_dict(), f"./CycleGAN/netG_A2B.pth")
-torch.save(G_B2A.state_dict(), f"./CycleGAN/netG_B2A.pth")
-torch.save(D_A.state_dict(), f"./CycleGAN/netD_A.pth")
-torch.save(D_B.state_dict(), f"./CycleGAN/netD_B.pth")
+torch.save(G_A2B.state_dict(), f"CycleGAN/netG_A2B.pth")
+torch.save(G_B2A.state_dict(), f"CycleGAN/netG_B2A.pth")
+torch.save(D_A.state_dict(), f"CycleGAN/netD_A.pth")
+torch.save(D_B.state_dict(), f"CycleGAN/netD_B.pth")
 
 # In[ ]:
 
 
 # 壓縮相關模型
-# !zip ./model.zip ./CycleGAN/*.*
+# !zip model.zip CycleGAN/*.*
 
 # In[ ]:
 
 
-files.download('./model.zip')
+files.download('model.zip')

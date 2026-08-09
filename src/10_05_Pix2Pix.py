@@ -17,9 +17,9 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
-import torch
-from torch import nn
 from PIL import Image
+import torch
+from torch import nn, optim
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset as TorchDataset
 from torchvision import transforms
@@ -45,7 +45,7 @@ RESIZE = 64
 
 
 def read_path(filepath: str) -> List[str]:
-    root_path = "./datasets/facades"
+    root_path = "datasets/facades"
     path = os.path.join(root_path, filepath)
     dataset = []
     for p in glob(path + "/" + "*.jpg"):

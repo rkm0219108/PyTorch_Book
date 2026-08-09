@@ -6,10 +6,10 @@
 # ## 程式參考來源：
 # - https://pytorch.org/tutorials/beginner/nlp/word_embeddings_tutorial.html
 # - https://pytorch.org/docs/stable/generated/nn.RNN.html#nn.RNN
-# - https://pytorch.org/text/stable/vocab.html
-# - https://pytorch.org/text/stable/functional.html#to-tensor
 # - https://pytorch.org/tutorials/beginner/text_sentiment_ngrams_tutorial.html
 #
+# torchtext 已被官方棄用（最後版本 0.18）且與新版 PyTorch 不相容，
+# 分詞、詞彙表、GloVe 詞向量等功能改用 text_utils.py 中的輕量替代實作。
 
 # ## 載入相關套件
 
@@ -22,12 +22,8 @@ from typing import List, Tuple
 
 import numpy as np
 import torch
-from torch import nn
-import torchtext
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import (
-    Vocab,
-)
+from torch import nn, optim
+from text_utils import GloVe, Vocab, get_tokenizer, to_tensor, truncate, vocab
 
 # ## 嵌入層測試
 
@@ -145,14 +141,14 @@ tokenizer(text)
 
 
 # BOW 統計
-counter = Counter(tokenizer(text))  # pyright: ignore[reportCallIssue, reportArgumentType]
+counter = Counter(tokenizer(text))
 # 依出現次數降冪排列
 sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: x[1], reverse=True)
 # 建立詞彙字典
 ordered_dict = OrderedDict(sorted_by_freq_tuples)
 
 # 建立詞彙表物件，並加一個未知單字(unknown)的索引值
-vocab_object = torchtext.vocab.vocab(ordered_dict, specials=["<unk>"])
+vocab_object = vocab(ordered_dict, specials=["<unk>"])
 # 設定詞彙表預設值為未知單字(unknown)的索引值
 vocab_object.set_default_index(vocab_object["<unk>"])
 
@@ -187,7 +183,7 @@ def create_vocabulary(text_list: List[str]) -> Tuple[Vocab, List[str], List[List
     for text in text_list:
         tokens = tokenizer(text)
         clean_tokens = []
-        for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
+        for w in tokens:
             if w not in stopwords:
                 clean_tokens.append(w)
         clean_tokens_list += clean_tokens
@@ -197,7 +193,7 @@ def create_vocabulary(text_list: List[str]) -> Tuple[Vocab, List[str], List[List
     counter = Counter(clean_tokens_list)
     sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: x[1], reverse=True)
     ordered_dict = OrderedDict(sorted_by_freq_tuples)
-    vocab_object = torchtext.vocab.vocab(ordered_dict, specials=["<unk>"])
+    vocab_object = vocab(ordered_dict, specials=["<unk>"])
     vocab_object.set_default_index(vocab_object["<unk>"])
 
     # 將輸入字串轉為索引值：自詞彙表物件查詢索引值
@@ -265,19 +261,19 @@ docs = [
 vocab_object, clean_text_list, clean_index_list = create_vocabulary(docs)
 
 # 若字串過長，刪除多餘單字
-clean_index_list = torchtext.functional.truncate(clean_index_list, maxlen)
+clean_index_list = truncate(clean_index_list, maxlen)
 
 # 若字串長度不足，後面補 0
 while len(clean_index_list[0]) < maxlen:
     clean_index_list[0] += [0]
-torchtext.functional.to_tensor(clean_index_list, 0)  # 0:不足補0
+to_tensor(clean_index_list, 0)  # 0:不足補0
 
 # In[362]:
 
 
 # 測試
 embeds = nn.Embedding(vocab_object.__len__(), 5)
-X = torchtext.functional.to_tensor(clean_index_list, 0)  # 0:不足補0
+X = to_tensor(clean_index_list, 0)  # 0:不足補0
 embed_output = embeds(X)
 print(embed_output.shape)
 
@@ -339,7 +335,7 @@ model = RecurrentNetEmbeddingBag(vocab_object.__len__(), 10, 1)
 
 # 定義 10 個語句的正面(1)或負面(0)的情緒
 y = torch.FloatTensor([1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
-X = torchtext.functional.to_tensor(clean_index_list, 0)  # 0:不足補0
+X = to_tensor(clean_index_list, 0)  # 0:不足補0
 
 # 指定優化器、損失函數
 criterion = nn.MSELoss()
@@ -376,8 +372,8 @@ for text in test_docs:
 while len(clean_index_list[0]) < maxlen:
     clean_index_list[0] += [0]
 
-clean_index_list = torchtext.functional.truncate(clean_index_list, maxlen)
-X = torchtext.functional.to_tensor(clean_index_list, 0)  # 0:不足補0
+clean_index_list = truncate(clean_index_list, maxlen)
+X = to_tensor(clean_index_list, 0)  # 0:不足補0
 model(X)
 
 # ## 使用詞向量(Word2Vec)
@@ -389,19 +385,19 @@ model(X)
 
 # https://pytorch.org/text/stable/vocab.html#glove
 examples = ['great']
-vec = torchtext.vocab.GloVe(name='6B', dim=50)
+vec = GloVe(name='6B', dim=50)
 ret = vec.get_vecs_by_tokens(examples, lower_case_backup=True)
 ret
 
 # In[303]:
 
 
-vec.vectors.size()  # pyright: ignore[reportOptionalMemberAccess]
+vec.vectors.size()
 
 # In[304]:
 
 
-vec.stoi['great']  # pyright: ignore[reportOptionalSubscript]
+vec.stoi['great']
 
 # ## Embedding 不需訓練，直接設定嵌入層權重
 
@@ -446,7 +442,7 @@ clean_tokens_list = []
 for i, text in enumerate(docs):
     tokens = tokenizer(text.lower())
     clean_tokens = []
-    for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
+    for w in tokens:
         if w not in stopwords:
             clean_tokens.append(w)
     clean_tokens_list += clean_tokens
@@ -512,7 +508,7 @@ clean_text_list = []
 for i, text in enumerate(test_docs):
     tokens = tokenizer(text.lower())
     clean_tokens = []
-    for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
+    for w in tokens:
         if w not in stopwords:
             clean_tokens.append(w)
     clean_text_list.append(clean_tokens)
@@ -569,10 +565,10 @@ for i, text in enumerate(docs):
     tokens = tokenizer(text.lower())
     clean_tokens = []
     j = 0
-    for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
+    for w in tokens:
         if w not in stopwords:
             # 轉成詞向量索引值
-            X[i, j] = vec.stoi[w]  # pyright: ignore[reportOptionalSubscript]
+            X[i, j] = vec.stoi[w]
             j += 1
 X
 
@@ -609,9 +605,9 @@ for i, text in enumerate(test_docs):
     tokens = tokenizer(text.lower())
     clean_tokens = []
     j = 0
-    for w in tokens:  # pyright: ignore[reportGeneralTypeIssues]
+    for w in tokens:
         if w not in stopwords:
-            X[i, j] = vec.stoi[w]  # pyright: ignore[reportOptionalSubscript]
+            X[i, j] = vec.stoi[w]
             j += 1
 X
 

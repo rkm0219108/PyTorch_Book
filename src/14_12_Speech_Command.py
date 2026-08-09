@@ -37,7 +37,7 @@ warnings.filterwarnings('ignore')
 # In[3]:
 
 
-dataset = torchaudio.datasets.SPEECHCOMMANDS('./audio', download=True)
+dataset = torchaudio.datasets.SPEECHCOMMANDS('audio', download=True)
 
 # In[4]:
 
@@ -50,7 +50,7 @@ dataset[0]
 
 
 # 任選一檔案測試，發音為 happy
-train_audio_path = './audio/SpeechCommands/speech_commands_v0.02/'
+train_audio_path = 'audio/SpeechCommands/speech_commands_v0.02/'
 wav_file = train_audio_path + 'happy/0ab3b47d_nohash_0.wav'
 
 # 播放語音
@@ -171,7 +171,7 @@ sns.histplot(length_list)
 # In[17]:
 
 
-dataset = torchaudio.datasets.SPEECHCOMMANDS('./audio', download=True)
+dataset = torchaudio.datasets.SPEECHCOMMANDS('audio', download=True)
 
 # ## 設定參數
 
@@ -349,7 +349,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
             data_count = len(cast(Sized, train_loader.dataset))
-            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            percentage = 100.0 * (batch_idx + 1) / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
     score_model()
     scheduler.step()
@@ -432,18 +432,18 @@ predict(train_audio_path + 'happy/0ab3b47d_nohash_0.wav')
 
 
 # 測試，該檔案發音為 bed
-predict('./audio/bed.wav')
+predict('audio/bed.wav')
 
 # In[47]:
 
 
 # 測試，該檔案發音為 cat
-predict('./audio/cat.wav')
+predict('audio/cat.wav')
 
 # In[46]:
 
 
 # 測試，該檔案發音為 happy
-predict('./audio/happy.wav')
+predict('audio/happy.wav')
 
 # In[ ]:

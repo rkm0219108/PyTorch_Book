@@ -12,7 +12,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from torch import nn
+from torch import nn, optim
+from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import FashionMNIST
 from torchvision.utils import make_grid
@@ -38,7 +39,7 @@ transform = transforms.Compose(
     ]
 )
 
-dataset = FashionMNIST("data", train=True, download=True, transform=transform)
+dataset = FashionMNIST(PATH_DATASETS, train=True, download=True, transform=transform)
 data_loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 # In[4]:

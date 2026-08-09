@@ -47,7 +47,7 @@ print("BOW=\n", X.toarray())
 
 # TF-IDF 轉換
 transformer = TfidfTransformer()
-tfidf = transformer.fit_transform(X)
+tfidf = cast(csr_matrix, transformer.fit_transform(X))
 print("TF-IDF=\n", np.around(tfidf.toarray(), 4))
 
 # In[17]:

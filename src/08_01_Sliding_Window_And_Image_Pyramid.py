@@ -62,7 +62,7 @@ def sliding_window(
 
 
 # 讀取一個圖檔
-image = cv2.imread('./images_Object_Detection/lena.jpg')
+image = cv2.imread('images_Object_Detection/lena.jpg')
 assert image is not None
 
 # 視窗尺寸

@@ -22,7 +22,7 @@ from tensorflow.keras.models import Sequential
 
 
 # 載入測試資料 -- 亞馬遜
-df = pd.read_csv('./RNN/AMZN_2006-01-01_to_2018-01-01.csv', index_col='Date', parse_dates=['Date'])
+df = pd.read_csv('RNN/AMZN_2006-01-01_to_2018-01-01.csv', index_col='Date', parse_dates=['Date'])
 df.head()
 
 # In[40]:
@@ -64,9 +64,7 @@ array = scl.fit_transform(array)
 
 # 前置處理函數，取得模型輸入的格式
 # look_back：特徵(X)個數，forward_days：目標(y)個數，jump：移動視窗
-def processData(
-    data: np.ndarray, look_back: int, forward_days: int, jump: int = 1
-) -> Tuple[np.ndarray, np.ndarray]:
+def processData(data: np.ndarray, look_back: int, forward_days: int, jump: int = 1) -> Tuple[np.ndarray, np.ndarray]:
     X, Y = [], []
     for i in range(0, len(data) - look_back - forward_days + 1, jump):
         X.append(data[i : (i + look_back)])
@@ -148,7 +146,7 @@ plt.show()
 # In[21]:
 
 
-model.save('./RNN/stock.h5')
+model.save('RNN/stock.h5')
 
 # ## 一次預測 1天：jump=1
 
@@ -280,7 +278,6 @@ for i in range(0, len(Xt)):
 # ## 改用 GRU 模型
 
 # In[43]:
-
 
 
 model_GRU = Sequential()

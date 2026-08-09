@@ -10,13 +10,15 @@
 
 
 import glob
-import os
+import os, sys
+from pathlib import Path
 from typing import cast
 
 import imageio
 import matplotlib.pyplot as plt
 import torch
-from torch import nn
+from torch import nn, optim
+from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision import utils as vutils
 from torchvision.datasets import MNIST
@@ -26,7 +28,10 @@ from torchvision.datasets import MNIST
 # In[2]:
 
 
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 64  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -248,14 +253,14 @@ plt.show()
 
 
 # 產生 GIF 檔
-anim_file = './gan_output/dcgan.gif'
+anim_file = 'gan_output/dcgan.gif'
 with imageio.get_writer(anim_file, mode='I') as writer:
-    filenames = glob.glob('./gan_output/fake_samples*.png')
+    filenames = glob.glob('gan_output/fake_samples*.png')
     filenames = sorted(filenames)
     for filename in filenames:
         image = imageio.imread(filename)
         cast(imageio.core.format.Format.Writer, writer).append_data(image)
 
-# <img src="./gan_output/dcgan.gif" align="left">
+# <img src="gan_output/dcgan.gif" align="left">
 
 # In[ ]:

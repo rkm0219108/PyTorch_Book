@@ -11,7 +11,7 @@ from typing import List, Tuple, Union
 import numpy as np
 from IPython.display import Image
 
-Image('./images/grid_world.png')
+Image('images/grid_world.png')
 
 # In[19]:
 
@@ -32,9 +32,7 @@ actions = [[-1, 0], [1, 0], [0, 1], [0, -1]]  # 行動空間
 
 
 # 行動及獎勵
-def actionValue(
-    initialPosition: List[int], action: List[int]
-) -> Tuple[Union[List[int], np.ndarray], int]:
+def actionValue(initialPosition: List[int], action: List[int]) -> Tuple[Union[List[int], np.ndarray], int]:
     if initialPosition in terminationStates:  # 到達終點
         finalPosition = initialPosition  # 不移動，留在原來位置
         reward = 0  # 獎勵為 0

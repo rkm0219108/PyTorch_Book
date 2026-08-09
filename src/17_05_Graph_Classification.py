@@ -30,7 +30,7 @@ from torch_geometric.nn import GCNConv, global_mean_pool
 
 
 # 載入內建資料
-dataset = TUDataset(root='./graph/TUDataset', name='MUTAG')
+dataset = TUDataset(root='graph/TUDataset', name='MUTAG')
 
 print()
 print(f'Dataset: {dataset}:')

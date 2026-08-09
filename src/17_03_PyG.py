@@ -78,8 +78,6 @@ list(data["edge_index"].cpu().numpy().T)
 # In[26]:
 
 
-
-
 def draw_pyg(Data: Data) -> None:
     G = to_networkx(Data, to_undirected=True)
     # 繪圖
@@ -134,9 +132,8 @@ draw_pyg2(data)
 # In[35]:
 
 
-
 # 載入內建資料
-dataset = TUDataset(root='./graph/ENZYMES', name='ENZYMES')
+dataset = TUDataset(root='graph/ENZYMES', name='ENZYMES')
 
 # 資料集內含的圖形個數
 len(dataset)
@@ -168,17 +165,15 @@ dataset[0]
 # In[37]:
 
 
-
-dataset = ShapeNet(root='./graph/ShapeNet')
+dataset = ShapeNet(root='graph/ShapeNet')
 
 dataset[0]
 
 # In[36]:
 
 
-
 # KNNGraph：使用最近鄰(KNN)演算法，每一點取6個最近的節點
-dataset = ShapeNet(root='./graph/ShapeNet', categories=['Airplane'], pre_transform=T.KNNGraph(k=6))
+dataset = ShapeNet(root='graph/ShapeNet', categories=['Airplane'], pre_transform=T.KNNGraph(k=6))
 
 dataset[0]
 
@@ -192,7 +187,7 @@ dataset[0]
 
 # 資料增補：RandomTranslate
 dataset = ShapeNet(
-    root='./graph/ShapeNet', categories=['Airplane'], pre_transform=T.KNNGraph(k=6), transform=T.RandomTranslate(0.01)
+    root='graph/ShapeNet', categories=['Airplane'], pre_transform=T.KNNGraph(k=6), transform=T.RandomTranslate(0.01)
 )
 
 dataset[0]

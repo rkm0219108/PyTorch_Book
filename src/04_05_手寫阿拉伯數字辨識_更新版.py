@@ -8,6 +8,8 @@
 # In[1]:
 
 
+import sys
+from pathlib import Path
 from typing import cast
 
 import matplotlib.pyplot as plt
@@ -26,7 +28,10 @@ from torchvision.datasets import MNIST
 # In[2]:
 
 
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -318,7 +323,7 @@ transform = transforms.Compose(
     [transforms.Grayscale(num_output_channels=1), transforms.Resize([28, 28]), transforms.PILToTensor()]
 )
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image = Image.open(uploaded_file)
     X1 = cast(torch.Tensor, transform(image))
     X1 = torch.FloatTensor(255.0 - X1).to(device)

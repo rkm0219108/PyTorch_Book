@@ -26,7 +26,7 @@ from torch_geometric.nn import GCNConv
 
 
 # 載入內建資料
-dataset = Planetoid(root='./graph/Cora', name='Cora')
+dataset = Planetoid(root='graph/Cora', name='Cora')
 
 # 資料集內含的圖形個數
 len(dataset)

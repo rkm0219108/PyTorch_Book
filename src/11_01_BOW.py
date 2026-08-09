@@ -59,7 +59,7 @@ maxlen = 1000  # 生字表最大個數
 
 # 生字表的集合
 word_freqs = collections.Counter()
-with open('./NLP_data/news.txt', 'r+', encoding='UTF-8') as f:
+with open('NLP_data/news.txt', 'r+', encoding='UTF-8') as f:
     for line in f:
         # 轉小寫、分詞
         words = line.lower().split(' ')

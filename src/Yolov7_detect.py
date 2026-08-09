@@ -112,7 +112,7 @@ def detect(source: str, img_size: int = 640, conf_thres: float = 0.25, save_img:
 # In[6]:
 
 
-# detect('./inference/images/horses.jpg')
-detect('./test.mp4')
+# detect('inference/images/horses.jpg')
+detect('test.mp4')
 
 # In[ ]:

@@ -22,7 +22,7 @@ from spacy.tokens import Doc
 
 
 # 訓練資料
-data_file = open('./chatbot_data/intents.json').read()
+data_file = open('chatbot_data/intents.json').read()
 intents = json.loads(data_file)
 
 intent_list = []
@@ -58,8 +58,6 @@ responses_df
 nlp = spacy.load("en_core_web_md")
 
 # In[4]:
-
-
 
 
 # 去除停用詞函數

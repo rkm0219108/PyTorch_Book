@@ -21,13 +21,11 @@ import simulation  # simulation.py
 import torch
 from torch import nn, optim
 from torch.nn import functional as F
-import torchvision.models
-import torchvision.utils
 from loss import dice_loss
 from torch.optim import Optimizer, lr_scheduler
 from torch.utils.data import DataLoader, Dataset
 from torchsummary import summary
-from torchvision import transforms
+from torchvision import models, transforms
 
 # if not os.path.exists("pytorch_unet"):
 #     get_ipython().system('git clone https://github.com/usuyama/pytorch-unet.git')
@@ -253,7 +251,7 @@ model = model.to(device)
 # In[10]:
 
 
-model
+print(model)
 
 # In[11]:
 

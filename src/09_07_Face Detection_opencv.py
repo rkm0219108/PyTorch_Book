@@ -19,7 +19,7 @@ from cv2 import imread, rectangle
 
 
 # 載入臉部級聯分類器(face cascade file)
-face_cascade = './cascade_files/haarcascade_frontalface_alt.xml'
+face_cascade = 'cascade_files/haarcascade_frontalface_alt.xml'
 classifier = cv2.CascadeClassifier(face_cascade)
 
 # ## 載入圖檔
@@ -28,7 +28,7 @@ classifier = cv2.CascadeClassifier(face_cascade)
 
 
 # 載入圖檔
-image_file = "./images_face/teammates.jpg"
+image_file = "images_face/teammates.jpg"
 image = imread(image_file)
 if image is None:
     raise FileNotFoundError(image_file)
@@ -67,7 +67,7 @@ plt.show()
 
 
 # 載入圖檔
-image_file = "./images_face/classmates.jpg"
+image_file = "images_face/classmates.jpg"
 image = imread(image_file)
 if image is None:
     raise FileNotFoundError(image_file)
@@ -106,11 +106,11 @@ plt.show()
 
 
 # 載入眼睛級聯分類器(eye cascade file)
-eye_cascade = './cascade_files/haarcascade_eye_tree_eyeglasses.xml'
+eye_cascade = 'cascade_files/haarcascade_eye_tree_eyeglasses.xml'
 eye_classifier = cv2.CascadeClassifier(eye_cascade)
 
 # 載入微笑級聯分類器(smile cascade file)
-smile_cascade = './cascade_files/haarcascade_smile.xml'
+smile_cascade = 'cascade_files/haarcascade_smile.xml'
 smile_classifier = cv2.CascadeClassifier(smile_cascade)
 
 # ## 偵測臉部並顯示圖像
@@ -118,7 +118,7 @@ smile_classifier = cv2.CascadeClassifier(smile_cascade)
 # In[46]:
 
 
-image_file = "./images_face/classmates.jpg"
+image_file = "images_face/classmates.jpg"
 image = imread(image_file)
 if image is None:
     raise FileNotFoundError(image_file)
@@ -165,7 +165,7 @@ plt.show()
 # In[49]:
 
 
-image_file = "./images_face/classmates.jpg"
+image_file = "images_face/classmates.jpg"
 image = imread(image_file)
 if image is None:
     raise FileNotFoundError(image_file)

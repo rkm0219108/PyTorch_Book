@@ -20,7 +20,7 @@ from sklearn.datasets import fetch_california_housing
 from sklearn.linear_model import LinearRegression
 
 # 載入資料集
-df = pd.read_csv('./data/population.csv')
+df = pd.read_csv('data/population.csv')
 
 w = ((df['pop'] - df['pop'].mean()) * df['year']).sum() / ((df['year'] - df['year'].mean()) ** 2).sum()
 b = df['pop'].mean() - w * df['year'].mean()
@@ -58,7 +58,6 @@ print(f'w={w[0, 0]}, b={w[1, 0]}')
 # In[18]:
 
 
-
 # 載入 Boston 房價資料集
 X, y = cast(tuple[np.ndarray, np.ndarray], fetch_california_housing(return_X_y=True))
 
@@ -77,7 +76,6 @@ w
 # In[19]:
 
 
-
 X, y = cast(tuple[np.ndarray, np.ndarray], fetch_california_housing(return_X_y=True))
 
 lr = LinearRegression()
@@ -88,7 +86,6 @@ lr.coef_, lr.intercept_
 # ## 使用PyTorch 線性代數函數庫
 
 # In[4]:
-
 
 
 # 載入 Boston 房價資料集

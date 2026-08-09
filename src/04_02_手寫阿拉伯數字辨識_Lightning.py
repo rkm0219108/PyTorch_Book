@@ -7,7 +7,8 @@
 # In[1]:
 
 
-import os
+import os, sys
+from pathlib import Path
 
 import lightning.pytorch as pl
 import torch
@@ -17,6 +18,11 @@ from torch.utils.data import DataLoader, random_split
 from torchmetrics import Accuracy
 from torchvision import transforms
 from torchvision.datasets import MNIST
+
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
@@ -65,8 +71,8 @@ class LitAutoEncoder(pl.LightningModule):
 
 
 # 下載 MNIST 手寫阿拉伯數字 訓練資料
-dataset = MNIST("data", train=True, download=True, transform=transforms.ToTensor())
-test_data = MNIST("data", train=False, download=True, transform=transforms.ToTensor())
+dataset = MNIST(PATH_DATASETS, train=True, download=True, transform=transforms.ToTensor())
+test_data = MNIST(PATH_DATASETS, train=False, download=True, transform=transforms.ToTensor())
 
 mnist_train, mnist_val = random_split(dataset, [55000, 5000])
 

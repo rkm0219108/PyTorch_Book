@@ -30,19 +30,19 @@ start = datetime.datetime.now()
 start
 
 # run this cell to begin training
-# !python train.py --batch 4 --cfg cfg/training/yolov7.yaml --img 640 --epochs 55 --data ./OID/Dataset/data.yaml --weights '' --name yolov7 --hyp data/hyp.scratch.p5.yaml --device 0
+# !python train.py --batch 4 --cfg cfg/training/yolov7.yaml --img 640 --epochs 55 --data OID/Dataset/data.yaml --weights '' --name yolov7 --hyp data/hyp.scratch.p5.yaml --device 0
 
 print(datetime.datetime.now())
 print((datetime.datetime.now() - start).total_seconds())
 
 print((datetime.datetime.now() - start).total_seconds() / 60)
 
-# ls ./runs/train/
+# ls runs/train/
 
-# ls ./runs/train/yolov7/weights/
+# ls runs/train/yolov7/weights/
 
 
-files.download('./runs/train/yolov73/weights/best.pt')
+files.download('runs/train/yolov73/weights/best.pt')
 
 # Run evaluation
-# !python detect.py --weights ./runs/train/yolov73/weights/best.pt --conf 0.03 --source ./OID/Dataset/test/Balloon/76e41712939b97f2.jpg
+# !python detect.py --weights runs/train/yolov73/weights/best.pt --conf 0.03 --source OID/Dataset/test/Balloon/76e41712939b97f2.jpg

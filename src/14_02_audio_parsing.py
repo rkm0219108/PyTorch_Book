@@ -24,7 +24,7 @@ import pyaudio
 
 
 # 檔案來源：https://github.com/maxifjaved/sample-files
-wav_file = './audio/WAV_1MG.wav'
+wav_file = 'audio/WAV_1MG.wav'
 
 # autoplay=True：自動播放，不須按 PLAY 鍵
 IPython.display.Audio(wav_file, autoplay=False)
@@ -143,7 +143,7 @@ def DrawWavFile_mono(filename: str) -> None:
 # In[6]:
 
 
-wav_file = './audio/down.wav'
+wav_file = 'audio/down.wav'
 DrawWavFile_mono(wav_file)
 
 # In[7]:
@@ -191,7 +191,7 @@ def DrawWavFile_stereo(filename: str) -> None:
 # In[9]:
 
 
-wav_file = './audio/WAV_1MG.wav'
+wav_file = 'audio/WAV_1MG.wav'
 DrawWavFile_stereo(wav_file)
 
 # In[10]:
@@ -212,9 +212,9 @@ def DrawWavFile(wav_file: str) -> None:
 # In[11]:
 
 
-wav_file = './audio/down.wav'
+wav_file = 'audio/down.wav'
 DrawWavFile(wav_file)
-wav_file = './audio/WAV_1MG.wav'
+wav_file = 'audio/WAV_1MG.wav'
 DrawWavFile(wav_file)
 
 # ## 產生音檔
@@ -227,7 +227,7 @@ DrawWavFile(wav_file)
 sampleRate = 44100.0  # 取樣頻率
 duration = 1.0  # 秒數
 
-wav_file = './audio/random.wav'
+wav_file = 'audio/random.wav'
 obj = wave.open(wav_file, 'w')
 obj.setnchannels(1)  # 單聲道
 obj.setsampwidth(2)
@@ -259,7 +259,7 @@ f.close()
 
 # 雙聲道音檔轉換為單聲道
 
-wav_file = './audio/WAV_1MG.wav'
+wav_file = 'audio/WAV_1MG.wav'
 # 開啟音檔
 with wave.open(wav_file, 'r') as f:
     # 字串轉換整數
@@ -276,7 +276,7 @@ with wave.open(wav_file, 'r') as f:
     sampleRate = f.getframerate()  # 取樣頻率
     sampwidth = f.getsampwidth()
 
-wav_file_out = './audio/WAV_1MG_mono.wav'
+wav_file_out = 'audio/WAV_1MG_mono.wav'
 obj = wave.open(wav_file_out, 'w')
 obj.setnchannels(1)  # 單聲道
 obj.setsampwidth(sampwidth)

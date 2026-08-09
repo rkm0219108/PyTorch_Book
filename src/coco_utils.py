@@ -143,7 +143,7 @@ def _coco_remove_images_without_annotations(
     return filtered_dataset
 
 
-def convert_to_coco_api(ds: torch.utils.data.Dataset) -> COCO:
+def convert_to_coco_api(ds: Dataset) -> COCO:
     coco_ds = COCO()
     # annotation IDs need to start at 1, not 0, see torchvision issue #1530
     ann_id = 1
@@ -197,7 +197,7 @@ def convert_to_coco_api(ds: torch.utils.data.Dataset) -> COCO:
     return coco_ds
 
 
-def get_coco_api_from_dataset(dataset: torch.utils.data.Dataset) -> COCO:
+def get_coco_api_from_dataset(dataset: Dataset) -> COCO:
     for _ in range(10):
         if isinstance(dataset, datasets.CocoDetection):
             break
@@ -222,9 +222,7 @@ class CocoDetection(datasets.CocoDetection):
         return img, target
 
 
-def get_coco(
-    root: str, image_set: str, transforms: Optional[Callable], mode: str = "instances"
-) -> torch.utils.data.Dataset:
+def get_coco(root: str, image_set: str, transforms: Optional[Callable], mode: str = "instances") -> Dataset:
     anno_file_template = "{}_{}2017.json"
     PATHS = {
         "train": ("train2017", os.path.join("annotations", anno_file_template.format(mode, "train"))),
@@ -252,5 +250,5 @@ def get_coco(
     return dataset
 
 
-def get_coco_kp(root: str, image_set: str, transforms: Optional[Callable]) -> torch.utils.data.Dataset:
+def get_coco_kp(root: str, image_set: str, transforms: Optional[Callable]) -> Dataset:
     return get_coco(root, image_set, transforms, mode="person_keypoints")

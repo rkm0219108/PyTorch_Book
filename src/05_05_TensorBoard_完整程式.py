@@ -14,8 +14,6 @@ import shutil
 
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorboard.compat.tensorflow_stub.io.gfile as tb_gfile
-import tensorflow as tf
 import torch
 from torch import nn, optim
 from torch.nn import functional as F
@@ -23,7 +21,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms, utils
 
-dirpath = './runs'
+dirpath = 'runs/fashion_mnist_experiment_1'
 if os.path.exists(dirpath) and os.path.isdir(dirpath):
     shutil.rmtree(dirpath)
 
@@ -41,8 +39,8 @@ if os.path.exists(dirpath) and os.path.isdir(dirpath):
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
 # datasets
-trainset = datasets.FashionMNIST('.', download=True, train=True, transform=transform)
-testset = datasets.FashionMNIST('.', download=True, train=False, transform=transform)
+trainset = datasets.FashionMNIST(PATH_DATASETS, download=True, train=True, transform=transform)
+testset = datasets.FashionMNIST(PATH_DATASETS, download=True, train=False, transform=transform)
 
 # dataloaders
 trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
@@ -144,8 +142,6 @@ writer.add_graph(net, images)
 
 # In[33]:
 
-
-tf.io.gfile = tb_gfile
 
 # In[34]:
 

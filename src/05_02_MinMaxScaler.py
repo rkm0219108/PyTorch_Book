@@ -9,7 +9,7 @@
 
 
 import os
-from typing import Callable
+from typing import Callable, Sized, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -173,7 +173,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_ds)
-            percentage = 100.0 * batch_idx / len(train_loader)
+            percentage = 100.0 * batch_idx / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[12]:
@@ -268,7 +268,7 @@ plt.show()
 # 讀取影像並轉為單色
 X1 = torch.empty(0)
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = Image.open(uploaded_file).convert('L')
 
     # 縮為 (28, 28) 大小的影像
@@ -346,7 +346,7 @@ transform = transforms.Compose(
 )
 
 # 建立 DataLoader
-test_image_ds = CustomImageDataset('./myDigits', transform)
+test_image_ds = CustomImageDataset('myDigits', transform)
 test_loader = DataLoader(test_image_ds, shuffle=False, batch_size=10)
 
 model.eval()

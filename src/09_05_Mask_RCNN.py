@@ -16,6 +16,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torchvision
+from torchvision import models, transforms
 
 from PIL import Image
 
@@ -161,7 +162,7 @@ def random_colour_masks(image: np.ndarray) -> np.ndarray:
 # 物件偵測，傳回遮罩、邊框、類別
 def get_prediction(img_path: str, threshold: float) -> tuple[np.ndarray, list[list[tuple[int, int]]], list[str]]:
     img = Image.open(img_path)
-    transform = T.Compose([T.ToTensor()])
+    transform = transforms.Compose([transforms.ToTensor()])
     img = transform(img)
     pred = model([img])
     pred_score = list(pred[0]['scores'].detach().numpy())
@@ -206,7 +207,7 @@ def instance_segmentation_api(
 
 
 # 顯示測試圖檔
-img = Image.open('./Mask_RCNN/PennFudanPed/PNGImages/FudanPed00001.png')
+img = Image.open('Mask_RCNN/PennFudanPed/PNGImages/FudanPed00001.png')
 plt.imshow(img)
 plt.axis('off')
 plt.show()
@@ -217,7 +218,7 @@ plt.show()
 
 
 # 模型預測
-transform = T.Compose([T.ToTensor()])
+transform = transforms.Compose([transforms.ToTensor()])
 img_tensor = transform(img)
 
 model.eval()
@@ -268,32 +269,32 @@ plt.show()
 # In[20]:
 
 
-instance_segmentation_api('./Mask_RCNN/people1.jpg', 0.5, rect_th=1, text_size=1, text_th=1)
+instance_segmentation_api('Mask_RCNN/people1.jpg', 0.5, rect_th=1, text_size=1, text_th=1)
 
 # In[30]:
 
 
-instance_segmentation_api('./Mask_RCNN/car.jpg', 0.9, rect_th=5, text_size=2, text_th=2)
+instance_segmentation_api('Mask_RCNN/car.jpg', 0.9, rect_th=5, text_size=2, text_th=2)
 
 # In[31]:
 
 
-instance_segmentation_api('./Mask_RCNN/traffic.jpg', 0.6, rect_th=2, text_size=2, text_th=2)
+instance_segmentation_api('Mask_RCNN/traffic.jpg', 0.6, rect_th=2, text_size=2, text_th=2)
 
 # In[32]:
 
 
-instance_segmentation_api('./Mask_RCNN/birds.jpg', 0.9)
+instance_segmentation_api('Mask_RCNN/birds.jpg', 0.9)
 
 # In[21]:
 
 
-instance_segmentation_api('./Mask_RCNN/people2.jpg', 0.8, rect_th=1, text_size=1, text_th=1)
+instance_segmentation_api('Mask_RCNN/people2.jpg', 0.8, rect_th=1, text_size=1, text_th=1)
 
 # In[34]:
 
 
-instance_segmentation_api('./Mask_RCNN/cat_dog.jpg', 0.95, rect_th=5, text_size=5, text_th=5)
+instance_segmentation_api('Mask_RCNN/cat_dog.jpg', 0.95, rect_th=5, text_size=5, text_th=5)
 
 # ## 應用：背景模糊化
 
@@ -322,7 +323,7 @@ def pick_person_mask(
 
 
 # 讀取檔案
-img_path = "./Mask_RCNN/blur.jpg"
+img_path = "Mask_RCNN/blur.jpg"
 img = cv2.imread(img_path)
 if img is None:
     raise FileNotFoundError(img_path)

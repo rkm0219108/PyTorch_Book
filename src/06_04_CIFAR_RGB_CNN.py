@@ -48,11 +48,11 @@ transform = transforms.Compose(
 batch_size = 1000
 
 # 載入資料集，如果出現 BrokenPipeError 錯誤，將 num_workers 改為 0
-train_ds = datasets.CIFAR10(root='./CIFAR10', train=True, download=True, transform=transform)
+train_ds = datasets.CIFAR10(PATH_DATASETS, train=True, download=True, transform=transform)
 
 train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=2)
 
-test_ds = datasets.CIFAR10(root='./CIFAR10', train=False, download=True, transform=transform)
+test_ds = datasets.CIFAR10(PATH_DATASETS, train=False, download=True, transform=transform)
 
 test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=2)
 
@@ -84,8 +84,7 @@ def imshow(img: torch.Tensor) -> None:
 # 取一筆資料
 batch_size_tmp = 8
 train_loader_tmp = DataLoader(train_ds, batch_size=batch_size_tmp)
-dataiter = iter(train_loader_tmp)
-images, labels = next(dataiter)
+images, labels = next(iter(train_loader_tmp))
 print(images.shape)
 
 # 顯示圖像
@@ -149,7 +148,7 @@ def train(
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
             data_count = len(cast(Sized, train_loader.dataset))
-            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            percentage = 100.0 * (batch_idx + 1) / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
     return loss_list
 
@@ -211,7 +210,7 @@ plt.plot(loss_list, 'r')
 # In[42]:
 
 
-PATH = './cifar_net.pth'
+PATH = 'cifar_net.pth'
 torch.save(model.state_dict(), PATH)
 
 # In[43]:

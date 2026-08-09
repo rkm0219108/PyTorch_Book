@@ -16,7 +16,7 @@ import joblib
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from torch.utils.data.dataset import random_split
+from Dataset import random_split
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 
@@ -33,10 +33,10 @@ device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_availabl
 
 
 # 資料集所在目錄
-data_base_path = './aclImdb/'
+data_base_path = 'aclImdb/'
 
 
-class ImdbDataset(torch.utils.data.Dataset):
+class ImdbDataset(Dataset):
     def __init__(self, mode: str) -> None:
         super(ImdbDataset, self).__init__()
         if mode == "train":
@@ -304,7 +304,7 @@ def predict(text: str, text_pipeline: Callable[[str], List[int]]) -> int:
 
 
 # 測試資料
-my_test = open('./nlp_data/imdb_1.txt', encoding='utf8').read()
+my_test = open('nlp_data/imdb_1.txt', encoding='utf8').read()
 print(label[predict(my_test, text_pipeline)])
 
 # In[98]:

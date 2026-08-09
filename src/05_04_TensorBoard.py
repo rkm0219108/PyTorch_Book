@@ -21,7 +21,7 @@ from torchvision import datasets, transforms, utils
 from IPython.display import Audio, display
 from torch.utils.tensorboard import SummaryWriter
 
-dirpath = './runs'
+dirpath = 'runs/fashion_mnist_experiment_1'
 if os.path.exists(dirpath) and os.path.isdir(dirpath):
     shutil.rmtree(dirpath)
 
@@ -39,8 +39,8 @@ if os.path.exists(dirpath) and os.path.isdir(dirpath):
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
 # datasets
-trainset = datasets.FashionMNIST('.', download=True, train=True, transform=transform)
-testset = datasets.FashionMNIST('.', download=True, train=False, transform=transform)
+trainset = datasets.FashionMNIST(PATH_DATASETS, download=True, train=True, transform=transform)
+testset = datasets.FashionMNIST(PATH_DATASETS, download=True, train=False, transform=transform)
 
 # dataloaders
 trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)

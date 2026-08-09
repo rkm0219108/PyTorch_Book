@@ -4,7 +4,7 @@ import cv2
 import cv2.ximgproc
 
 # 讀取影像
-img_path = './images_Object_Detection/bike2.jpg'
+img_path = 'images_Object_Detection/bike2.jpg'
 if len(sys.argv) > 1:
     img_path = sys.argv[1]
 img = cv2.imread(img_path)

@@ -22,9 +22,9 @@ import pytesseract
 
 
 # 載入圖檔
-image = cv2.imread('./images_ocr/2.jpg', cv2.IMREAD_COLOR)
+image = cv2.imread('images_ocr/2.jpg', cv2.IMREAD_COLOR)
 if image is None:
-    raise FileNotFoundError('./images_ocr/2.jpg')
+    raise FileNotFoundError('images_ocr/2.jpg')
 
 # 顯示圖檔
 image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

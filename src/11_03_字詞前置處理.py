@@ -89,7 +89,7 @@ filtered_text
 
 
 # 測試文章段落
-with open('./NLP_data/news.txt', 'r+', encoding='UTF-8') as f:
+with open('NLP_data/news.txt', 'r+', encoding='UTF-8') as f:
     text = f.read()
 
 filtered_text, filtered_tokens = remove_stopwords(text, True)

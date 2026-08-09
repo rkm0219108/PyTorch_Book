@@ -50,8 +50,7 @@ model = models.resnet50(weights=ResNet50_Weights.DEFAULT).to(device)
 # In[7]:
 
 
-
-filename = './images_Object_Detection/bike.jpg'
+filename = 'images_Object_Detection/bike.jpg'
 orig = Image.open(filename)
 # 等比例縮放圖片
 orig = orig.resize((WIDTH, int(orig.size[1] / orig.size[0] * WIDTH)))

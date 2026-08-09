@@ -20,6 +20,7 @@ import numpy as np
 import torch
 from torch import nn, optim
 from torch.optim import lr_scheduler
+from torch.utils.data import DataLoader
 import torchvision
 from torchvision import datasets, models, transforms
 
@@ -49,7 +50,7 @@ data_transforms = {
 }
 
 # 使用 ImageFolder 可方便轉換為 dataset
-data_dir = './hymenoptera_data'
+data_dir = 'hymenoptera_data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
 dataloaders = {x: DataLoader(image_datasets[x], batch_size=4, shuffle=True, num_workers=4) for x in ['train', 'val']}
 

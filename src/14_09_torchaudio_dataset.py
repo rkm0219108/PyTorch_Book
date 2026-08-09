@@ -19,7 +19,7 @@ import audio_util
 # In[7]:
 
 
-yesno_data = torchaudio.datasets.YESNO('./audio', download=True)
+yesno_data = torchaudio.datasets.YESNO('audio', download=True)
 data_loader = DataLoader(yesno_data, batch_size=1, shuffle=True)
 
 # ## 顯示第一筆資料
@@ -44,7 +44,7 @@ for i in [1, 3, 5]:
 # In[12]:
 
 
-wav_file = "./audio/yesno1.wav"
+wav_file = "audio/yesno1.wav"
 torchaudio.save(wav_file, yesno_data[0][0], yesno_data[0][1])
 audio_util.inspect_file(wav_file)
 
@@ -61,7 +61,7 @@ IPython.display.Audio(wav_file, autoplay=False)
 # In[11]:
 
 
-dataset1 = torchaudio.datasets.GTZAN('./audio', download=True)
+dataset1 = torchaudio.datasets.GTZAN('audio', download=True)
 data_loader = DataLoader(dataset1, batch_size=1, shuffle=True)
 
 # ## 顯示第一筆資料
@@ -96,7 +96,7 @@ len(dataset1)
 # In[21]:
 
 
-dataset2 = torchaudio.datasets.CMUDict('./audio', download=True)
+dataset2 = torchaudio.datasets.CMUDict('audio', download=True)
 
 # ## 顯示第一筆資料
 
@@ -118,7 +118,7 @@ for i in range(0, 4):
 # In[4]:
 
 
-dataset3 = torchaudio.datasets.SPEECHCOMMANDS('./audio', download=True)
+dataset3 = torchaudio.datasets.SPEECHCOMMANDS('audio', download=True)
 
 # ## 顯示第一筆資料
 

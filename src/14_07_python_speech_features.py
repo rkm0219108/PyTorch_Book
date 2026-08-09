@@ -19,7 +19,7 @@ from scipy.io import wavfile
 
 
 # 載入音樂檔案
-sr, data = wavfile.read("./audio/WAV_1MG.wav")
+sr, data = wavfile.read("audio/WAV_1MG.wav")
 
 # In[12]:
 

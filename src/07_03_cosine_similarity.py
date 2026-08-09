@@ -75,7 +75,7 @@ model._modules
 
 # 任選一張圖片，例如老虎側面照，取得圖檔的特徵向量
 
-filename = './images_test/tiger2.jpg'
+filename = 'images_test/tiger2.jpg'
 input_image = Image.open(filename)
 
 transform = transforms.Compose(
@@ -106,16 +106,14 @@ print(output.shape)
 # In[31]:
 
 
-
 # 取得 images_test 目錄下所有 .jpg 檔案名稱
-img_path = './images_test/'
+img_path = 'images_test/'
 image_files = np.array([f for f in listdir(img_path) if isfile(join(img_path, f)) and f[-3:] == 'jpg'])
 image_files
 
 # ### 步驟 2. 取得 images_test 目錄下所有 .jpg 檔案的像素
 
 # In[34]:
-
 
 
 # 合併所有圖檔
@@ -145,7 +143,6 @@ features.shape
 # ### 步驟 4. 使用 cosine_similarity 函數比較特徵向量
 
 # In[40]:
-
 
 
 # 比較 Tiger2.jpg 與其他圖檔特徵向量

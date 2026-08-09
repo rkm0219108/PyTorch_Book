@@ -96,7 +96,7 @@ summary(model, input_size=(3, 224, 224))
 # In[18]:
 
 
-img = Image.open("./images_test/cat.jpg")
+img = Image.open("images_test/cat.jpg")
 plt.imshow(img)
 plt.axis('off')
 plt.show()

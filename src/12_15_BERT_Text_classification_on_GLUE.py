@@ -40,8 +40,6 @@ dataset
 dataset["train"][1]
 
 
-
-
 # 隨機抽取資料函數
 def show_random_elements(dataset: datasets.Dataset, num_examples: int = 10) -> None:
     picks = []
@@ -169,7 +167,7 @@ trainer.train()
 trainer.evaluate()
 
 # 模型存檔
-trainer.save_model('./cola')
+trainer.save_model('cola')
 
 
 # 預測

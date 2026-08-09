@@ -8,7 +8,9 @@
 
 # 載入相關套件
 from collections import defaultdict
+from typing import cast
 
+import numpy as np
 from gensim import (
     corpora,
     models,
@@ -111,7 +113,7 @@ print(vec_lsi)
 index = similarities.MatrixSimilarity(lsi[corpus])
 
 # 比較例句與語料庫的相似機率
-sims = index[vec_lsi]
+sims = cast(np.ndarray, index[vec_lsi])
 
 # 顯示語料庫的索引值及相似機率
 print(list(enumerate(sims)))

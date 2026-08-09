@@ -17,7 +17,6 @@ from torch import nn
 from torch.nn import functional as F
 from torchsummary import summary
 from torchvision import models, transforms
-from torchvision.models import ResNet50_Weights, VGG16_Weights
 
 # ## 檢查 GPU
 
@@ -32,7 +31,7 @@ device
 # In[51]:
 
 
-model = models.vgg16(weights=VGG16_Weights.DEFAULT)
+model = models.vgg16(weights=models.VGG16_Weights.DEFAULT)
 
 # ## 顯示神經層名稱
 
@@ -92,8 +91,7 @@ summary(model, input_size=(3, 224, 224))
 # In[61]:
 
 
-
-filename = './images_test/cat.jpg'
+filename = 'images_test/cat.jpg'
 input_image = Image.open(filename)
 
 transform = transforms.Compose(
@@ -133,7 +131,7 @@ categories[int(torch.argmax(probabilities).item())]
 # In[64]:
 
 
-filename = './images_test/tiger2.jpg'
+filename = 'images_test/tiger2.jpg'
 input_image = Image.open(filename)
 
 transform = transforms.Compose(
@@ -170,10 +168,10 @@ with open("imagenet_classes.txt", "r") as f:
 
 
 # 載入 resnet50 模型
-model = models.resnet50(weights=ResNet50_Weights.DEFAULT).to(device)
+model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT).to(device)
 
 # 預測
-filename = './images_test/cat.jpg'
+filename = 'images_test/cat.jpg'
 input_image = Image.open(filename)
 
 transform = transforms.Compose(
@@ -201,10 +199,10 @@ print(f'{max_item} {categories[max_item]}: {torch.max(probabilities).item()}')
 
 
 # 載入 resnet50 模型
-model = models.resnet50(weights=ResNet50_Weights.DEFAULT).to(device)
+model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT).to(device)
 
 # 預測
-filename = './images_test/cat.jpg'
+filename = 'images_test/cat.jpg'
 input_image = Image.open(filename)
 
 transform = transforms.Compose(
@@ -243,7 +241,6 @@ sum(probabilities.cpu().numpy())
 # In[70]:
 
 
-
 probabilities.cpu().numpy().argsort()[-5:][::-1]
 
 # In[71]:
@@ -254,7 +251,7 @@ np.array(categories)[probabilities.cpu().numpy().argsort()[-5:][::-1]]
 # In[72]:
 
 
-filename = './images_test/tiger2.jpg'
+filename = 'images_test/tiger2.jpg'
 input_image = Image.open(filename)
 
 transform = transforms.Compose(

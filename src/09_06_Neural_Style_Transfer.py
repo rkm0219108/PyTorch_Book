@@ -71,8 +71,8 @@ def imshow(tensor: torch.Tensor, title: Optional[str] = None) -> None:
 # In[37]:
 
 
-style_img = image_loader("./StyleTransfer/des_glaneuses.jpg")
-content_img = image_loader("./StyleTransfer/dancing.jpg")
+style_img = image_loader("StyleTransfer/des_glaneuses.jpg")
+content_img = image_loader("StyleTransfer/dancing.jpg")
 print(style_img.shape, content_img.shape)
 imshow(style_img, title='Style Image')
 imshow(content_img, title='Content Image')
@@ -335,8 +335,8 @@ plt.show()
 # In[44]:
 
 
-style_img = image_loader("./StyleTransfer/mirror.jpg")
-content_img = image_loader("./StyleTransfer/dancing.jpg")
+style_img = image_loader("StyleTransfer/mirror.jpg")
+content_img = image_loader("StyleTransfer/dancing.jpg")
 print(style_img.shape, content_img.shape)
 imshow(style_img, title='Style Image')
 imshow(content_img, title='Content Image')

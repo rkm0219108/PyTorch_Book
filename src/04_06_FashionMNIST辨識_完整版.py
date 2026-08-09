@@ -10,7 +10,9 @@
 # In[1]:
 
 
-import os
+import os, sys
+from pathlib import Path
+from typing import cast, Sized
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,7 +29,10 @@ from torchvision.datasets import FashionMNIST
 # In[2]:
 
 
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -164,7 +169,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_ds)
-            percentage = 100.0 * batch_idx / len(train_loader)
+            percentage = 100.0 * batch_idx / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # ## 對訓練過程的損失繪圖
@@ -253,7 +258,7 @@ plt.show()
 # In[18]:
 
 
-torch.save(model, './FashionMNIST.pt')
+torch.save(model, 'FashionMNIST.pt')
 
 # ## 步驟10：新資料預測
 
@@ -278,7 +283,7 @@ label_dict = {
 
 # 使用小畫家，繪製 0~9，實際測試看看
 # 讀取影像並轉為單色
-test_data_folder = './fashion_test_data'
+test_data_folder = 'fashion_test_data'
 for file_name in os.listdir(test_data_folder):
     image1 = io.imread(os.path.join(test_data_folder, file_name), as_gray=True)
 

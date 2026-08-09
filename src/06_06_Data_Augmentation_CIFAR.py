@@ -15,13 +15,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import PIL.Image as Image
 import torch
-import torchvision
 from skimage import io
 from skimage.transform import resize
-from torch import nn
+from torch import nn, optim
 from torch.nn import functional as F
-from torch.utils.data import DataLoader
-from torchvision import transforms
+from torch.utils.data import DataLoader, Dataset
+from torchvision import datasets, transforms
 
 # ## 設定參數
 
@@ -68,11 +67,11 @@ test_transforms = transforms.Compose(
 
 
 # 載入資料集，如果出現 BrokenPipeError 錯誤，將 num_workers 改為 0
-train_ds = datasets.CIFAR10(root='./CIFAR10', train=True, download=True, transform=train_transforms)
+train_ds = datasets.CIFAR10(PATH_DATASETS, train=True, download=True, transform=train_transforms)
 
 train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
-test_ds = datasets.CIFAR10(root='./CIFAR10', train=False, download=True, transform=test_transforms)
+test_ds = datasets.CIFAR10(PATH_DATASETS, train=False, download=True, transform=test_transforms)
 
 test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
 
@@ -141,7 +140,7 @@ def train(
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
             data_count = len(cast(Sized, train_loader.dataset))
-            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            percentage = 100.0 * (batch_idx + 1) / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
     return loss_list
 
@@ -263,7 +262,7 @@ def imshow(X: np.ndarray) -> None:
 data_shape = data.shape
 
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = Image.open(uploaded_file).convert('L')
 
     # 縮為 (28, 28) 大小的影像
@@ -295,7 +294,7 @@ for i in range(10):
 
 # 讀取影像並轉為單色
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
@@ -322,7 +321,7 @@ for i in range(10):
 # In[20]:
 
 
-class CustomImageDataset(torch.utils.data.Dataset):
+class CustomImageDataset(Dataset):
     def __init__(
         self,
         img_dir: str,
@@ -367,7 +366,7 @@ class CustomImageDataset(torch.utils.data.Dataset):
 # In[21]:
 
 
-ds = CustomImageDataset('./myDigits', to_gray=True, transform=test_transforms)
+ds = CustomImageDataset('myDigits', to_gray=True, transform=test_transforms)
 data_loader = DataLoader(ds, batch_size=10, shuffle=False)
 
 test(model, device, data_loader)

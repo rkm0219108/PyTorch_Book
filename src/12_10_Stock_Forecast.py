@@ -31,7 +31,7 @@ device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_availabl
 # In[3]:
 
 
-df = pd.read_csv('./nlp_data/AMZN_2006-01-01_to_2018-01-01.csv')
+df = pd.read_csv('nlp_data/AMZN_2006-01-01_to_2018-01-01.csv')
 df.head()
 
 # In[4]:

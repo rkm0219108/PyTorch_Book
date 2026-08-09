@@ -27,7 +27,7 @@ from IPython.display import Audio
 # In[2]:
 
 
-path = "./audio/steam-train-whistle-daniel_simon.wav"
+path = "audio/steam-train-whistle-daniel_simon.wav"
 url = "https://pytorch-tutorial-assets.s3.amazonaws.com/steam-train-whistle-daniel_simon.wav"
 with open(path, 'wb') as file_:
     file_.write(requests.get(url).content)
@@ -38,7 +38,7 @@ with open(path, 'wb') as file_:
 
 
 # 檔案來源：https://pytorch-tutorial-assets.s3.amazonaws.com/steam-train-whistle-daniel_simon.wav
-wav_file = './audio/steam-train-whistle-daniel_simon.wav'
+wav_file = 'audio/steam-train-whistle-daniel_simon.wav'
 
 metadata = torchaudio.info(wav_file)
 print(metadata)
@@ -173,14 +173,14 @@ plot_specgram(waveform, sample_rate)
 
 
 # 以 16-bit signed integer Linear PCM 編碼存檔
-path = "./audio/PCM_S16.wav"
+path = "audio/PCM_S16.wav"
 torchaudio.save(path, waveform, sample_rate, encoding="PCM_S", bits_per_sample=16)
 inspect_file(path)
 
 # In[10]:
 
 
-path = "./audio/steam-train-whistle-daniel_simon.wav"
+path = "audio/steam-train-whistle-daniel_simon.wav"
 inspect_file(path)
 
 # ## 重抽樣
@@ -203,7 +203,7 @@ plot_waveform(resampled_waveform, resample_rate)
 # In[13]:
 
 
-path = "./audio/resample.wav"
+path = "audio/resample.wav"
 torchaudio.save(path, resampled_waveform, resample_rate)
 
 # autoplay=True：自動播放，不須按 PLAY 鍵
@@ -252,7 +252,7 @@ IPython.display.Audio(out_path, autoplay=False)
 # In[23]:
 
 
-wav_file = './audio/speech.wav'
+wav_file = 'audio/speech.wav'
 waveform, sample_rate = torchaudio.load(wav_file)
 
 # In[17]:

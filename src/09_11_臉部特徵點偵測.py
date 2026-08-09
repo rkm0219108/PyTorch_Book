@@ -25,7 +25,7 @@ from PIL import Image, ImageDraw
 
 
 # 載入圖檔
-image_file = "./images_face/classmates.jpg"
+image_file = "images_face/classmates.jpg"
 image = plt.imread(image_file)
 
 # 顯示圖像
@@ -81,7 +81,7 @@ plt.show()
 
 
 # 載入圖檔
-image_file = "./images_face/classmates.jpg"
+image_file = "images_face/classmates.jpg"
 image = plt.imread(image_file).copy()  # copy 避免唯讀陣列導致 cv2.circle 出錯
 
 # 顯示圖像
@@ -126,7 +126,7 @@ plt.show()
 
 
 # 讀取視訊檔
-cap = cv2.VideoCapture('./images_face/hamilton_clip.mp4')
+cap = cv2.VideoCapture('images_face/hamilton_clip.mp4')
 while True:
     # 讀取一幀影像
     _, image = cap.read()

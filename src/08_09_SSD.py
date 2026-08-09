@@ -12,6 +12,7 @@ from typing import Any, cast
 
 import matplotlib.patches as patches
 import torch
+from torch import nn
 from matplotlib import pyplot as plt
 
 # ## 檢查 GPU

@@ -25,16 +25,16 @@ from matplotlib import pyplot as plt
 
 
 # 載入圖檔
-known_image_1 = face_recognition.load_image_file("./images_face/jared_1.jpg")
-known_image_2 = face_recognition.load_image_file("./images_face/jared_2.jpg")
-known_image_3 = face_recognition.load_image_file("./images_face/jared_3.jpg")
-known_image_4 = face_recognition.load_image_file("./images_face/obama.jpg")
+known_image_1 = face_recognition.load_image_file("images_face/jared_1.jpg")
+known_image_2 = face_recognition.load_image_file("images_face/jared_2.jpg")
+known_image_3 = face_recognition.load_image_file("images_face/jared_3.jpg")
+known_image_4 = face_recognition.load_image_file("images_face/obama.jpg")
 
 # 標記圖檔名稱
 names = ["jared_1.jpg", "jared_2.jpg", "jared_3.jpg", "obama.jpg"]
 
 # 顯示圖像
-unknown_image = face_recognition.load_image_file("./images_face/jared_4.jpg")
+unknown_image = face_recognition.load_image_file("images_face/jared_4.jpg")
 plt.imshow(unknown_image)
 plt.axis('off')
 plt.show()
@@ -74,8 +74,8 @@ print(results)
 
 
 # 載入模型
-pose_predictor_5_point = dlib.shape_predictor("./OpenCV/shape_predictor_5_face_landmarks.dat")
-face_encoder = dlib.face_recognition_model_v1("./OpenCV/dlib_face_recognition_resnet_model_v1.dat")
+pose_predictor_5_point = dlib.shape_predictor("OpenCV/shape_predictor_5_face_landmarks.dat")
+face_encoder = dlib.face_recognition_model_v1("OpenCV/dlib_face_recognition_resnet_model_v1.dat")
 detector = dlib.get_frontal_face_detector()
 
 # ## 定義臉部編碼及比對的函數
@@ -116,11 +116,11 @@ def face_encodings(
 
 
 # 載入圖檔
-known_image_1 = cv2.imread("./images_face/jared_1.jpg")
-known_image_2 = cv2.imread("./images_face/jared_2.jpg")
-known_image_3 = cv2.imread("./images_face/jared_3.jpg")
-known_image_4 = cv2.imread("./images_face/obama.jpg")
-unknown_image = cv2.imread("./images_face/jared_4.jpg")
+known_image_1 = cv2.imread("images_face/jared_1.jpg")
+known_image_2 = cv2.imread("images_face/jared_2.jpg")
+known_image_3 = cv2.imread("images_face/jared_3.jpg")
+known_image_4 = cv2.imread("images_face/obama.jpg")
+unknown_image = cv2.imread("images_face/jared_4.jpg")
 if (
     known_image_1 is None
     or known_image_2 is None

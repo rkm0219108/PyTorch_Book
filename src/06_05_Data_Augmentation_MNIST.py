@@ -8,7 +8,8 @@
 # In[1]:
 
 
-import os
+import os, sys
+from pathlib import Path
 from typing import Any, Callable, List, Optional, Sized, Tuple, cast
 
 import matplotlib.pyplot as plt
@@ -17,9 +18,9 @@ import PIL.Image as Image
 import torch
 from skimage import io
 from skimage.transform import resize
-from torch import nn
+from torch import nn, optim
 from torch.nn import functional as F
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
@@ -29,7 +30,10 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 1000  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -146,7 +150,7 @@ def train(
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
             data_count = len(cast(Sized, train_loader.dataset))
-            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            percentage = 100.0 * (batch_idx + 1) / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
     return loss_list
 
@@ -266,7 +270,7 @@ def imshow(X: np.ndarray) -> None:
 data_shape = data.shape
 
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = Image.open(uploaded_file).convert('L')
 
     # 縮為 (28, 28) 大小的影像
@@ -298,7 +302,7 @@ for i in range(10):
 
 # 讀取影像並轉為單色
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像
@@ -325,7 +329,7 @@ for i in range(10):
 # In[15]:
 
 
-class CustomImageDataset(torch.utils.data.Dataset):
+class CustomImageDataset(Dataset):
     def __init__(
         self,
         img_dir: str,
@@ -370,7 +374,7 @@ class CustomImageDataset(torch.utils.data.Dataset):
 # In[16]:
 
 
-ds = CustomImageDataset('./myDigits', to_gray=True, transform=test_transforms)
+ds = CustomImageDataset('myDigits', to_gray=True, transform=test_transforms)
 data_loader = DataLoader(ds, batch_size=10, shuffle=False)
 
 test(model, device, data_loader)

@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 
 # 載入圖檔
-image_file = "./images_face/lin-manuel-miranda.png"
+image_file = "images_face/lin-manuel-miranda.png"
 image = plt.imread(image_file)
 
 # 顯示圖像
@@ -35,7 +35,7 @@ plt.show()
 # 指定輸出檔名
 fourcc = cv2.VideoWriter.fourcc(*'XVID')
 # 每秒幀數(fps):29.97，影片解析度(Frame Size)：(640, 360)
-output_movie = cv2.VideoWriter('./images_face/output2.avi', fourcc, 29.97, (640, 360))
+output_movie = cv2.VideoWriter('images_face/output2.avi', fourcc, 29.97, (640, 360))
 
 # ## 載入要辨識的圖像
 
@@ -44,13 +44,13 @@ output_movie = cv2.VideoWriter('./images_face/output2.avi', fourcc, 29.97, (640,
 
 # 載入要辨識的圖像
 image_file = 'lin-manuel-miranda.png'  # 美國歌手
-lmm_image = face_recognition.load_image_file("./images_face/" + image_file)
+lmm_image = face_recognition.load_image_file("images_face/" + image_file)
 # 取得圖像編碼
 lmm_face_encoding = face_recognition.face_encodings(lmm_image)[0]
 
 # obama
 image_file = 'obama.jpg'  # 美國總統
-obama_image = face_recognition.load_image_file("./images_face/" + image_file)
+obama_image = face_recognition.load_image_file("images_face/" + image_file)
 # 取得圖像編碼
 obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
 

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import Image
 
-Image('./images/maze.png', width=300)
+Image('images/maze.png', width=300)
 
 # ### 起點為(1, 1)，終點為(4, 3)或(4, 2)，走到(4, 3)獎勵為1，走到(4, 2)獎勵為 -1，每走一步獎勵均為 -0.04。
 

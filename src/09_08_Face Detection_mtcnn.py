@@ -37,7 +37,7 @@ device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_availabl
 # In[3]:
 
 
-image_file = './MTCNN/angelina_jolie/1.jpg'
+image_file = 'MTCNN/angelina_jolie/1.jpg'
 image = Image.open(image_file)
 
 # In[4]:
@@ -114,7 +114,7 @@ def collate_fn(x: List[Tuple[Image.Image, int]]) -> Tuple[Image.Image, int]:
     return x[0]
 
 
-dataset = datasets.ImageFolder('./MTCNN')
+dataset = datasets.ImageFolder('MTCNN')
 idx_to_class = {i: c for c, i in dataset.class_to_idx.items()}
 loader = DataLoader(dataset, collate_fn=collate_fn)
 
@@ -170,7 +170,7 @@ mtcnn = MTCNN(keep_all=True, device=device)
 # In[72]:
 
 
-video_path = './MTCNN/video.mp4'
+video_path = 'MTCNN/video.mp4'
 video = mmcv.VideoReader(video_path)
 frames = [Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)) for frame in video]
 

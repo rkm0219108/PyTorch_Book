@@ -12,14 +12,13 @@ import matplotlib.pyplot as plt
 import torchvision.models as models
 from flashtorch.saliency import Backprop
 from flashtorch.utils import apply_transforms, load_image
-from torchvision.models import AlexNet_Weights
 
 # ## 載入圖檔
 
 # In[3]:
 
 
-image = load_image('./images_test/owl.jpg')
+image = load_image('images_test/owl.jpg')
 
 plt.imshow(image)
 plt.title('Original image')
@@ -30,7 +29,7 @@ plt.axis('off')
 # In[4]:
 
 
-model = models.alexnet(weights=AlexNet_Weights.DEFAULT)
+model = models.alexnet(weights=models.AlexNet_Weights.DEFAULT)
 
 # ## 建立反向傳導的物件
 
@@ -58,11 +57,11 @@ backprop.visualize(owl, target_class, guided=True)
 # In[7]:
 
 
-peacock = apply_transforms(load_image('./images_test/peacock.jpg'))
+peacock = apply_transforms(load_image('images_test/peacock.jpg'))
 backprop.visualize(peacock, 84, guided=True)
 
 # In[8]:
 
 
-toucan = apply_transforms(load_image('./images_test/toucan.jpg'))
+toucan = apply_transforms(load_image('images_test/toucan.jpg'))
 backprop.visualize(toucan, 96, guided=True)

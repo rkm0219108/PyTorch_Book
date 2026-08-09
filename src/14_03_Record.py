@@ -98,7 +98,7 @@ except Exception:
 
 
 # 錄音存檔
-wav_file = "./audio/woman.wav"
+wav_file = "audio/woman.wav"
 with open(wav_file, "wb") as f:
     f.write(audio.get_wav_data(convert_rate=16000))
 

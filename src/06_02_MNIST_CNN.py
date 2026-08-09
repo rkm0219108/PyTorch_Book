@@ -8,7 +8,9 @@
 # In[1]:
 
 
-import math
+import math, sys
+from pathlib import Path
+from typing import Sized, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,7 +29,10 @@ from torchvision.datasets import MNIST
 
 
 # 設定參數
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 1000  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -191,7 +196,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
             data_count = len(train_ds)
-            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            percentage = 100.0 * (batch_idx + 1) / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[11]:
@@ -298,7 +303,7 @@ model = torch.load('cnn_model.pth')
 # 使用小畫家，繪製 0~9，實際測試看看
 
 no = 9
-uploaded_file = f'./myDigits/{no}.png'
+uploaded_file = f'myDigits/{no}.png'
 image1 = io.imread(uploaded_file, as_gray=True)
 
 # 縮為 (28, 28) 大小的影像
@@ -367,7 +372,7 @@ model(X1)
 
 # 讀取影像並轉為單色
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像

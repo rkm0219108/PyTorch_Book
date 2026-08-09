@@ -16,7 +16,7 @@ import torch
 from torch import nn
 from torch.nn import utils
 from torch.utils.data import DataLoader
-from torch.utils.data.dataset import random_split
+from Dataset import random_split
 from torchtext.data.functional import (
     to_map_style_dataset,
 )
@@ -274,7 +274,7 @@ print(ag_news_label[predict(ex_text_str, text_pipeline)])
 # In[40]:
 
 
-my_test = open('./nlp_data/news.txt', encoding='utf8').read()
+my_test = open('nlp_data/news.txt', encoding='utf8').read()
 print(ag_news_label[predict(my_test, text_pipeline)])
 
 # In[ ]:

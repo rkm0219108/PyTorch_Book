@@ -18,7 +18,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # 載入GloVe詞向量檔 glove.6B.300d.txt
 embeddings_dict = {}
-with open("./glove/glove.6B.300d.txt", 'r', encoding="utf-8") as f:
+with open("glove/glove.6B.300d.txt", 'r', encoding="utf-8") as f:
     for line in f:
         values = line.split()
         word = values[0]
@@ -63,7 +63,7 @@ words = list(embeddings_dict.keys())[100:200]
 
 # 以 T-SNE 降維至二個特徵
 tsne = TSNE(n_components=2)
-vectors = [embeddings_dict[word] for word in words]
+vectors = np.array([embeddings_dict[word] for word in words])
 Y = tsne.fit_transform(vectors)
 
 # 繪製散佈圖，觀察單字相似度
@@ -89,7 +89,6 @@ corpus = [
 # ## 語料分詞
 
 # In[8]:
-
 
 
 # 參數設定

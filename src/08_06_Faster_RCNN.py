@@ -14,9 +14,9 @@ import cv2
 import matplotlib.pyplot as plt
 import torch
 import torchvision
+from torchvision import models, transforms
 
 from PIL import Image
-from models.detection import FasterRCNN_ResNet50_FPN_Weights
 
 # ## 檢查 GPU
 
@@ -36,7 +36,9 @@ device = "cpu"
 # In[4]:
 
 
-model = models.detection.fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT).to(device)
+model = models.detection.fasterrcnn_resnet50_fpn(weights=models.detection.FasterRCNN_ResNet50_FPN_Weights.DEFAULT).to(
+    device
+)
 model.eval()
 
 # ## COCO 資料集類別
@@ -149,7 +151,7 @@ def get_prediction(img_path: str, threshold: float) -> Tuple[List[List[Tuple[int
     # 讀取圖檔
     img = Image.open(img_path)
     # 預測
-    transform = T.Compose([T.ToTensor()])
+    transform = transforms.Compose([transforms.ToTensor()])
     img = transform(img)
     pred = model([img])
     # 取得預測類別、定界框(bounding box)及分數
@@ -203,16 +205,16 @@ def object_detection_api(
 
 
 # 呼叫物件偵測的 API
-object_detection_api('./images_Object_Detection/people.jpg', threshold=0.8)
+object_detection_api('images_Object_Detection/people.jpg', threshold=0.8)
 
 # In[74]:
 
 
 # 呼叫物件偵測的 API
-object_detection_api('./images_Object_Detection/car.jpg', threshold=0.8)
+object_detection_api('images_Object_Detection/car.jpg', threshold=0.8)
 
 # In[81]:
 
 
 # 呼叫物件偵測的 API
-object_detection_api('./images_Object_Detection/traffic_scene.jpg', threshold=0.8, rect_th=1, text_size=1, text_th=1)
+object_detection_api('images_Object_Detection/traffic_scene.jpg', threshold=0.8, rect_th=1, text_size=1, text_th=1)

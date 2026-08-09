@@ -8,6 +8,8 @@
 # In[1]:
 
 
+from typing import cast, Sized
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -162,7 +164,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_ds)
-            percentage = 100.0 * batch_idx / len(train_loader)
+            percentage = 100.0 * batch_idx / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[12]:
@@ -201,7 +203,7 @@ with torch.no_grad():
 test_loss /= len(test_ds)
 # 顯示測試結果
 data_count = len(test_ds)
-percentage = 100.0 * correct / len(test_loader)
+percentage = 100.0 * correct / len(cast(Sized, test_loader.dataset))
 print(f'平均損失: {test_loss:.4f}, 準確率: {correct}/{data_count} ({percentage:.0f}%)\n')
 
 # In[15]:
@@ -264,7 +266,7 @@ model = torch.load('model.pth')
 
 # 讀取影像並轉為單色
 for i in range(10):
-    uploaded_file = f'./myDigits/{i}.png'
+    uploaded_file = f'myDigits/{i}.png'
     image1 = io.imread(uploaded_file, as_gray=True)
 
     # 縮為 (28, 28) 大小的影像

@@ -16,7 +16,7 @@
 
 # ls -l data
 
-# !./darknet detect cfg/yolov3.cfg ./yolov3.weights data/horses.jpg
+# !darknet detect cfg/yolov3.cfg yolov3.weights data/horses.jpg
 
 # mount google drive
 from google.colab import (
@@ -27,7 +27,7 @@ from google.colab import (
 drive.mount('/content/drive')
 
 # 注意 yolov3.weights在 gdrive 所在目錄
-# !./darknet detect cfg/yolov3.cfg "/content/drive/My Drive/yolov3.weights" data/dog.jpg
+# !darknet detect cfg/yolov3.cfg "/content/drive/My Drive/yolov3.weights" data/dog.jpg
 
 
 files.upload()

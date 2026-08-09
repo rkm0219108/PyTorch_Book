@@ -30,7 +30,7 @@ device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_availabl
 # In[3]:
 
 
-df = pd.read_csv('./nlp_data/airline-passengers.csv')
+df = pd.read_csv('nlp_data/airline-passengers.csv')
 df.head()
 
 # In[4]:

@@ -21,7 +21,7 @@ from matplotlib import pyplot as plt
 
 
 # 載入圖檔
-image_file = "./images_Object_Detection/lena.jpg"
+image_file = "images_Object_Detection/lena.jpg"
 image = cv2.imread(image_file)
 if image is None:
     raise FileNotFoundError(image_file)
@@ -38,7 +38,7 @@ plt.show()
 
 
 # 偵測臉部
-cascade = cv2.CascadeClassifier("./cascade_files/haarcascade_frontalface_alt2.xml")
+cascade = cv2.CascadeClassifier("cascade_files/haarcascade_frontalface_alt2.xml")
 faces = np.array(cascade.detectMultiScale(image, 1.3, 5))
 print("faces", faces)
 
@@ -104,7 +104,7 @@ plt.show()
 facemark = cv2.face.createFacemarkKazemi()
 # 訓練模型 face_landmark_model.dat 下載自：
 # https://github.com/opencv/opencv_3rdparty/tree/contrib_face_alignment_20170818
-facemark.loadModel("./OpenCV/face_landmark_model.dat")
+facemark.loadModel("OpenCV/face_landmark_model.dat")
 # 偵測臉部特徵點
 ok, landmarks2 = facemark.fit(image, faces)
 print("Landmarks Kazemi", ok, landmarks2)

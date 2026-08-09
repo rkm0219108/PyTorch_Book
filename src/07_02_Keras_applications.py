@@ -9,27 +9,17 @@
 
 
 import numpy as np
-from tensorflow.keras.applications.resnet50 import (
+from keras.applications.resnet50 import (
     ResNet50,
-)
-from tensorflow.keras.applications.resnet50 import (
     decode_predictions as resnet50_decode_predictions,
-)
-from tensorflow.keras.applications.resnet50 import (
     preprocess_input as resnet50_preprocess_input,
 )
-from tensorflow.keras.applications.vgg16 import (
+from keras.applications.vgg16 import (
     VGG16,
-)
-from tensorflow.keras.applications.vgg16 import (
     decode_predictions as vgg16_decode_predictions,
-)
-from tensorflow.keras.applications.vgg16 import (
     preprocess_input as vgg16_preprocess_input,
 )
-from tensorflow.keras.preprocessing import (
-    image,
-)
+from keras.utils import img_to_array, load_img
 
 # ## 載入模型
 
@@ -44,12 +34,12 @@ model = VGG16(weights='imagenet')
 
 
 # 任選一張圖片，例如大象側面照
-img_path = './images_test/cat.jpg'
+img_path = 'images_test/cat.jpg'
 # 載入圖檔，並縮放寬高為 (224, 224)
-img = image.load_img(img_path, target_size=(224, 224))
+img = load_img(img_path, target_size=(224, 224))
 
 # 加一維，變成 (1, 224, 224)
-x = image.img_to_array(img)
+x = img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = vgg16_preprocess_input(x)
 
@@ -61,11 +51,11 @@ print('Predicted:', vgg16_decode_predictions(preds, top=3)[0])
 # In[11]:
 
 
-img_path = './images_test/tiger2.jpg'
+img_path = 'images_test/tiger2.jpg'
 # 載入圖檔，並縮放寬高為 (224, 224)
-img = image.load_img(img_path, target_size=(224, 224))
+img = load_img(img_path, target_size=(224, 224))
 # 加一維，變成 (1, 224, 224, 3)，最後一維是色彩
-x = image.img_to_array(img)
+x = img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = vgg16_preprocess_input(x)
 
@@ -86,12 +76,12 @@ model = ResNet50(weights='imagenet')
 
 
 # 任意一張圖片，例如老虎大頭照
-img_path = './images_test/cat.jpg'
+img_path = 'images_test/cat.jpg'
 # 載入圖檔，並縮放寬高為 (224, 224)
-img = image.load_img(img_path, target_size=(224, 224))
+img = load_img(img_path, target_size=(224, 224))
 
 # 加一維，變成 (1, 224, 224)
-x = image.img_to_array(img)
+x = img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = resnet50_preprocess_input(x)
 
@@ -103,11 +93,11 @@ print('Predicted:', resnet50_decode_predictions(preds, top=3)[0])
 # In[17]:
 
 
-img_path = './images_test/tiger2.jpg'
+img_path = 'images_test/tiger2.jpg'
 # 載入圖檔，並縮放寬高為 (224, 224)
-img = image.load_img(img_path, target_size=(224, 224))
+img = load_img(img_path, target_size=(224, 224))
 # 加一維，變成 (1, 224, 224, 3)，最後一維是色彩
-x = image.img_to_array(img)
+x = img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = resnet50_preprocess_input(x)
 

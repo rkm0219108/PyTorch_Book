@@ -12,7 +12,7 @@ RATE = 16000  # 44100
 RECORD_SECONDS = 2
 
 if len(sys.argv) < 2:
-    file_path = './demo.wav'
+    file_path = 'demo.wav'
 else:
     file_path = sys.argv[1]
 

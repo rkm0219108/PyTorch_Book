@@ -11,6 +11,7 @@
 from typing import cast
 
 import torch
+from torch import nn
 
 # ## 檢查 GPU
 
@@ -44,7 +45,7 @@ model = cast(nn.Module, torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrain
 
 
 # 批次處理
-imgs = ['https://ultralytics.com/images/zidane.jpg', './images_Object_Detection/car.jpg']
+imgs = ['https://ultralytics.com/images/zidane.jpg', 'images_Object_Detection/car.jpg']
 
 # 預測
 results = model(imgs)

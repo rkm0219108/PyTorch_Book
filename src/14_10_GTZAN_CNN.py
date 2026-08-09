@@ -24,7 +24,7 @@ from torch.utils.data import DataLoader, Dataset, random_split
 # In[2]:
 
 
-PATH_DATASETS = "./audio"  # 預設路徑
+PATH_DATASETS = "audio"  # 預設路徑
 BATCH_SIZE = 5  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -198,7 +198,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = (batch_idx + 1) * len(data)
             data_count = len(cast(Sized, train_loader.dataset))
-            percentage = 100.0 * (batch_idx + 1) / len(train_loader)
+            percentage = 100.0 * (batch_idx + 1) / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # In[13]:

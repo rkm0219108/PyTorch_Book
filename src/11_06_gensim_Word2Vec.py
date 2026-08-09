@@ -22,9 +22,9 @@ from gensim.models.doc2vec import (
     Doc2Vec,
     TaggedDocument,
 )
-from gensim.summarization import keywords
 from gensim.test.utils import common_texts
 from sklearn.metrics.pairwise import cosine_similarity
+from summa import keywords
 
 # ## Gensim簡單測試
 
@@ -62,7 +62,7 @@ model_simple.epochs
 
 
 # 載入 OpinRank 語料庫：關於車輛與旅館的評論
-data_file = "./Word2Vec/reviews_data.txt.gz"
+data_file = "Word2Vec/reviews_data.txt.gz"
 
 with gzip.open(data_file, 'rb') as f:
     for i, line in enumerate(f):
@@ -163,7 +163,8 @@ model.wv.doesnt_match(["cat", "dog", "france"])
 
 
 # 關鍵詞萃取(Keyword Extraction)
-# https://radimrehurek.com/gensim_3.8.3/summarization/keywords.html
+# gensim 4.x 已移除 gensim.summarization，改用 summa 套件的 TextRank 實作
+# https://github.com/summanlp/textrank
 
 # 測試語料
 text = '''Challenges in natural language processing frequently involve
@@ -173,7 +174,7 @@ connecting language and machine perception, dialog systems, or some
 combination thereof.'''
 
 # 關鍵詞萃取
-print(''.join(keywords(text)))
+print(keywords.keywords(text))
 
 # ## 預先訓練的模型
 
@@ -190,7 +191,7 @@ wv = api.load('word2vec-google-news-300')
 # 載入本機的預先訓練模型
 
 # 每個詞向量有 300 個元素
-model = KeyedVectors.load_word2vec_format('./Word2Vec/GoogleNews-vectors-negative300.bin', binary=True)
+model = KeyedVectors.load_word2vec_format('Word2Vec/GoogleNews-vectors-negative300.bin', binary=True)
 
 # In[103]:
 
@@ -228,7 +229,7 @@ model.similarity('woman', 'man')
 
 
 # 測試語料
-f = open('./FAQ/starbucks_faq.txt', 'r', encoding='utf8')
+f = open('FAQ/starbucks_faq.txt', 'r', encoding='utf8')
 corpus = f.readlines()
 # print(corpus)
 

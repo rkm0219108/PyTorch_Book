@@ -8,8 +8,10 @@
 # In[60]:
 
 
-import os
+import os, sys
+from pathlib import Path
 import shutil
+from typing import Sized, cast
 
 import matplotlib.pyplot as plt
 import torch
@@ -25,7 +27,10 @@ from torchvision.datasets import MNIST
 # In[61]:
 
 
-PATH_DATASETS = "data"  # 預設路徑
+# 判斷是否為 Colab 環境
+is_colab = 'google.colab' in sys.modules
+base_path = Path('/content/drive/MyDrive/colab_env') if is_colab else Path('.')
+PATH_DATASETS = base_path / "data"  # 預設路徑
 BATCH_SIZE = 1024  # 批量
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 device
@@ -49,7 +54,7 @@ print(train_ds.data.shape, test_ds.data.shape)
 
 # 刪除 log 目錄
 
-dirpath = './runs_2'
+dirpath = 'runs_2'
 if os.path.exists(dirpath) and os.path.isdir(dirpath):
     shutil.rmtree(dirpath)
 
@@ -145,7 +150,7 @@ for epoch in range(1, epochs + 1):
             loss_list.append(loss.item())
             batch = batch_idx * len(data)
             data_count = len(train_ds)
-            percentage = 100.0 * batch_idx / len(train_loader)
+            percentage = 100.0 * batch_idx / len(cast(Sized, train_loader.dataset))
             print(f'Epoch {epoch}: [{batch:5d} / {data_count}] ({percentage:.0f} %)  Loss: {loss.item():.6f}')
 
 # ## 對訓練過程的損失繪圖

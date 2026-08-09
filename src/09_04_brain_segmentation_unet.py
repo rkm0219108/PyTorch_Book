@@ -19,6 +19,7 @@ from typing import cast
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from torch import nn
 from PIL import Image
 from torchvision import transforms
 
