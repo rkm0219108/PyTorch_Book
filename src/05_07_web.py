@@ -9,7 +9,7 @@ from skimage.transform import resize
 
 # 模型載入
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
-device
+print(device)
 
 
 @st.cache_resource

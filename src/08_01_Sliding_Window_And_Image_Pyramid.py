@@ -4,15 +4,6 @@
 # # 範例1. 對圖片滑動視窗並作影像金字塔
 # ### 原程式來自Sliding Windows for Object Detection with Python and OpenCV (https://www.pyimagesearch.com/2015/03/23/sliding-windows-for-object-detection-with-python-and-opencv/)
 
-# In[ ]:
-
-
-# 需安裝 OpenCV、imutils
-# !pip install opencv-python
-# !pip install imutils
-
-# In[1]:
-
 
 # 載入套件
 import time
@@ -21,8 +12,6 @@ from typing import Iterator, Tuple
 import cv2
 import imutils
 import numpy as np
-
-# In[2]:
 
 
 # 影像金字塔操作
@@ -43,9 +32,6 @@ def pyramid(image: np.ndarray, scale: float = 1.5, minSize: Tuple[int, int] = (3
         yield image
 
 
-# In[3]:
-
-
 # 滑動視窗
 def sliding_window(
     image: np.ndarray, stepSize: int, windowSize: Tuple[int, int]
@@ -57,10 +43,6 @@ def sliding_window(
 
 
 # ## 測試
-
-# In[15]:
-
-
 # 讀取一個圖檔
 image = cv2.imread('images_Object_Detection/lena.jpg')
 assert image is not None
@@ -85,5 +67,3 @@ for resized in pyramid(image, scale=1.5):
 
 # 結束時關閉視窗
 cv2.destroyAllWindows()
-
-# In[ ]:
