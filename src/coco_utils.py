@@ -223,11 +223,10 @@ class CocoDetection(datasets.CocoDetection):
 
 
 def get_coco(root: str, image_set: str, transforms: Optional[Callable], mode: str = "instances") -> Dataset:
-    anno_file_template = "{}_{}2017.json"
     PATHS = {
-        "train": ("train2017", os.path.join("annotations", anno_file_template.format(mode, "train"))),
-        "val": ("val2017", os.path.join("annotations", anno_file_template.format(mode, "val"))),
-        # "train": ("val2017", os.path.join("annotations", anno_file_template.format(mode, "val")))
+        "train": ("train2017", os.path.join("annotations", f"{mode}_train2017.json")),
+        "val": ("val2017", os.path.join("annotations", f"{mode}_val2017.json")),
+        # "train": ("val2017", os.path.join("annotations", f"{mode}_val2017.json"))
     }
 
     t: List[Callable] = [ConvertCocoPolysToMask()]

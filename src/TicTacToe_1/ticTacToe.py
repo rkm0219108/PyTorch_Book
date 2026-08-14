@@ -234,7 +234,7 @@ class Player:
                 if value >= value_max:
                     value_max = value
                     action = p
-        # print("{} takes action {}".format(self.name, action))
+        # print(f"{self.name} takes action {action}")
         return action
 
     # 更新狀態值函數

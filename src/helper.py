@@ -25,7 +25,7 @@ def plot_side_by_side(img_arrays: Sequence[Sequence[np.ndarray]]) -> None:
 def plot_errors(results_dict: Dict[str, List[float]], title: str) -> None:
     markers = itertools.cycle(('+', 'x', 'o'))
 
-    plt.title('{}'.format(title))
+    plt.title(f'{title}')
 
     for label, result in sorted(results_dict.items()):
         plt.plot(result, marker=next(markers), label=label)

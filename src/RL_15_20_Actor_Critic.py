@@ -166,11 +166,10 @@ while True:  # Run until solved
     # Log details
     episode_count += 1
     if episode_count % 10 == 0:
-        template = "running reward: {:.2f} at episode {}"
-        print(template.format(running_reward, episode_count))
+        print(f"running reward: {running_reward:.2f} at episode {episode_count}")
 
     if running_reward > 195:  # Condition to consider the task solved
-        print("Solved at episode {}!".format(episode_count))
+        print(f"Solved at episode {episode_count}!")
         break
 """
 ## Visualizations

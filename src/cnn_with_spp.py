@@ -45,7 +45,7 @@ class SPP_NET(nn.Module):
         x = self.conv4(x)
         # x = F.leaky_relu(self.BN3(x))
         # x = self.conv5(x)
-        spp = spatial_pyramid_pool(x, 1, [int(x.size(2)), int(x.size(3))], self.output_num)
+        spp = spatial_pyramidw_pool(x, 1, [int(x.size(2)), int(x.size(3))], self.output_num)
         # print(spp.size())
         fc1 = self.fc1(spp)
         fc2 = self.fc2(fc1)

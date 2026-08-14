@@ -154,8 +154,8 @@ def train(dataloader: DataLoader) -> None:
         if idx % log_interval == 0 and idx > 0:
             elapsed = time.time() - start_time
             print(
-                '| epoch {:3d} | {:5d}/{:5d} batches '
-                '| accuracy {:8.3f}'.format(epoch, idx, len(dataloader), total_acc / total_count)
+                f'| epoch {epoch:3d} | {idx:5d}/{len(dataloader):5d} batches '
+                f'| accuracy {total_acc / total_count:8.3f}'
             )
             total_acc, total_count = 0, 0
             start_time = time.time()
@@ -227,8 +227,8 @@ for epoch in range(1, EPOCHS + 1):
         total_accu = accu_val
     print('-' * 59)
     print(
-        '| end of epoch {:3d} | time: {:5.2f}s | '
-        'valid accuracy {:8.3f} '.format(epoch, time.time() - epoch_start_time, accu_val)
+        f'| end of epoch {epoch:3d} | time: {time.time() - epoch_start_time:5.2f}s | '
+        f'valid accuracy {accu_val:8.3f} '
     )
     print('-' * 59)
 
