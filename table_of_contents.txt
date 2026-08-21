@@ -1,0 +1,169 @@
+目錄大綱：
+
+▌第一篇／深度學習導論
+
+第 1 章深度學習 (Deep Learning) 導論
+1-1人工智慧的三波浪潮
+1-2 AI的學習地圖
+1-3 TensorFlow vs. PyTorch
+1-4機器學習開發流程
+1-5開發環境安裝
+1-6 免費雲端環境開通
+
+第 2 章神經網路 (Neural Network) 原理
+2-1必備的數學與統計知識
+2-2萬般皆自『迴歸』起
+2-3神經網路
+ 
+
+▌第二篇／PyTorch 基礎篇
+
+第 3 章 PyTorch 學習路徑與主要功能
+3-1 PyTorch學習路徑
+3-2張量運算
+3-3自動微分(Automatic Differentiation)
+3-4 神經層(Neural Network Layer)
+3-5 總結
+
+第 4 章神經網路實作
+4-1撰寫第一支神經網路程式
+4-2 模型種類
+4-3 神經層(Layer)
+4-4 激勵函數(Activation Functions)
+4-5 損失函數(Loss Functions)
+4-6 優化器(Optimizer)
+4-7 效能衡量指標(Performance Metrics)
+4-8 超參數調校(Hyperparameter Tuning)
+
+第 5 章 PyTorch 進階功能
+5-1 資料集(Dataset)及資料載入器(DataLoader)
+5-2 TensorBoard
+5-3 模型佈署(Deploy)與TorchServe
+
+第 6 章卷積神經網路 (Convolutional Neural Network)
+6-1卷積神經網路簡介
+6-2卷積(Convolution)
+6-3各式卷積
+6-4池化層(Pooling Layer)
+6-5 CNN模型實作
+6-6 影像資料增補(Data Augmentation)
+6-7 可解釋的AI(eXplainable AI, XAI)
+
+第 7 章預先訓練的模型 (Pre-trained Model)
+7-1 預先訓練模型的簡介
+7-2 採用完整的模型
+7-3 採用部分模型
+7-4 轉移學習(Transfer Learning)
+7-5 Batch Normalization說明
+ 
+
+▌第三篇／進階的影像應用
+
+第 8 章物件偵測 (Object Detection)
+8-1 圖像辨識模型的發展
+8-2 滑動視窗(Sliding Window)
+8-3 方向梯度直方圖(HOG）
+8-4 R-CNN物件偵測
+8-5 R-CNN改良
+8-6 YOLO演算法簡介
+8-7 YOLO測試
+8-8 YOLO環境建置
+8-9 YOLO模型訓練
+8-10 YOLOv5模型訓練
+8-11 SSD演算法
+8-12 物件偵測的效能衡量指標
+8-13 總結
+
+第 9 章進階的影像應用
+9-1 語義分割(Semantic Segmentation)介紹
+9-2 自動編碼器(AutoEncoder)
+9-3 語義分割(Semantic segmentation)實作
+9-4 實例分割(Instance Segmentation)
+9-5 風格轉換(Style Transfer) --人人都可以是畢卡索
+9-6 臉部辨識(Facial Recognition)
+9-7 光學文字辨識(OCR)
+9-8 車牌辨識(ANPR)
+9-9 卷積神經網路的缺點
+
+第 10 章生成對抗網路 (GAN)
+10-1 生成對抗網路介紹
+10-2 生成對抗網路種類
+10-3 DCGAN
+10-4 Progressive GAN
+10-5 Conditional GAN
+10-6 Pix2Pix
+10-7 CycleGAN
+10-8 GAN挑戰
+10-9 深度偽造(Deepfake)
+
+
+▌第四篇／自然語言處理
+
+第 11 章自然語言處理的介紹
+11-1 詞袋(BOW)與TF-IDF
+11-2 詞彙前置處理
+11-3 詞向量(Word2Vec)
+11-4 GloVe模型
+11-5 中文處理
+11-6 spaCy套件
+
+第 12 章自然語言處理的演算法
+12-1 循環神經網路(RNN)
+12-2 PyTorch 內建文本資料集
+12-3 長短期記憶網路(LSTM)
+12-4自訂資料集
+12-5 時間序列預測
+12-6 Gate Recurrent Unit (GRU)
+12-7 股價預測
+12-8 注意力機制(Attention Mechanism)
+12-9 Transformer架構
+12-10 BERT
+12-11 Transformers套件
+12-12 總結
+
+第 13 章聊天機器人 (ChatBot)
+13-1 ChatBot類別
+13-2 ChatBot設計
+13-3 ChatBot實作
+13-4 ChatBot工具套件
+13-5 Dialogflow實作
+13-6 結語
+
+第 14 章語音辨識
+14-1語音基本認識
+14-2語音前置處理
+14-3 PyTorch語音前置處理
+14-4 PyTorch內建語音資料集
+14-5語音深度學習應用
+14-6自動語音辨識(Automatic Speech Recognition)
+14-7自動語音辨識實作
+14-8 結語
+ 
+
+▌第五篇／強化學習 (Reinforcement Learning)
+
+第 15 章強化學習
+15-1 強化學習的基礎
+15-2 強化學習模型
+15-3 簡單的強化學習架構
+15-4 Gym套件
+15-5 Gym擴充功能
+15-6 動態規劃(Dynamic Programming)
+15-7 值循環(Value Iteration)
+15-8 蒙地卡羅(Monte Carlo)
+15-9 時序差分(Temporal Difference)
+15-10 井字遊戲
+15-11 連續型狀態變數與Deep Q-Learning演算法
+15-12 Actor Critic演算法
+15-13 實際應用案例
+15-14 其他演算法
+15-15 結論
+ 
+
+▌第六篇／圖神經網路 (GNN)
+
+第 16 章圖神經網路 (GNN)
+16-1 圖形理論(Graph Theory)
+16-2 PyTorch Geometric(PyG)
+16-3 圖神經網路(GNN)
+16-4 結論

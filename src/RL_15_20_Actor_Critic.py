@@ -155,7 +155,7 @@ while True:  # Run until solved
 
         # Backpropagation
         loss_value = sum(actor_losses) + sum(critic_losses)
-        grads = tape.gradient(loss_value, model.trainable_variables)  # pyright: ignore[reportCallIssue, reportArgumentType]
+        grads = tape.gradient(loss_value, model.trainable_variables)
         optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
         # Clear the loss and reward history

@@ -232,6 +232,7 @@ horses_train/
 horses_test/
 zebra_train/
 zebra_test/
+aclImdb/
 
 # GAN
 gan_output/
@@ -239,3 +240,6 @@ gan_weights/
 celeba_gan/
 gan_face_output/
 gan_face_weights/
+
+# output
+test-glue/
