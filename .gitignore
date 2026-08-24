@@ -221,8 +221,17 @@ __marimo__/
 
 .DS_Store
 
+# data
 MNIST/
 FashionMNIST/
+cifar-10-batches-py/
+cifar-10-python.tar.gz
+yes_no/
+facades/
+horses_train/
+horses_test/
+zebra_train/
+zebra_test/
 
 # GAN
 gan_output/
